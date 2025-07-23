@@ -1,0 +1,145 @@
+%% ==================== DOCUMENT COLORS ====================
+% Define global colors for hyperlinks and URLs
+\definecolor{linkborder_Color}{rgb}{0.1329,0.247,0.467}   % Blue for link borders
+\definecolor{urlborder_Color}{rgb}{0,1,1}                % Cyan for URL borders
+\definecolor{url_Color}{rgb}{1,0,0}                      % Red for URL text
+
+%% ==================== HYPERREF SETUP ====================
+\hypersetup{
+    %author = {Thomas AUBIN},                            % Uncomment to set PDF author
+    %pdftitle = {Nom du Projet - Sujet du Projet},       % Uncomment to set PDF title
+    pdfsubject = {Mémoire de Projet},                    % PDF document subject
+    pdfkeywords = {Tag1, Tag2, Tag3, \dots},             % PDF keywords for indexing
+    pdfstartview={FitH},                                 % Default PDF view (fit width)
+    linkbordercolor = {linkborder_Color}                 % Color for hyperlink borders
+    %urlbordercolor = \color{urlborder_Color},           % Uncomment to set URL border color
+    %urlcolor = \color{url_Color}                        % Uncomment to set URL text color
+}
+
+%% ==================== CHAPTER & SECTION FORMATTING ====================
+% Use Roman numerals for chapters
+\renewcommand{\thechapter}{\Roman{chapter}}
+
+% Set width for chapter/section numbers in table of contents
+\setlength{\cftchapnumwidth}{\widthof{\large\bfseries{}XVIII}}
+\setlength{\cftsecnumwidth}{\widthof{\large\bfseries{}XVIII}}
+\setlength{\cftsubsecnumwidth}{\widthof{\large\bfseries{}XVIIIII}}
+\setlength{\cftsubsubsecnumwidth}{\widthof{\large\bfseries{}XVIIIIII}}
+\setlength{\cfttabnumwidth}{\widthof{\large\bfseries{}XVIIII}}
+\setlength{\cftfignumwidth}{\widthof{\large\bfseries{}XVIIII}}
+
+% Enable numbering for \paragraph and \subparagraph
+\setcounter{secnumdepth}{4}    % Depth of section numbering
+\setcounter{tocdepth}{4}       % Depth of sections included in table of contents
+
+%% ==================== ABSTRACT FORMATTING ====================
+\renewcommand{\abstractnamefont}{\normalfont\Large\bfseries}
+
+%% ==================== EQUATION LIST ====================
+% Create a custom list of equations
+\newcommand{\listequationsname}{Table des Équations}
+\newlistof{myequations}{equ}{\listequationsname}
+\newcommand{\myequations}[1]{%
+    \addcontentsline{equ}{myequations}{\protect\numberline{\theequation}\hspace{3 mm} #1}\par
+}
+
+%% ==================== TABLE FORMATTING ====================
+% Define custom colored column types with specific widths
+% Narrow columns (approximately 7.3% width)
+\newcolumntype{u}{>{\columncolor{PaleTurquoise1}} p{0.0727\textwidth}}
+\newcolumntype{d}{>{\columncolor{LightBlue1}} p{0.0727\textwidth}}
+\newcolumntype{t}{>{\columncolor{Khaki1}} p{0.0677\textwidth}}
+\newcolumntype{q}{>{\columncolor{Khaki2}} p{0.0727\textwidth}}
+
+% Wider columns (13% width)
+\newcolumntype{U}{>{\columncolor{PaleTurquoise1}} p{0.13\textwidth}}
+\newcolumntype{D}{>{\columncolor{LightBlue1}} p{0.13\textwidth}}
+\newcolumntype{T}{>{\columncolor{Khaki1}} p{0.13\textwidth}}
+\newcolumntype{Q}{>{\columncolor{Khaki2}} p{0.13\textwidth}}
+
+%% ==================== CODE LISTING FORMATTING ====================
+% Rename the list of listings
+\renewcommand{\lstlistlistingname}{Table des éléments de code}
+
+% Define colors for code syntax highlighting
+\definecolor{codegreen}{rgb}{0,0.6,0}        % Green for comments
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}     % Gray for line numbers
+\definecolor{codepurple}{rgb}{0.58,0,0.82}   % Purple for strings
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92} % Light background
+
+% Define the main code style
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},       % Light gray background
+    frame=single,                             % Single-line frame around code
+    commentstyle=\color{codegreen},           % Green comments
+    keywordstyle=\color{magenta},             % Magenta keywords
+    numberstyle=\tiny\color{codegray},        % Small gray line numbers
+    stringstyle=\color{codepurple},           % Purple strings
+    basicstyle=\ttfamily\footnotesize,        % Monospace font, small size
+    breakatwhitespace=false,                  % Allow breaks at whitespace
+    breaklines=true,                          % Enable line breaking
+    captionpos=b,                             % Caption at bottom
+    keepspaces=true,                          % Preserve spaces
+    numbers=left,                             % Line numbers on left
+    numbersep=5pt,                            % Space between numbers and code
+    showspaces=false,                         % Don't show spaces
+    showstringspaces=false,                   % Don't show spaces in strings
+    showtabs=false,                           % Don't show tabs
+    tabsize=2,                                % Tab size of 2 spaces
+    language={Python}                         % Default language is Python
+}
+
+% Apply the custom style
+\lstset{style=mystyle}
+
+% Add support for French characters in code listings
+\lstset{
+    style=mystyle,
+    extendedchars=true,
+    literate=
+        {é}{{\'e}}1
+        {è}{{\`e}}1
+        {ê}{{\^e}}1
+        {à}{{\`a}}1
+        {â}{{\^a}}1
+        {î}{{\^i}}1
+        {ô}{{\^o}}1
+        {ù}{{\`u}}1
+        {û}{{\^u}}1
+        {ç}{{\c{c}}}1
+}
+
+%% ==================== PAGE HEADERS AND FOOTERS ====================
+% Setup for fancy headers with chapter title
+\pagestyle{fancy}                                % Use fancy page style for headers/footers
+\fancyhf{}                                       % Clear all header/footer fields
+\fancyhead[L]{\leftmark}                         % Chapter title in uppercase on the left
+\fancyfoot[C]{\thepage}                          % Page number centered at bottom
+
+% Redefine plain style for chapter pages
+\fancypagestyle{plain}{%
+  \fancyhf{}                                     % Clear all header/footer fields
+  \fancyfoot[C]{\thepage}                        % Page number centered at bottom
+}
+
+% Make sure header doesn't get too big
+\renewcommand{\headrulewidth}{0.4pt}             % Thin line under the header
+\setlength{\headheight}{14.5pt}                  % Adequate height for the header
+
+%% ==================== CUSTOM ENVIRONMENTS & COMMANDS ====================
+% Question environment for exercises or assignments
+\newenvironment{question}[1][]{%
+    \refstepcounter{question}%                % Increment question counter
+    \par\noindent\textbf{Question~\thequestion\;:} \textbf{#1}}%
+    {}
+
+% Horizontal rule command
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+%% ==================== BIBLIOGRAPHY SETUP ====================
+\addbibresource{main.bib}                     % Set bibliography resource file
+
+%% ==================== GLOSSARY SETUP ====================
+
+\newglossary[slg]{symbols}{sym}{sbl}{Symboles}
+\makeglossaries

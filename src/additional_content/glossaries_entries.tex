@@ -1,0 +1,59 @@
+%% Regular glossary entries
+\newglossaryentry{database}{
+  name={base de données},
+  description={Collection organisée de données structurées},
+  plural={bases de données},
+  first={base de données (BDD)},
+  sort={base de donnees}
+}
+
+\newglossaryentry{algorithm}{
+  name={algorithme},
+  description={Ensemble d'instructions pour résoudre un problème}
+  % Removed the see reference to non-existent entry
+}
+
+\newglossaryentry{complexity}{
+  name={complexité},
+  description={Mesure des ressources nécessaires pour exécuter un algorithme}
+}
+
+%% Acronyms
+\newacronym{cpu}{CPU}{Central Processing Unit}
+\newacronym[longplural={Unités Centrales de Traitement}]{uc}{UC}{Unité Centrale}
+\newacronym[description={Interface permettant la communication entre les systèmes}]{api}{API}{Application Programming Interface}
+
+%% Symbols - convert from glsxtrnewsymbol to newglossaryentry
+\newglossaryentry{omega}{
+  type=symbols,
+  name={\ensuremath{\omega}},
+  description={Vitesse angulaire},
+  sort={omega}
+}
+
+\newglossaryentry{ohm}{
+  type=symbols,
+  name={\ensuremath{\Omega}},
+  description={Résistance électrique},
+  sort={ohm}
+}
+
+%% Abbreviations (with glossaries-extra)
+\newabbreviation{etc}{etc.}{et cetera}
+\newabbreviation[longplural={Numéros d'identification}]{id}{ID}{Identifiant}
+
+%% Categories
+\glssetcategoryattribute{math}{glossname}{Termes mathématiques}
+\newglossaryentry{integral}{
+  category={math},
+  name={\ensuremath{\int}},
+  description={Opération mathématique pour calculer l'aire sous une courbe}
+}
+
+%% Entry for the symbols glossary
+\newglossaryentry{pi}{
+  type=symbols,  % Add this line to specify the glossary type
+  name={\ensuremath{\pi}},
+  description={Rapport entre la circonférence d'un cercle et son diamètre},
+  sort={pi}
+}

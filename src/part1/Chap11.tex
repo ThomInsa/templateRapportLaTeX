@@ -1,0 +1,83 @@
+\chapter{}
+    \section{}
+        \subsection{}
+            \subsubsection{}
+                \begin{equation}\label{eq:Eq1}
+                    a+b = c
+                \end{equation}
+                \myequations{Une équation simple}
+                \begin{figure}[htp]
+                    \centering
+                    {\fbox{\includegraphics[width = 0.8\textwidth]{figures/placeholder}}}
+                    \caption{Exemple de figure}
+                \end{figure}
+                \begin{lstlisting}[caption={Un code Python}]
+print("This line will be printéd.")
+print("Another line to print."\end{lstlisting}
+                \begin{tcolorbox}[colback=linkborder_Color!5!white,colframe=linkborder_Color!75!black]
+                    \textit{Ceci est un exemple d'encadré. Il sert à mettre en évidence des parties importantes du rapport}
+                \end{tcolorbox}
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{lcccc}
+                        \toprule
+                        \textbf{Donnée} & \textbf{} & \textbf{} & \textbf{} & \textbf{} \\
+                        \midrule
+                         &  &  &  &  \\
+                         &  &  &  &  \\
+                         &  &  &  &  \\
+                         &  &  &  &  \\
+                        \bottomrule
+                    \end{tabular}
+                    \caption{Exemple de tableau}
+                \end{table}
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{p{0.2\textwidth}|u|d|t|q} \toprule
+                        \textbf{Tâche} &  &  &  &
+                        \\
+                        \midrule
+                        \textbf{Donnée}&  &  & 0 & 0\\
+                        \bottomrule
+                    \end{tabular}
+                    \caption{Exemple de tableau coloré}
+                \end{table}
+
+            \begin{figure}[H]
+                \centering
+                    \subfloat[Sous-légende]{\fbox{
+                        \includegraphics[width = 0.28\textwidth]{figures/placeholder}}}\qquad
+                    \subfloat[Sous-légende]{\fbox{
+                        \includegraphics[width = 0.28\textwidth]{figures/placeholder}}}\qquad
+                    \subfloat[Sous-légende]{\fbox{
+                        \includegraphics[width = 0.28\textwidth]{figures/placeholder}}}\qquad
+                    \subfloat[Sous-légende]{\fbox{
+                        \includegraphics[width = 0.28\textwidth]{figures/placeholder}}}\qquad
+                    \subfloat[Sous-légende]{\fbox{
+                        \includegraphics[width = 0.28\textwidth]{figures/placeholder}}}\qquad
+                    \subfloat[Sous-légende]{\fbox{
+                        \includegraphics[width = 0.28\textwidth]{figures/placeholder}}}\qquad
+                    \subfloat[Sous-légende]{\fbox{
+                        \includegraphics[width = 0.28\textwidth]{figures/placeholder}}}\qquad
+                    \subfloat[Sous-légende]{\fbox{
+                        \includegraphics[width = 0.28\textwidth]{figures/placeholder}}}\qquad
+                    \subfloat[Sous-légende]{\fbox{
+                        \includegraphics[width = 0.28\textwidth]{figures/placeholder}}}\qquad
+                \caption{Exemple avec plusieurs figures}
+            \end{figure}
+
+        Examples of glossaries usage :\\
+%        % Regular entries
+        \Gls{database}
+%
+%        % Acronyms
+        \gls{cpu}, \glspl{cpu}, \acrlong{cpu}, \acrshort{cpu}
+%
+%        % Symbols
+        \gls{omega}, \glspl{omega}
+
+        % Additional symbols
+        \gls{ohm}, \gls{pi}
+
+%        % Abbreviations
+        \gls{etc}, \glspl{etc}

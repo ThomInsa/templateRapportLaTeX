@@ -1,0 +1,55 @@
+%% Document Language and Encoding
+\usepackage[french]{babel}         % French language support
+\usepackage{inputenc}              % Input encoding
+\usepackage[T1]{fontenc}           % Font encoding
+\usepackage{ae,lmodern}            % Vector fonts
+
+%% Page Layout and Structure
+\usepackage[a4paper, margin=2cm]{geometry}  % Page format and margins
+\usepackage{abstract}               % Enhanced abstract environment
+\usepackage[bottom]{footmisc}       % Footer configuration
+\usepackage[subfigure]{tocloft}     % Table of contents customization
+\usepackage{calc}                   % For spacing in ToC between chapter number and name
+\usepackage[color={[gray]{0.8}}, scale=1, text={Draft}]{draftwatermark}  % Draft watermark
+
+%% Headers and Footers
+\usepackage{fancyhdr}               % Custom header and footer styles
+
+%% Mathematics
+\usepackage{amsmath}                % Advanced math formatting
+\usepackage{amsfonts}               % Math fonts
+\usepackage{amssymb}                % Mathematical symbols
+\usepackage{mathtools}              % Extension to amsmath
+
+%% Tables and Lists
+\usepackage{booktabs}               % Professional tables
+\usepackage{tabularx}               % Advanced tables with flexible columns
+\usepackage{longtable}              % Tables that span multiple pages
+\usepackage{rotating}               % Rotate tables and figures
+\usepackage{lscape}                 % Landscape orientation
+\usepackage{glossaries-extra}
+\setglossarystyle{long}
+
+%% Graphics, Figures and Colors
+\usepackage{graphicx}               % Graphics inclusion
+\usepackage{subfig}                 % Sub-figures
+\usepackage{float}                  % Improved figure placement
+\usepackage[dvipsnames, x11names, table]{xcolor}  % Color support
+\usepackage[most]{tcolorbox}        % Colored boxes
+
+%% Code Listing
+\usepackage{listings}               % Code blocks and syntax highlighting
+
+%% TikZ and Drawing
+\usepackage{tikz}                   % Drawing capabilities
+\usetikzlibrary{positioning, shapes.multipart, arrows.meta, shapes.geometric}
+\usetikzlibrary{calc,positioning}
+
+%% Hyperlinks
+\usepackage[plainpages=false, pdfpagelabels=false]{hyperref}  % Should be loaded last (with some exceptions)
+
+%% Bibliography and Citations
+\usepackage{biblatex}               % Bibliography management
+\usepackage{etoolbox}               % Programming tools for LaTeX
+\usepackage{keyval}                 % Key-value parsing
+\usepackage{csquotes}               % Context-sensitive quotations
