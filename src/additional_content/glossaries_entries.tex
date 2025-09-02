@@ -38,6 +38,150 @@
   sort={ohm}
 }
 
+%! suppress = MissingGlossaryReference
+
+
+\newglossaryentry{arbreR}{
+  name={arbre R},
+  type=main,
+  description={Structure de données arborescente utilisée pour indexer des objets spatiaux multidimensionnels.
+  L'arbre R organise les données en groupant les objets proches dans l'espace à l'intérieur de rectangles englobants minimaux (MBR). Ces rectangles peuvent se chevaucher et sont organisés hiérarchiquement.
+  Formellement, un arbre R est un arbre équilibré où chaque nœud contient entre $m$ et $M$ entrées, où $m \leq M/2$.
+  Chaque entrée de nœud non-feuille contient une paire $(mbr, ptr)$ où $ptr$ est un pointeur vers un nœud enfant et $mbr$ est le rectangle englobant minimal contenant tous les rectangles du nœud enfant. \newline
+  Cette structure est particulièrement efficace pour les requêtes spatiales comme les recherches par intervalle et les recherches des plus proches voisins, avec une complexité de recherche moyenne de $O(\log n)$.}
+}
+
+\newglossaryentry{octree}{
+  name={octree},
+  type=main,
+  description={Structure de données arborescente dans laquelle chaque nœud interne possède exactement huit enfants, utilisée pour partitionner récursivement l'espace tridimensionnel.
+  Chaque nœud de l'octree représente un cube dans l'espace 3D, qui est divisé en huit octants de taille égale.
+  Formellement, un octree pour un ensemble de points $P$ dans $\mathbb{R}^3$ est construit en divisant récursivement l'espace en huit régions cubiques jusqu'à ce qu'un critère d'arrêt soit atteint (comme une profondeur maximale ou un nombre minimal de points par région). \newline
+  Les octrees sont particulièrement utiles pour la détection de collisions, le rendu graphique, la compression de données spatiales et les calculs de champs de force en 3D, avec une complexité de recherche de $O(\log n)$ dans le cas moyen.}
+}
+
+\newglossaryentry{algorithmedijkstra}{
+  name={algorithme de Dijkstra},
+  type=main,
+  description={Algorithme de recherche de chemin conçu par Edsger Dijkstra en 1956.
+  Il permet de déterminer le plus court chemin entre un sommet source et tous les autres sommets d'un graphe pondéré dont les arêtes ont des poids positifs ou nuls.
+  Formellement, pour un graphe $G = (V, E)$ avec une fonction de poids $w : E \rightarrow [0, \infty)$, l'algorithme calcule $d(s, v)$ pour tout $v \in V$, où $d(s, v)$ est la distance la plus courte du sommet source $s$ au sommet $v$. \newline L'algorithme maintient un ensemble $S$ des sommets dont les distances minimales sont connues et un ensemble prioritaire $Q$ des sommets dont les distances sont provisoires.
+  À chaque itération, il sélectionne le sommet $u \in Q$ avec la distance minimale, l'ajoute à $S$, et met à jour les distances des sommets adjacents.}
+}
+
+\newglossaryentry{graphevisibilite}{
+  name={graphe de visibilité},
+  type=main,
+  description={En géométrie algorithmique, un graphe de visibilité est une représentation qui connecte des points (sommets) par des arêtes si ces points sont visibles l'un de l'autre, c'est-à-dire si le segment de droite qui les relie ne croise aucun obstacle.
+  Formellement, pour un ensemble $P$ de points et un ensemble $O$ d'obstacles, le graphe de visibilité $G = (V, E)$ est défini tel que $V = P$ et $(u, v) \in E$ si et seulement si la ligne droite de $u$ à $v$ n'intersecte aucun obstacle de $O$. \newline Les graphes de visibilité sont particulièrement utiles en planification de trajectoires robotiques et en navigation, permettant de calculer le plus court chemin évitant des obstacles polygonaux.
+  Pour $n$ sommets au total, la construction d'un graphe de visibilité peut être réalisée en $O(n^2 \log n)$ dans le cas général.}
+}
+
+\newglossaryentry{maillage}{
+  name={maillage},
+  type=main,
+  description={Un maillage est la discrétisation spatiale d'un milieu continu, ou aussi, une modélisation géométrique d’un domaine par des éléments proportionnés finis et bien définis. L'objet d'un maillage est de procéder à une simplification d'un système par un modèle représentant ce système et, éventuellement, son environnement (le milieu), dans l'optique de calculs de simulation ou de représentations graphiques.}
+}
+\newglossaryentry{enveloppe}{
+  name={enveloppe},
+  type=main,
+  description={En géométrie, courbe ou surface qui est tangente à chaque membre d'une famille de courbes ou de surfaces.
+  Formellement, pour une famille de courbes $F(x,y,a) = 0$ paramétrée par $a$, l'enveloppe est le lieu des points $(x,y)$ qui vérifient simultanément $F(x,y,a) = 0$ et $\frac{\partial F}{\partial a}(x,y,a) = 0$. \newline
+  L'enveloppe représente la limite extérieure atteinte par cette famille, et possède la propriété d'être tangente à chaque membre de la famille en au moins un point.}
+}
+\newglossaryentry{calcultensoriel}{
+  name={géométrie tensorielle},
+  type=main,
+  description={Représentation des données géométriques en tenseurs plutôt qu'en structures traditionnelles. Cette approche traite les primitives géométriques comme des collections de données homogènes pouvant être parallélisées efficacement par le biais d'opérations vectorisées.}
+}
+\newglossaryentry{lignepolygonale}{
+  name={ligne polygonale},
+  type=main,
+  description={En mathématiques, une ligne polygonale ou une ligne brisée est une figure géométrique formée d’une suite de segments de droites reliant une suite de points. Une ligne brisée fermée constitue un polygone.
+  En jargon informatique[3], notamment géomatique, une ligne polygonale est par apocope couramment nommée polyligne. Elle peut alors être formée de segments de droites ou de segments de courbes.}
+}
+\newglossaryentry{calculgeometrique}{
+  name={calcul géométrique},
+  type=main,
+  description={La géométrie algorithmique est l'étude des algorithmes manipulant des objets géométriques. Par exemple, le problème algorithmique qui consiste, étant donné un ensemble de points dans le plan décrits par leurs coordonnées, à trouver la paire de points dont la distance est minimale est un problème d'algorithmique géométrique.}
+}
+
+\newglossaryentry{acoustique}{
+  name={acoustique},
+  type=main,
+  description={Science du son. La discipline a étendu son domaine à l'étude de toute onde mécanique dans tout fluide, où un ébranlement se propage presque exclusivement en onde longitudinale ; le calcul de ces ondes selon les caractéristiques du milieu s'applique aussi bien pour l'air aux fréquences audibles que pour tout milieu fluide homogène et toute fréquence, y compris infrasons et ultrasons.}
+}
+
+\newglossaryentry{enveloppeconvexe}{
+  name={enveloppe convexe},
+  type=main,
+  description={Plus petit ensemble convexe contenant un ensemble donné de points.
+  Mathématiquement, pour un ensemble $S$ de points, l'enveloppe convexe est l'ensemble $\{  \sum_{i=1}^{n} \lambda_i p_i \mid p_i \in S, \lambda_i \geq 0, \sum_{i=1}^{n} \lambda_i = 1 \}$. \newline
+  \textbf{En 2D} : L'enveloppe convexe forme un polygone convexe dont les sommets sont un sous-ensemble des points initiaux.
+  Elle peut être visualisée comme la forme obtenue en tendant un élastique autour de l'ensemble des points. \newline
+  \textbf{En 3D} : L'enveloppe convexe forme un polyèdre convexe dont les sommets sont un sous-ensemble des points initiaux.
+  La complexité algorithmique augmente en 3D, où l'enveloppe est constituée de faces triangulaires formant une surface fermée.}
+}
+
+\newglossaryentry{polygone}{
+  name={polygone},
+  type=main,
+  description={Figure géométrique plane formée par une suite finie de segments de droite consécutifs, appelés côtés, qui se rejoignent pour former une ligne fermée.
+  Mathématiquement, un polygone est défini par un ensemble ordonné de sommets $\{P_1, P_2, \dots, P_n\}$, où chaque segment $[P_i, P_{i+1}]$ (et $[P_n, P_1]$ pour fermer) constitue un côté. \newline
+  \newline
+  - Un polygone est dit convexe si tous ses angles internes sont inférieurs ou égaux à $180^\circ$. \newline
+  - La somme des angles internes d'un polygone à $n$ côtés est donnée par $(n-2) \cdot 180^\circ$.}
+}
+
+\newglossaryentry{bord}{
+    name={bord},
+    type={main},
+    description={En topologie, le bord d'un ensemble est la frontière qui sépare cet ensemble de son complément.
+    Formellement, pour un sous-ensemble $A$ d'un espace topologique, le bord de $A$, noté $\partial A$, est l'ensemble des points tels que tout voisinage contient au moins un point de $A$ et un point du complément de $A$.
+    En géométrie différentielle, l'opérateur de bord $\partial$ agit sur les chaînes et permet de définir l'homologie.
+    Pour une $n$-chaîne, $\partial$ donne sa frontière comme une $(n-1)$-chaîne.}
+}
+
+\newglossaryentry{polyhedre}{
+  name={polyhèdre},
+  type=main,
+  description={Solide géométrique à trois dimensions délimité uniquement par des faces planes polygonales.
+  Mathématiquement, un polyhèdre peut être défini comme l'intersection d'un nombre fini de demi-espaces de $\mathbb{R}^3$.
+  Formellement, $P = \{x \in \mathbb{R}^3 \mid Ax \leq b\}$ où $A$ est une matrice et $b$ un vecteur. \newline
+  Un polyèdre est constitué de sommets (points), d'arêtes (segments de droite) et de faces (polygones).
+  La formule d'Euler établit que pour un polyhèdre simple : $V - E + F = 2$, où $V$ est le nombre de sommets, $E$ le nombre d'arêtes et $F$ le nombre de faces.}
+}
+
+\newglossaryentry{complexité}{
+    name={complexité},
+    type={main},
+    description={
+        La complexité en mathématiques et en algorithmique désigne une mesure quantitative de la difficulté ou du coût d'un problème ou d'un algorithme.
+        En particulier, on définit la complexité temporelle comme la grandeur mesurant le temps d'exécution d'un algorithme en fonction de la taille $n$ de l'entrée. Elle s'exprime avec la notation de Landau (notation $\mathcal O$)
+    }
+}
+
+\newglossaryentry{emergence}{
+    name={émergence},
+    type={main},
+    description={L'émergence d'un son occasionnel est la modification qu'il entraîne dans les
+    caractéristiques acoustiques de son environnement, sa capacité à affecter les personnes présentes, quelle que soit sa puissance.)
+    }
+}
+
+
+
+\newacronym{edf}{EDF}{Électricité de France}
+\newacronym{dtg}{DTG}{Division Technique Générale}
+\newacronym{nmpb}{NMPB}{Nouvelle Méthode de Prévision du Bruit}
+\newacronym{cm}{CM}{Comportement Machines}
+\newacronym{cca}{CCA}{Centre de Compétences Acoustiques}
+\newacronym{cnb}{CNB}{Conseil National du Bruit}
+\newacronym{ademe}{ADEME}{Agence de l'environnement et de la maîtrise de l'énergie}
+\newacronym{dipde}{DIPDE}{Division de l'Ingénierie du Parc et De l'Environnement}
+\newacronym{zer}{ZER}{Zone à Émergence Réglementée}
+
+
 %% Abbreviations (with glossaries-extra)
 \newabbreviation{etc}{etc.}{et cetera}
 \newabbreviation[longplural={Numéros d'identification}]{id}{ID}{Identifiant}

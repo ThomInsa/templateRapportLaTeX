@@ -17,8 +17,25 @@
 }
 
 %% ==================== CHAPTER & SECTION FORMATTING ====================
+
+%\renewcommand{\familydefault}{\sfdefault}      % Uncomment to use sans-serif font
+%% Use alphabetic letters for parts
+\renewcommand{\thepart}{\Alph{part}}
 % Use Roman numerals for chapters
 \renewcommand{\thechapter}{\Roman{chapter}}
+
+%% TOC Spacing Adjustments
+\setlength{\cftbeforepartskip}{18pt}       % Space before parts in TOC
+\setlength{\cftbeforechapskip}{3.5pt}     % Reduce space before chapters (default: 10pt)
+\setlength{\cftbeforesecskip}{1pt}      % Reduce space before sections
+\setlength{\cftsecindent}{1em}          % Reduce section indentation (default: 1.5em)
+\setlength{\cftsubsecindent}{1em}     % Reduce subsection indentation
+
+%% TOC Font Size Adjustments
+\renewcommand{\cfttoctitlefont}{\normalfont\Huge\bfseries}  % Title
+\renewcommand{\cftchapfont}{\normalfont\normalsize\bfseries}      % Chapter entries
+\renewcommand{\cftsecfont}{\normalfont\small}                % Section entries
+\renewcommand{\cftsubsecfont}{\normalfont\footnotesize}      % Subsection entries
 
 % Set width for chapter/section numbers in table of contents
 \setlength{\cftchapnumwidth}{\widthof{\large\bfseries{}XVIII}}
@@ -30,14 +47,14 @@
 
 % Enable numbering for \paragraph and \subparagraph
 \setcounter{secnumdepth}{4}    % Depth of section numbering
-\setcounter{tocdepth}{4}       % Depth of sections included in table of contents
+\setcounter{tocdepth}{1}       % Depth of sections included in table of contents
 
 %% ==================== ABSTRACT FORMATTING ====================
 \renewcommand{\abstractnamefont}{\normalfont\Large\bfseries}
 
 %% ==================== EQUATION LIST ====================
 % Create a custom list of equations
-\newcommand{\listequationsname}{Table des Équations}
+\newcommand{\listequationsname}{Liste des Équations}
 \newlistof{myequations}{equ}{\listequationsname}
 \newcommand{\myequations}[1]{%
     \addcontentsline{equ}{myequations}{\protect\numberline{\theequation}\hspace{3 mm} #1}\par
@@ -57,9 +74,10 @@
 \newcolumntype{T}{>{\columncolor{Khaki1}} p{0.13\textwidth}}
 \newcolumntype{Q}{>{\columncolor{Khaki2}} p{0.13\textwidth}}
 
-%% ==================== CODE LISTING FORMATTING ====================
-% Rename the list of listings
-\renewcommand{\lstlistlistingname}{Table des éléments de code}
+%% ==================== CODE FORMATTING ====================
+\renewcommand{\lstlistlistingname}{Liste des éléments de code}
+\renewcommand{\listalgorithmname}{Liste des algorithmes}
+
 
 % Define colors for code syntax highlighting
 \definecolor{codegreen}{rgb}{0,0.6,0}        % Green for comments
@@ -136,10 +154,10 @@
 % Horizontal rule command
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 
-%% ==================== BIBLIOGRAPHY SETUP ====================
-\addbibresource{main.bib}                     % Set bibliography resource file
-
 %% ==================== GLOSSARY SETUP ====================
-
+\setglossarystyle{long}
+\setabbreviationstyle[acronym]{long-short}
 \newglossary[slg]{symbols}{sym}{sbl}{Symboles}
 \makeglossaries
+%% ==================== BIBLIOGRAPHY SETUP ====================
+\addbibresource{main.bib}                     % Set bibliography resource file
