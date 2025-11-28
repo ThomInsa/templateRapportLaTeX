@@ -1,4 +1,48 @@
-\chapter{}
-    \section{}
-        \subsection{}
-            \subsubsection{}
+
+\chapter{État de l'art en modélisation de bâtiments : courte étude bibliographique}
+    \section{Analogie avec les circuits électriques}~\cite[chap.~VI]{manuel_energie_batiment}
+    \section{Modèle de Contrôle Prédictif pour le bâtiment}~\cite[chap.~I--IV]{MPC_needs}
+%        \begin{figure}
+%            \centering
+%            \begin{tikzpicture}[node distance=1.5cm]
+%
+%                % Nodes
+%                \node (timek) [startstop] {@ temps $t_k$};
+%                \node (measurements) [process, below of=timek] {Prendre les mesures du processus};
+%                \node (model) [process, below of=measurements, minimum width=8cm] {%
+%                    \textbf{Modèle du processus} \\[1ex]
+%                    \begin{minipage}{7cm}
+%                        \textbf{Entrées :} \\
+%                        - Actions de contrôle actuelles et futures \\
+%                        - Perturbations \\[1ex]
+%                        $\Rightarrow$ \textbf{Sorties futures du processus}
+%                    \end{minipage}
+%                    \hspace{0.5cm}
+%                    \begin{minipage}{3cm}
+%                        \textbf{Objectifs} \\
+%                        \textbf{Contraintes}
+%                    \end{minipage}
+%                };
+%                \node (optimization) [process, below of=model] {Résoudre le problème d'optimisation ci-dessus \\ $\Downarrow$ Meilleures actions de contrôle actuelles et futures};
+%                \node (implement) [process, below of=optimization] {Mettre en œuvre la meilleure action de contrôle \textit{actuelle}};
+%                \node (timek1) [startstop, below of=implement] {temps $t_{k+1}$};
+%
+%                % Arrows
+%                \draw [arrow] (timek) -- (measurements);
+%                \draw [arrow] (measurements) -- (model);
+%                \draw [arrow] (model) -- (optimization);
+%                \draw [arrow] (optimization) -- (implement);
+%                \draw [arrow] (implement) -- (timek1);
+%                \draw [arrow] (timek1.east) .. controls +(2,0) and +(2,0) .. (timek.east);
+%
+%            \end{tikzpicture}
+%            \caption{Schéma résumant le principe du MPC (\cite{MPC_needs})}
+%            \label{fig:mpc}
+%        \end{figure}
+
+    \section{Machine Learning pour le bâtiment}
+        \subsection{Approches traditionnelles}
+            \cite{WML}
+        \subsection{Réseaux de neurones}
+            \cite{LeCun_DL}
+            \cite{UDL}

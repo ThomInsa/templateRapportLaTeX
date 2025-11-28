@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/RapportAlt25_26.iml" filepath="$PROJECT_DIR$/RapportAlt25_26.iml" />
       <module fileurl="file://$PROJECT_DIR$/parametres.iml" filepath="$PROJECT_DIR$/parametres.iml" />
-      <module fileurl="file://$PROJECT_DIR$/templateRapportLaTeX.iml" filepath="$PROJECT_DIR$/templateRapportLaTeX.iml" />
     </modules>
   </component>
 </project>

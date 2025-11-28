@@ -1,5 +1,9 @@
+\usepackage{booktabs}   % pour \toprule, \midrule, \bottomrule
+\usepackage{pdflscape}  % pour tourner la page
+
 %% Document Language and Encoding
-\usepackage[french]{babel}         % French language support
+\usepackage{polyglossia}
+\setmainlanguage{french}
 \usepackage{inputenc}              % Input encoding
 \usepackage[T1]{fontenc}           % Font encoding
 \usepackage{ae,lmodern}            % Vector fonts
@@ -10,7 +14,7 @@
 %% Page Layout and Margins
 \usepackage[a4paper, margin=2cm]{geometry}  % Page format and margins
 \usepackage[bottom]{footmisc}      % Footer configuration
-\usepackage[color={[gray]{0.8}}, scale=1, text={Draft}]{draftwatermark}  % Draft watermark
+\usepackage[color={[gray]{0.8}}, scale=0.5, text={Version intermédiaire}]{draftwatermark}  % Draft watermark
 
 %% Document Structure
 \usepackage{abstract}              % Enhanced abstract environment
@@ -48,17 +52,29 @@
 \usepackage{listings}              % Code blocks and syntax highlighting
 \usepackage{algpseudocode}
 \usepackage{algorithm}          % Algorithm formatting
+\usepackage{algorithmicx}          % Algorithm formatting
 
 %% Drawing and Diagrams
 \usepackage{tikz}                  % Drawing capabilities
-%\usetikzlibrary{positioning, shapes.multipart, arrows.meta, shapes.geometric}
+\usetikzlibrary{positioning, shapes.multipart, arrows.meta, shapes.geometric}
 \usetikzlibrary{calc,positioning}
 
 %% References and Glossaries
-\usepackage[acronym]{glossaries-extra}  % Glossaries and acronyms
+\usepackage[acronym,automake]{glossaries-extra}  % Glossaries and acronyms
 
 %% Bibliography and Citations
-\usepackage{biblatex}              % Bibliography management
+\usepackage[backend=biber,
+    doi=true,
+    url=true,
+    isbn=true
+%    organization=true,
+%    subtitle=true,
+%    publisher=true,
+%    edition=true,
+%    address=true,
+%    editor=true,
+%    volume=true
+]{biblatex}              % Bibliography management
 \usepackage{etoolbox}              % Programming tools for LaTeX
 \usepackage{keyval}                % Key-value parsing
 

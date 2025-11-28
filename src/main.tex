@@ -3,12 +3,15 @@
 
 % Preamble
 \documentclass[a4paper, 10pt]{report}
+\usepackage{glossaries}
+\usepackage{amsopn}
+\usepackage{stmaryrd}
 
 % Inclusion des paramètres
 \input{parametres/packages}
 \input{parametres/parametres1}
+\input{parametres/parametres2}
 
-\input{biblio/bibConfig}
 \input{biblio/bibConfig}
 \input{additional_content/glossaries_entries}
 
@@ -47,15 +50,13 @@
     \input{part3/part3}
     \input{resume_intro_conclu/conclusion}
     % Inclusion des annexes
-    \input{annexes/annexe1}
-    \input{annexes/annexe2}
-    \input{annexes/annexe3}
-    
+%    \input{annexes/annexes}
+
     \input{biblio/biblio}
 %    \nocite{*} % récupère toutes les citations
-    \printglossary[type=\acronymtype,title=Acronymes]
-    \printglossary[title=Glossaire]
-    \printglossary[type=symbols,title=Symboles]
+%    \printglossary[title=Glossaire]
+%    \printglossary[type=\acronymtype,title=Acronymes]
+%    \printglossary[type=symbols,title=Symboles]
     \newpage
-    \input{biblio/biblio}
+
 \end{document}

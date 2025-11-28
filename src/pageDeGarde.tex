@@ -1,49 +1,51 @@
 \begin{titlepage}
     \begin{center}
-        % Deux logos
-%        \includegraphics[width=0.30\textwidth]{figures/placeholder}\hspace{0.5cm}\includegraphics[width=0.30\textwidth]{figures/placeholder}\\[0.9cm]
+        \includegraphics[width=0.30\textwidth]{figures/logos/Logo_INSA_CVL}\hspace{0.65cm}\includegraphics[width=0.30\textwidth]{figures/logos/logo_CEA}\\[0.9cm]
         % Un logo
-        \includegraphics[width=0.45\textwidth]{figures/logos/Logo_INSA_CVL}\\[0.9cm]
+%        \includegraphics[width=0.45\textwidth]{figures/logos/Logo_INSA_CVL}\\[0.9cm]
 
-        \textsc{\LARGE Entreprise-Institut 1}\\[0.35cm]
-        %\textsc{\LARGE Entreprise-Institut 2}\\[1.5cm]
+        \textsc{\LARGE Institut National des Sciences Appliquées}\\[0.35cm]
+        \textsc{\LARGE Commissariat à l'Énergie Atomique \\et aux Énergies Alternatives}\\[1cm]
 
         \HRule \\[0.4cm]
 
-            {\huge \bfseries Titre du rapport\\[0.15cm]
-            \Large Sous-titre du rapport\\[0.4cm] }
+            {\huge \bfseries Analyse de données pour la consommation énergétique de bâtiments tertiaires\\[0.15cm]
+            \Large Rapport d'Alternance en Contrat de Professionnalisation\\[0.4cm] }
 
-        \HRule \\[1.5cm]
+        \HRule \\[0.5cm]
 
         % Auteurs et relecteurs
         \begin{minipage}{0.4\textwidth}
             \begin{flushleft} \large
-                \emph{Auteurs:}\\
-                    Prénom \textsc{Nom}\\
-                    Prénom \textsc{Nom}\\
-                    Prénom \textsc{Nom}\\
-                    Prénom \textsc{Nom}
-
+                \emph{Auteur:}\\
+                    Thomas \textsc{Aubin}\\
             \end{flushleft}
         \end{minipage}
         \begin{minipage}{0.4\textwidth}
             \begin{flushright} \large
-                \emph{Relecteurs 1 :} \\
-                Prénom \textsc{Nom}\\
-                Prénom \textsc{Nom}\\
-                \emph{Relecteurs 2 :} \\
-                Prénom \textsc{Nom}
+                \emph{Encadrant en entreprise :} \\
+                Antoine \textsc{Leconte}\\
+                \emph{Tuteur pédagogique :} \\
+                Pascal \textsc{Berthomé}\\
+                \emph{Relecteurs :} \\
             \end{flushright}
         \end{minipage}
-        \vfill
-        \fbox{\includegraphics[width = 0.9\textwidth]{figures/placeholder}}
+        \\[0.5cm]
+        \fbox{\includegraphics[width = 0.8\textwidth]{figures/illustrations/Smart-City}}
         \\[3mm]
         Résumé en quelques lignes du projet\\
-        \textbf{Mots-clés :} mot1, mot2, mot3, mot4, mot5\\
-        \vfill
+        \textbf{Mots-clés :} Énergétique, Bâtiment, Optimisation, Machine Learning\\[0.5cm]
         {\large \today}
-        \begin{flushright}
-            \small{Modèle \LaTeX créé par Thomas AUBIN}
-        \end{flushright}
+        % Texte en bas à gauche
+        \begin{tikzpicture}[remember picture,overlay]
+            \node[anchor=south west, xshift=1cm, yshift=1cm, align=left]
+            at (current page.south west) {INSA CVL \\ Département \textbf{S}écurité et \textbf{T}echnologies \textbf{I}nformatiques \\ Option \textbf{A}rchitecture et \textbf{S}écurité \textbf{L}ogicielles et \textbf{I}\textbf{A}};
+        \end{tikzpicture}
+        % Texte en bas à droite
+        \begin{tikzpicture}[remember picture,overlay]
+            \node[anchor=south east, xshift=-1cm, yshift=1cm, align=right]
+            at (current page.south east) {CEA Grenoble - \textbf{D}irection des \textbf{É}nergie\textbf{s} \\ LITEN - \textbf{D}épartement des \textbf{T}echnologies \textbf{S}olaires \\ \textbf{S}ervice \textbf{I}ntégration et \textbf{R}éseaux \textbf{É}nergétiques \\ \textbf{L}aboratoire \textbf{É}nergétique \textbf{L}ocale et \textbf{A}utoconsommation};
+        \end{tikzpicture}
     \end{center}
 \end{titlepage}
+

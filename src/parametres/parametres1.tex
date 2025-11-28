@@ -52,6 +52,11 @@
 %% ==================== ABSTRACT FORMATTING ====================
 \renewcommand{\abstractnamefont}{\normalfont\Large\bfseries}
 
+
+\patchcmd{\abstract}{\titlepage}{\thispagestyle{empty}}{}{}
+\patchcmd{\endabstract}{\endtitlepage}{}{}{}
+
+
 %% ==================== EQUATION LIST ====================
 % Create a custom list of equations
 \newcommand{\listequationsname}{Liste des Équations}
@@ -77,6 +82,23 @@
 %% ==================== CODE FORMATTING ====================
 \renewcommand{\lstlistlistingname}{Liste des éléments de code}
 \renewcommand{\listalgorithmname}{Liste des algorithmes}
+
+\makeatletter
+\newcommand{\nochapterpage}[1]{%
+        {\parindent 0pt \raggedright \normalfont
+    \Huge\bfseries #1\par\nobreak\vskip 40pt}
+}
+
+%\renewcommand{\lstlistoflistings}{%
+%    \nochapterpage{\lstlistlistingname}%
+%    \@starttoc{lol}%
+%}
+%
+%\renewcommand{\listofalgorithms}{%
+%    \nochapterpage{\listalgorithmname}%
+%    \@starttoc{loa}%
+%}
+\makeatother
 
 
 % Define colors for code syntax highlighting
@@ -160,4 +182,12 @@
 \newglossary[slg]{symbols}{sym}{sbl}{Symboles}
 \makeglossaries
 %% ==================== BIBLIOGRAPHY SETUP ====================
+\DeclareCiteCommand{\cite}[\mkbibbrackets]
+{\usebibmacro{prenote}}
+{\printtext[bibhyperref]{%
+    \printfield{labelnumber}%
+    \addcomma\space
+    \printnames{labelname}}}
+{\multicitedelim}
+{\usebibmacro{postnote}}
 \addbibresource{main.bib}                     % Set bibliography resource file
