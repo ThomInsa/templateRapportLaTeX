@@ -4,6 +4,10 @@
 
 # De l'énergétique du bâtiment au CEA : rappels historiques et contextualisation
 
+## Généralités
+
+- Chiffres-clés = checker document déjà en biblio dernière page
+
 ## Direction des énergies et Centre de Grenoble
 
 - Citer livre CEA
@@ -11,6 +15,8 @@
 ## LITEN, INES et DTS
 
 ## SIRE et LELA
+
+> Changement dans la hiérarchie à pratiquement tous les niveaux : directeur de labo arrivée en même temps que moi
 
 # Modélisation du comportement thermique d'un bâtiment depuis des données simulées et réelles : approches White-Box et Black-Box
 
@@ -33,6 +39,7 @@
 
 ## Modélisation des besoins énergétiques du quartier DISTRISIM
 
+- Diagrame Tikz représentant tout le pipeline de calcul (drafter sur draw.io)
 - Figure : courbes de visualisation des données de mesure d'un bâtiment (Thales ou Apache ...)
 - Algo : méthode de la sécante
   - Citer num_anal :
@@ -146,6 +153,9 @@ Tableau d'analyse du risque :
     - Tableau des issues ouvertes, en cours et fermées à la fin du S9
     - Tableau similaire pour la fin du S10 _(garder les deux tableaux pour le rapport final)_
 
+# Conclusion
+
+> Conclure avec l'image cartographie d'IA pour se représenter la multitude d'algos existants et leur portée
 
 # Annexes
 

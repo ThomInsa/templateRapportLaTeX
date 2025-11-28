@@ -18,41 +18,44 @@
 % Document
 \begin{document}
     % Page de Garde
-    \input{pageDeGarde}
-
-    % Remerciements without page number
-    \pagenumbering{gobble} % Removes page numbers
-    \input{resume_intro_conclu/remerciements}
-
-    % Start page numbering with Arabic numerals at abstract
-    \pagenumbering{arabic} % Start page 1 here
-    \input{resume_intro_conclu/abstract}
-
-
-    \tableofcontents \newpage
-    \listoffigures
-    \listoftables
-    \listofmyequations
-    \listofalgorithms
-    \lstlistoflistings
-
-
-
-    % Force acronym to be processed
-    \glsresetall
-
-%    \input{annexes/annexe3}
-    \input{resume_intro_conclu/introduction}
-
-    % Inclusion des parties
-    \input{part1/part1}
-    \input{part2/part2}
-    \input{part3/part3}
-    \input{resume_intro_conclu/conclusion}
-    % Inclusion des annexes
-%    \input{annexes/annexes}
-
-    \input{biblio/biblio}
+    \input{TO_REMERGE_HUMA/pageDeGardeHuma}
+    \input{TO_REMERGE_HUMA/introHuma}
+    \input{TO_REMERGE_HUMA/part1Huma}
+    \input{TO_REMERGE_HUMA/part2Huma}
+    \input{TO_REMERGE_HUMA/concluHuma}
+%    % Remerciements without page number
+%    \pagenumbering{gobble} % Removes page numbers
+%    \input{resume_intro_conclu/remerciements}
+%
+%    % Start page numbering with Arabic numerals at abstract
+%    \pagenumbering{arabic} % Start page 1 here
+%    \input{resume_intro_conclu/abstract}
+%
+%
+%    \tableofcontents \newpage
+%    \listoffigures
+%    \listoftables
+%    \listofmyequations
+%    \listofalgorithms
+%    \lstlistoflistings
+%
+%
+%
+%    % Force acronym to be processed
+%    \glsresetall
+%
+%%    \input{annexes/annexe3}
+%    \input{resume_intro_conclu/introduction}
+%
+%    % Inclusion des parties
+%    \input{part1/part1}
+%    \input{part2/part2}
+%    \input{part3/part3}
+%    \input{resume_intro_conclu/conclusion}
+%    % Inclusion des annexes
+%%    \input{annexes/annexes}
+%
+%    \input{biblio/biblio}
 %    \nocite{*} % récupère toutes les citations
 %    \printglossary[title=Glossaire]
 %    \printglossary[type=\acronymtype,title=Acronymes]

@@ -1,0 +1,54 @@
+% TikZ Organigram Template
+% How to use:
+% - Edit the node texts below (CEO, Dept A, etc.) to match your organization.
+% - Duplicate or remove branches as needed; keep the coordinate and child structure.
+% - Colors and shapes are controlled by the styles defined at the top.
+
+\begin{tikzpicture}[
+    organigram/.style={
+        font=\sffamily, align=center,
+        minimum width=28mm, minimum height=9mm,
+        inner sep=2mm, outer sep=1mm,
+        draw, rounded corners=2pt,
+        fill=blue!5
+    },
+    role/.style={organigram},
+    lead/.style={organigram, fill=green!10},
+    exec/.style={organigram, fill=orange!10},
+    link/.style={-{Stealth[length=3mm]}, line width=0.6pt},
+    level distance=14mm,
+]
+    % Root node (top of the organigram)
+    \node[exec] (root) {Direction\newline Générale};
+
+    % First level
+    \node[lead, below left=of root, xshift=-8mm] (deptA) {Direction\newline Technique};
+    \node[lead, below=of root]                 (deptB) {Direction\newline Projets};
+    \node[lead, below right=of root, xshift=8mm] (deptC) {Direction\newline Support};
+
+    % Second level under Direction Technique
+    \node[role, below left=of deptA]  (a1) {Équipe\newline Modélisation};
+    \node[role, below right=of deptA] (a2) {Équipe\newline Déploiement};
+
+    % Second level under Direction Projets
+    \node[role, below left=of deptB]  (b1) {Pôle\newline Bâtiments};
+    \node[role, below right=of deptB] (b2) {Pôle\newline Quartiers};
+
+    % Second level under Direction Support
+    \node[role, below left=of deptC]  (c1) {RH \&\newline Formation};
+    \node[role, below right=of deptC] (c2) {Admin \&\newline Qualité};
+
+    % Connections
+    \draw[link] (root) -- (deptA);
+    \draw[link] (root) -- (deptB);
+    \draw[link] (root) -- (deptC);
+
+    \draw[link] (deptA) -- (a1);
+    \draw[link] (deptA) -- (a2);
+
+    \draw[link] (deptB) -- (b1);
+    \draw[link] (deptB) -- (b2);
+
+    \draw[link] (deptC) -- (c1);
+    \draw[link] (deptC) -- (c2);
+\end{tikzpicture}
