@@ -92,3 +92,4 @@ Pour adapter le template à vos besoins, modifiez :
 - `src/parametres/` : Paramètres et packages LaTeX
 - `src/biblio/bibConfig.tex` : Configuration de la bibliographie
 - `build.bat` : Chemins vers les exécutables (à adapter selon votre installation)
+- `fix-bcf.bat` : Utilise des chemins relatifs par défaut. Si tectonic n'est pas dans le PATH, vous pouvez spécifier le chemin complet dans le script.

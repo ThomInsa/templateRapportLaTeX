@@ -9,11 +9,15 @@ echo Fix pour fichier main.bcf manquant
 echo ========================================
 echo.
 
-:: Chemins vers les exécutables (à adapter selon votre installation)
-set TECTONIC="C:\Users\TA285040\Documents\Alternance\Livrables\templateRapportLaTeX\tectonic.exe"
-set SRC_DIR="C:\Users\TA285040\Documents\Alternance\Livrables\templateRapportLaTeX\src"
-set OUT_DIR="C:\Users\TA285040\Documents\Alternance\Livrables\templateRapportLaTeX\out"
+:: Chemins relatifs (le script doit être exécuté depuis la racine du projet)
+set SCRIPT_DIR=%~dp0
+set TECTONIC=tectonic
+set SRC_DIR=%SCRIPT_DIR%src
+set OUT_DIR=%SCRIPT_DIR%out
 set MAIN_FILE=main
+
+:: Si tectonic n'est pas dans le PATH, spécifiez le chemin complet ici
+:: Exemple: set TECTONIC="C:\path\to\tectonic.exe"
 
 echo Etape 1: Création du dossier de sortie...
 if not exist %OUT_DIR% (
