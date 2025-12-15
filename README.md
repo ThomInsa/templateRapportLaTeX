@@ -43,14 +43,20 @@ Si vous rencontrez une erreur indiquant que le fichier `main.bcf` est manquant d
 
 Le fichier `.bcf` est un fichier de contrôle généré automatiquement pendant la compilation LaTeX. Pour le régénérer :
 
-1. **Option 1 : Recompiler complètement**
+1. **Option 1 : Utiliser le script de correction (recommandé)**
+   ```bash
+   fix-bcf.bat
+   ```
+   Ce script régénère automatiquement le fichier `main.bcf` en effectuant une première compilation LaTeX.
+
+2. **Option 2 : Recompiler complètement**
    ```bash
    # Supprimez le dossier out/ et recompilez
    rmdir /s /q out
    build.bat
    ```
 
-2. **Option 2 : Compilation manuelle étape par étape**
+3. **Option 3 : Compilation manuelle étape par étape**
    ```bash
    # Créer le dossier out/ s'il n'existe pas
    mkdir out
