@@ -20,8 +20,9 @@
     % Page de Garde
     \input{TO_REMERGE_HUMA/pageDeGardeHuma}
     \input{TO_REMERGE_HUMA/introHuma}
-    \input{TO_REMERGE_HUMA/part1Huma}
-    \input{TO_REMERGE_HUMA/part2Huma}
+    \tableofcontents \newpage
+    \input{TO_REMERGE_HUMA/part1Huma/part1Huma}
+    \input{TO_REMERGE_HUMA/part2Huma/part2Huma}
     \input{TO_REMERGE_HUMA/concluHuma}
 %    % Remerciements without page number
 %    \pagenumbering{gobble} % Removes page numbers
@@ -32,7 +33,6 @@
 %    \input{resume_intro_conclu/abstract}
 %
 %
-%    \tableofcontents \newpage
 %    \listoffigures
 %    \listoftables
 %    \listofmyequations
@@ -55,11 +55,18 @@
 %    % Inclusion des annexes
 %%    \input{annexes/annexes}
 %
-%    \input{biblio/biblio}
+%    % Imprimer uniquement les entrées du glossaire principal (type=main)
+%    \printglossary[type=main, title=Glossaire]
+%
+%    % Imprimer uniquement les acronymes
+%    \printglossary[type=\acronymtype, title=Acronymes]
+%
+%    % Imprimer uniquement les symboles
+%    \printglossary[type=symbols, title=Symboles]
+
+%    \printglossaries
+
+    \input{biblio/biblio}
 %    \nocite{*} % récupère toutes les citations
-%    \printglossary[title=Glossaire]
-%    \printglossary[type=\acronymtype,title=Acronymes]
-%    \printglossary[type=symbols,title=Symboles]
-    \newpage
 
 \end{document}

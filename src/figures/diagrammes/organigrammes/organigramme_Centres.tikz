@@ -1,0 +1,31 @@
+\begin{tikzpicture}[
+    main/.style={text centered, text width=10cm, fill=red!20, draw, rectangle, rounded corners, font=\bfseries\Large},
+    direction/.style={text centered, text width=3cm, fill=orange!50, draw, rectangle, rounded corners, font=\large},
+    institut/.style={grow=down, xshift=3cm, text centered, text width=4cm, draw, rectangle, rounded corners, edge from parent path={(\tikzparentnode.225) |- (\tikzchildnode.west)}},
+    site/.style={level distance = 6ex, xshift=4.5cm, text centered, text width=5cm, draw, rectangle, rounded corners, edge from parent path={(\tikzparentnode.225) |- (\tikzchildnode.west)}},
+    first/.style    ={level distance=12ex},
+    second/.style   ={level distance=24ex},
+    third/.style    ={level distance=36ex},
+    fourth/.style   ={level distance=48ex},
+    fifth/.style    ={level distance=60ex},
+    level 1/.style={sibling distance=30em, level distance=5em}]
+
+    \node[main, anchor=south]{Direction Générale du CEA}
+    [edge from parent fork down]
+    %
+    child{node (d1) [direction] {Centres civils}
+        child[institut,first]  {node {Centre de Cadarache}}
+        child[institut,second] {node {Centre de Grenoble}
+            child[site]  {node {\textbf Institut \textbf National de l'\textbf Énergie \textbf Solaire (Chambéry)}}
+        }
+        child[institut,third]  {node {Centre de Marcoule}}
+        child[institut,fourth] {node {Centre de Paris-Saclay}}
+    }
+    %
+    child{node (d2) [direction] {Centres Militaires}
+        child[institut,first]  {node {Centre du Cesta}}
+        child[institut,second] {node {Centre de Gramat}}
+        child[institut,third]  {node {Centre du Ripault}}
+        child[institut,fourth] {node {Centre de Valduc}}
+    };
+\end{tikzpicture}

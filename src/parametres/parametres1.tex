@@ -179,15 +179,20 @@
 %% ==================== GLOSSARY SETUP ====================
 \setglossarystyle{long}
 \setabbreviationstyle[acronym]{long-short}
+
+% Définir le glossaire des symboles AVANT \makeglossaries
 \newglossary[slg]{symbols}{sym}{sbl}{Symboles}
+
+% Créer les glossaires
 \makeglossaries
+
 %% ==================== BIBLIOGRAPHY SETUP ====================
-\DeclareCiteCommand{\cite}[\mkbibbrackets]
-{\usebibmacro{prenote}}
-{\printtext[bibhyperref]{%
-    \printfield{labelnumber}%
-    \addcomma\space
-    \printnames{labelname}}}
-{\multicitedelim}
-{\usebibmacro{postnote}}
+%\DeclareCiteCommand{\cite}[\mkbibbrackets]
+%{\usebibmacro{prenote}}
+%{\printtext[bibhyperref]{%
+%    \printfield{labelnumber}%
+%    \addcomma\space
+%    \printnames{labelname}}}
+%{\multicitedelim}
+%{\usebibmacro{postnote}}
 \addbibresource{main.bib}                     % Set bibliography resource file

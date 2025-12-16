@@ -1,0 +1,24 @@
+\begin{tikzpicture}[
+    main/.style={text centered, text width=8cm, fill=green!20, draw, rectangle, rounded corners, font=\bfseries\Large},
+    service/.style={text centered, text width=3cm, fill=gray!50, draw, rectangle, rounded corners},
+    labo/.style={grow=down, xshift=4cm, text centered, text width=5cm, draw, rectangle, rounded corners, edge from parent path={(\tikzparentnode.225) |- (\tikzchildnode.west)}},
+    first/.style    ={level distance=15ex},
+    second/.style   ={level distance=30ex},
+    third/.style    ={level distance=45ex},
+    fourth/.style   ={level distance=60ex},
+    fifth/.style    ={level distance=75ex},
+    level 1/.style={sibling distance=12.5em, level distance=8em}]
+
+    \node[main, anchor=south]{Département des Technologies Solaires}
+    [edge from parent fork down]
+    %
+    child{node (d1) [service] {\textbf Service \\ Procédés \\ et \textbf Cellules \textbf Photo\textbf{v}oltaïques}}
+    %
+    child{node (d2) [service] {\textbf Service \textbf Modules \\ et \textbf Systèmes \textbf Photovoltaïques}
+        child[labo,first]  {node {\textbf Laboratoire \\ de \textbf Stockage \textbf Stationnaire \\pour \textbf Applications ENR}}
+        child[labo,second] {node {\textbf Laboratoire \\ d'\textbf Intégration \textbf Énergétique Locale \\et \textbf Autoconsommation}}
+        child[labo,third]  {node {\textbf Laboratoire \\ de Pilotage \textbf Intelligent \\ des \textbf Réseaux \textbf Électriques}}
+    }
+    %
+    child{node (d3) [service] {\textbf Service \\ \textbf Modules \\ \textbf Systèmes \textbf Photovoltaïques}};
+\end{tikzpicture}
