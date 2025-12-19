@@ -1,12 +1,13 @@
 \begin{tikzpicture}[
-    main/.style={text centered, text width=8cm, fill=blue!20, draw, rectangle, rounded corners, font=\bfseries\Large},
-    département/.style={text centered, text width=3cm, fill=gray!50, draw, rectangle, rounded corners},
+    main/.style={text centered, text width=8cm, fill=blue!50, draw, rectangle, rounded corners, font=\bfseries\Large},
+    département/.style={text centered, text width=3cm, fill=green!20, draw, rectangle, rounded corners},
     service/.style={grow=down, xshift=4cm, text centered, text width=5cm, draw, rectangle, rounded corners, edge from parent path={(\tikzparentnode.225) |- (\tikzchildnode.west)}},
     first/.style    ={level distance=15ex},
     second/.style   ={level distance=30ex},
     third/.style    ={level distance=45ex},
     fourth/.style   ={level distance=60ex},
     fifth/.style    ={level distance=75ex},
+    special/.style  ={draw, rectangle, dotted, rounded corners},
     level 1/.style={sibling distance=12.5em, level distance=8em}]
 
     \node[main, anchor=south]{Direction du LITEN}
@@ -15,7 +16,7 @@
     child{node (d1) [département] {\textbf Département \\ des \\ \textbf Technologies \textbf Solaires}
         child[service,first]  {node {\textbf Service Procédés \\ \textbf Cellules \textbf Photo\textbf{v}oltaïques}}
         child[service,second] {node {\textbf Service \textbf Modules \\et \textbf Systèmes \textbf Photovoltaïques}}
-        child[service,third]  {node {\textbf Service \textbf Intégration et \textbf Réseaux \textbf Énergétiques}}
+        child[service,third]  {node [special]{\textbf Service \textbf Intégration et \textbf Réseaux \textbf Énergétiques}}
     }
     %
     child{node (d2) [département] {\textbf Département \\ \textbf Électricité \\ et \textbf Hydrogène pour les \textbf Transports}}

@@ -25,7 +25,7 @@ if not exist %OUT_DIR% (
 
 :: --------------------------------------------------
 echo === Compilation LaTeX initiale ===
-%TECTONIC% --outdir=%OUT_DIR% --keep-logs --reruns 0 %SRC_DIR%\%MAIN_FILE%.tex
+%TECTONIC% --outdir=%OUT_DIR% --keep-logs --keep-intermediates --reruns 0 %SRC_DIR%\%MAIN_FILE%.tex
 if errorlevel 1 (
     echo Erreur lors de la compilation LaTeX. Arrêt.
     pause
@@ -49,7 +49,7 @@ if errorlevel 1 (
 cd /d %PROJECT_DIR%
 
 echo === Compilation LaTeX pour bibliographie et glossaires (2/2) ===
-%TECTONIC% --outdir=%OUT_DIR% --keep-logs --reruns 0 %SRC_DIR%\%MAIN_FILE%.tex
+%TECTONIC% --outdir=%OUT_DIR% --keep-logs --keep-intermediates --reruns 0 %SRC_DIR%\%MAIN_FILE%.tex
 if errorlevel 1 (
     echo Erreur lors de la compilation LaTeX. Arrêt.
     pause
@@ -57,7 +57,7 @@ if errorlevel 1 (
 )
 
 echo === Compilation finale pour mises à jour des références (3/3) ===
-%TECTONIC% --outdir=%OUT_DIR% --keep-logs %SRC_DIR%\%MAIN_FILE%.tex
+%TECTONIC% --outdir=%OUT_DIR% --keep-logs --keep-intermediates %SRC_DIR%\%MAIN_FILE%.tex
 if errorlevel 1 (
     echo Erreur lors de la compilation LaTeX. Arrêt.
     pause

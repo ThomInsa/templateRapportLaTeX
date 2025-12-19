@@ -56,13 +56,22 @@
 
 - Reprendre paragraphe 5.1 de TST dans un logigramme 
 
+- Figure : logigramme pour expliquer la démarche pour reproduire figure 18
+
 - Tableau : reproduire figure 18 de TST 
   - l'originale pour harmoniser la charte graphique
   - un nouveau run sur le même bâtiment pour comparer les résultats
-  - le même tableau avec les moyennes de chaque bâtiment
+  - le même tableau avec les moyennes et écart-types de chaque bâtiment
 - Tableau : reproduire figure 14
 
 ## Étude et développement de nouvelles approches pour la modélisation énergétiques de bâtiments
+
+Figure introductive : graphe en trois colonnes 
+1. Datasets d'entrée
+2. Modèles développés
+3. Résultats obtenus
+Éventuellement 
+
 ### Couple modèle-dataset1
 ### Couple modèle-dataset2
 ### Couple modèle-datasetN
@@ -116,13 +125,14 @@ Axes d'amélioration (probablement non explorés fin S9)
 
 - Revoir ce que propose Claude
 - Bandit + Outils CEA _(demander à Mathieu)_
-
+- Utiliser au maximum des librairies standards pour minimiser le risque d'introduire des vulnérabilités dans le code
 
 ### Analyse de risques inhérents au Machine Learning
 
+#### Recommendations générales du NIST et de l'ENISA
+
 - Aspects data : citer 5.2.2 Reco 3 de cybersecurity OF AI and standardisation
 - Citer AI Cyber and Research : 1.6 et 1.8
-- Voir ce qu'on peut faire du scénario de rapport d'incident sur l'approvisionnement énergétique
 - Reprendre tableaux 3 et 4 de Securing Machine Learning Algorithms : les adapter au code et mener une étude qualitative
 - Commenter tableau 5, idéalement expliquer quelles mesures ont été prises
   - Pour RBAC : accès restreint à GitLab
@@ -131,6 +141,12 @@ Axes d'amélioration (probablement non explorés fin S9)
   - En particulier, explorer la partie SPECIFIC ML du Tableau 5
     - Donner la procédure pour mener un petit pentest par inférence d'appartenance sur le modèle. Citer le rapport MIA
     - Randomiser les données d'entrée pour compliquer la compréhension du modèle
+
+#### 
+
+Insister sur ce qui est applicable et ce qui ne l'est pas (recommendations des normes VS réalité dans les bureaux)
+
+- Reprise du scénario de rapport d'incident sur l'approvisionnement énergétique
 
 | Datasets utilisés         | Intégrité | Sensibilité | Traçabilité | Confidentialité |
 |---------------------------|-----------|-------------|-------------|-----------------|
@@ -148,14 +164,16 @@ Tableau d'analyse du risque :
 |                  |                            |                  |                          |                      |                              |                                        |      
 |                  |                            |                  |                          |                      |                              |                                        |      
 
-### Versionning et gestion de projet
+## Versionnage et gestion de projet
 - Suivi du projet = tableau :
     - Tableau des issues ouvertes, en cours et fermées à la fin du S9
-    - Tableau similaire pour la fin du S10 _(garder les deux tableaux pour le rapport final)_
+    - Tableau similaire pour la fin du S10 
+
+- Bonne pratique adoptée : ne jamais push sans update la documentation
 
 # Conclusion
 
-> Conclure avec l'image cartographie d'IA pour se représenter la multitude d'algos existants et leur portée
+> Conclure avec l'image cartographie d'IA pour se représenter la multitude d'algos existants et leur portée (conv LinkedIn Selyan)
 
 # Annexes
 

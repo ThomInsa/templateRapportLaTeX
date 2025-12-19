@@ -1,20 +1,21 @@
 \begin{tikzpicture}[
-    main/.style={text centered, text width=10cm, fill=red!20, draw, rectangle, rounded corners, font=\bfseries\Large},
-    direction/.style={text centered, text width=3cm, fill=gray!50, draw, rectangle, rounded corners},
+    main/.style={text centered, text width=10cm, fill=red!50, draw, rectangle, rounded corners, font=\bfseries\Large},
+    direction/.style={text centered, text width=3cm, fill=blue!20, draw, rectangle, rounded corners},
     institut/.style={grow=down, xshift=4cm, text centered, text width=5cm, draw, rectangle, rounded corners, edge from parent path={(\tikzparentnode.225) |- (\tikzchildnode.west)}},
     first/.style    ={level distance=15ex},
     second/.style   ={level distance=30ex},
     third/.style    ={level distance=45ex},
     fourth/.style   ={level distance=60ex},
     fifth/.style    ={level distance=75ex},
+    special/.style  ={draw, rectangle, dotted, rounded corners},
     level 1/.style={sibling distance=12.5em, level distance=8em}]
 
     \node[main, anchor=south]{Direction Générale du CEA}
     [edge from parent fork down]
     %
-    child{node (d1) [direction] {\textbf Direction \\ des \textbf Énergies}
-    child[institut,first] {node {\textbf{I}nstitut de {R}echerche\\ et d'{É}{\textbf t}ude{\textbf s} en {É}conomie\\ de l'\textbf{É}nergie}}
-    child[institut,second] {node {\textbf{L}aboratoire d'\textbf{I}nnovation\\ pour les \textbf{T}echnologies des\\ \textbf{É}nergies {N}ouvelles et\\ les \textbf{N}anomatériaux}}
+    child{node (d1) [direction] {\textbf Direction \\ des \textbf Énergie\textbf{s}}
+    child[institut,first] {node {\textbf{I}nstitu\textbf{t} de Recherche\\ et d'{É}{\textbf t}ude{\textbf s} en \textbf{É}conomie\\ de l'{É}nergie}}
+    child[institut,second] {node[special]{\textbf{L}aboratoire d'\textbf{I}nnovation\\ pour les \textbf{T}echnologies des\\ \textbf{É}nergies {N}ouvelles et\\ les \textbf{N}anomatériaux}}
     child[institut,third] {node {\textbf{I}nstitut des \textbf{S}ciences\\ \textbf{et} {T}echnologies pour une\\ \textbf{É}conomie \textbf{C}irculaire\\ des {é}nergies bas carbone}}
     child[institut,fourth] {node {\textbf{I}nstitut de \textbf{Re}cherche\\ pour les \textbf{S}ystèmes \textbf{N}ucléaires\\ pour la production d'\textbf{É}nergie bas carbone}}
     child[institut,fifth] {node {\textbf{I}nstitut des \textbf{S}ciences\\ \textbf{A}ppliquées et de la \textbf{S}imulation\\ pour les {É}nergies carbone}}

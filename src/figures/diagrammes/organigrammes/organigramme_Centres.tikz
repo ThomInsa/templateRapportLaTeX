@@ -1,6 +1,6 @@
 \begin{tikzpicture}[
-    main/.style={text centered, text width=10cm, fill=red!20, draw, rectangle, rounded corners, font=\bfseries\Large},
-    direction/.style={text centered, text width=3cm, fill=orange!50, draw, rectangle, rounded corners, font=\large},
+    main/.style={text centered, text width=10cm, fill=red!50, draw, rectangle, rounded corners, font=\bfseries\Large},
+    direction/.style={text centered, text width=3cm, fill=orange!20, draw, rectangle, rounded corners, font=\large},
     institut/.style={grow=down, xshift=3cm, text centered, text width=4cm, draw, rectangle, rounded corners, edge from parent path={(\tikzparentnode.225) |- (\tikzchildnode.west)}},
     site/.style={level distance = 6ex, xshift=4.5cm, text centered, text width=5cm, draw, rectangle, rounded corners, edge from parent path={(\tikzparentnode.225) |- (\tikzchildnode.west)}},
     first/.style    ={level distance=12ex},
@@ -27,5 +27,6 @@
         child[institut,second] {node {Centre de Gramat}}
         child[institut,third]  {node {Centre du Ripault}}
         child[institut,fourth] {node {Centre de Valduc}}
+        child[institut,fifth] {node {Centre DAM Île-de-France}}
     };
 \end{tikzpicture}

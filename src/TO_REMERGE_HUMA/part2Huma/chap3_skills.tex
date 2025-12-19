@@ -1,49 +1,91 @@
-\chapter{Compétences apportées et développées par l'alternant}
-
-\section{Capitalisation sur la double formation apportée par l'INSA CVL}
+\chapter{Compétences apportées et développées par l'alternant}\label{ch:competences-apportees-et-developpees-par-l'alternant}
 
 
+\section{Capitalisation sur la double formation apportée par l'INSA CVL}\label{sec:capitalisation-sur-la-double-formation-apportee-par-l'insa-cvl}
+
+Les premières semaines d'alternance ont permis d'exploiter de nombreux modules enseignés à l'INSA CVL, en particulier dans le cadre du double diplôme \gls{MRI}-\gls{STI}.
+Les connaissances mobilisées sont synthétisées dans le tableau ci-dessous.
+
+Ces connaissances ont été abondées par les deux stages suivies avant l'alternance, dans chacun des deux départements.
+
+\begin{itemize}
+    \item Par le stage de 4A \gls{MRI}, portant sur le développement d'un outil de liquéfaction des barrages en remblai :
+    \begin{itemize}
+        \item Modélisation physique
+        \item Optimisation non linéaire
+        \item Travail de R\&D et exploitation de la littérature scientifique
+    \end{itemize}
+    \item Par le stage de 4A \gls{STI}, portant sur l'étude de l'architecture logicielle d'un code de calcul en \gls{acoustique} environnementale pour les installations industrielles du parc EDF :
+    \begin{itemize}
+        \item Calcul géométrique
+        \item Développement Python
+        \item Utilisation de \texttt{Git} et \texttt{GitLab} sur un projet d'envergure
+        \item Introduction à l'agilité et au développement logiciel
+    \end{itemize}
+\end{itemize}
 
 \begin{table}[H]
-    \centering
-    \begin{tabular}{lccp{6cm}}
-        \toprule
-        \textbf{Matière} & \textbf{Spécialité} & \textbf{Semestre} & \textbf{Compétences apportées par le module} \\
-        \midrule
-        Projet Mathématiques & MRI & S5 & \\
-        Thermique & MRI & S5 & \\
-        Composants Électroniques & MRI & S5 & \\
-        Optimisation Linéaire & MRI & S6 & \\
-        Analyse Numérique & MRI & S6 & \\
-        Automatique & MRI & S6 & \\
-        Modélisation et commande dans l'espace d'état & MRI & S7 & \\
-        Projet Informatique et Sécurité & STI & S7 & \\
-        Introduction au Machine Learning & STI & S8 & \\
-        Deep Learning et applications & STI & S8 & \\
-        Traitement de données NoSQL & STI & S8 & \\
-        Data Mining & STI & S9 & \\
-        IA Avancée & STI & S9 & \\
-        \bottomrule
-    \end{tabular}
+    \centering \renewcommand{\arraystretch}{1.3}
+    \begin{tabularx}{\textwidth}{lccX}
+         \toprule \textbf{Matière} & \textbf{Spécialité} & \textbf{Semestre} & \textbf{Compétences apportées par le module}\\
+         \midrule
+         Électrocinétique & STPI & S1 & Panel exhaustif des composants utilisés par l'analogie électrique\\
+         Projet Mathématiques & \gls{MRI} & S5 & Introduction à l'automatique et au contrôle prédictif \\
+         Thermique & \gls{MRI} & S5 & Comportement des flux de chaleur avec une approche nodale et l'introduction aux trois modes de transport \textit{(conduction, convection, rayonnement)}\\
+         Composants Électroniques & \gls{MRI} & S5 & Approfondissement des connaissances en électronique mobilisées par les modèles $RC$ de bâtiment\\
+         Optimisation Linéaire & \gls{MRI} & S6 & Méthodologie de base de l'optimisation sous contraintes et de la minimisation de fonctions objectifs \\
+         Analyse Numérique & \gls{MRI} & S6 & Résolution numérique itérative d'équations différentielles \\
+         Automatique & \gls{MRI} & S6 & Fondamentaux du contrôle prédictif \\
+         Modélisation et commande dans l'espace d'état & \gls{MRI} & S7 & Approfondissement du contrôle prédictif \\
+         Projet Informatique et Sécurité & \gls{STI} & S7 & Machine Learning, développement Python, visualisation de données, approche par projet, restitution écrite et orale \\
+         Introduction au Machine Learning & \gls{STI} & S8 & Machine Learning, développement Python \\
+         Deep Learning et applications & \gls{STI} & S8 & Machine Learning, Statistiques, approche par projet, développement Python \\
+         Traitement de données NoSQL & \gls{STI} & S8 & Introduction au traitement de données \\
+         Data Mining & \gls{STI} & S9 & Approfondissent des méthodes de traitement de données \\
+         IA Avancée & \gls{STI} & S9 & Approfondissement des techniques modernes de Machine Learning \\
+         \bottomrule
+     \end{tabularx}
     \caption{Apports de la formation INSA pour l'alternance}
     \label{tab:modules}
 \end{table}
 
-\ldots
 
-\begin{itemize}
-    \item Par le stage de 4A MRI, portant sur le développement d'un outil de liquéfaction des barrages en remblai :
+\newpage
+\section{Marges de progression identifiées et continuité de la formation…}\label{sec:marges-de-progression-identifiees-et-continuite-de-la-formation}
+
+    S'il est aisé de faire un certain nombre de liens avec les compétences développées en amont de l'alternance, plusieurs lacunes subsistent à la fin de la première période, illustrant une montée en compétences encore en cours pour plusieurs domaines.
+    Celles-ci sont progressivement comblées par de nombreuses discussions avec les experts du sujet dans le laboratoire, ainsi que par la formation autodidacte imposée au fil de l'eau par la reprise du projet \texttt{DISTRISIM}.
+
+    Ces travaux sont complétés par l'examen approfondi de plusieurs articles, ressources et ouvrages de référence dans les sciences sollicitées par le sujet d'alternance.
+    Nous les citons ci-après.
     \begin{itemize}
-        \item
+        \item En Thermique du Bâtiment :~\cite{manuel_energie_batiment, audit_energy_engineering}
+        \item En Analyse Numérique et en Optimisation :~\cite{numerical_analysis, NIA}
+        \item En Modèle de Contrôle Prédictif :~\cite{MPC_needs}
+        \item En Machine Learning :~\cite{WML, Goodfellow-et-al-2016, UDL}
+        \item En développement logiciel :~\cite{clean_code}
+        \item En Sécurité des \gls{algorithme}s de Machine Learning :~\cite{ENISA_securing_ML, ENISA_AI_standardization, ENISA_AI_cyber_research, ENISA_AI_forecasting_demand_electricity}
     \end{itemize}
-    \item Par le stage de 4A STI, portant sur l'étude de l'architecture logicielle d'un code de calcul en acoustique environnementale pour les installations industrielles du parc EDF :
-    \begin{itemize}
-        \item
-    \end{itemize}
-\end{itemize}
 
-\section{Marges de progression identifiées et continuité de la formation}
+\section{Premier retour d'expérience et suite immédiate de l'alternance}\label{sec:premier-retour-d'experience-et-suite-immediate-de-l'alternance}
 
+    Les premiers résultats concrets sont très récents\footnote{les simulations tournent en parallèle de l'écriture du rapport !} et nécessitent un examen approfondi, mais tendent vraisemblablement à montrer que les écueils de l'\gls{algorithme} existant viennent de deux problèmes au moins :
 
+    \begin{enumerate}
+        \item Une implémentation encore trop fragile pour porter le code sur d'autres études
+        \item Une approche mathématique challengeable par la considération d'autres procédés similaires à celle-ci (autres méthodes méta-heuristiques) ou non \textit{(modèles de Machine Learning, dits "boîtes noires")}
+    \end{enumerate}
 
-\section{Premier retour d'expérience et suite immédiate de l'alternance}
+    Ces résultats sont conformes aux hypothèses émises au début de l'alternance et confirment le besoin de continuer le développement du projet, désormais renommé \texttt{IBIS} pour \textbf Identification of \textbf Buildings \textbf Insights and \textbf Simulation.
+
+    D'un point de vue du projet de l'alternant et de la montée en compétences, l'ensemble des compétences nécessaires à une activité d'ingénieur-chercheur \textit{(étude bibliographique, comparaison de modèles, développement scientifique ...)} a été mobilisé et ont permis sa formation active et intensive.
+
+    \begin{figure}[H]
+        \centering
+        \subfloat[Par semaine]{\fbox{
+            \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/volume_horaire/hours_distribution}}}\\
+        \subfloat[Au total]{\fbox{
+            \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/volume_horaire/total_hours_pie}}}
+        \caption{Répartition horaire des cinq premières semaines d'alternance}\label{fig:volume_horaire}
+    \end{figure}
+
