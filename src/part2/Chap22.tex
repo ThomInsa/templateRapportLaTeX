@@ -1,26 +1,76 @@
-\usepackage{algorithmicx}\chapter{Modélisation des besoins énergétiques du quartier DISTRISIM}
+%! suppress = MissingImport
+\chapter{Modélisation des besoins énergétiques du quartier DISTRISIM}
+
+    \section{Position du problème}
+
+        \begin{figure}[htp]
+            \centering
+            {\fbox{\includegraphics[width = 0.8\textwidth]{figures/diagrammes/schémas/DISTRISIM AE.drawio}}}
+            \caption{Modèle RC utilisé pour modéliser un bâtiment DISTRISIM \textit(tiré de \cite{TST} et inspiré de \cite{aoun})}\label{fig:figure}
+        \end{figure}
+
+        \begin{equation}
+            \begin{split}
+                C_{air}\frac{\mathrm dT_{air}}{\mathrm dt}&=U_{air-env}\left(T_{env}-T_{air}\right) + U_{air-ext}\left(T_{env}-T_{ext}\right) + k_2\phi_{sol}+\phi_{em} \\
+                C_{env}\frac{\mathrm dT_{env}}{\mathrm dt}&=U_{env-ext}\left(T_{ext}-T_{env}\right) + U_{air-env}\left(T_{air}-T_{env}\right) + \left( k_1-k_2 \right)\phi_{sol} \\
+            \end{split}
+        \end{equation}\myequations{Équations différentielles régissant la température d'un modèle thermique à 7 paramètres}
+
+        \begin{figure}[htp]
+            \centering
+            \fbox{\input{figures/diagrammes/logigrammes/DISTRISIM_behavior.tikz}}
+            \caption{Logigramme des étapes de calcul pour le projet \texttt{DISTRISIM}}\label{fig:figure2}
+        \end{figure}
+
+        \subsection{Quelques commentaires sur les données d'entrée}\label{subsec:quelques-commentaires-sur-les-donnees-d'entree}
 
 
-    \begin{figure}[htp]
-        \centering
-        {\fbox{\includegraphics[width = 0.8\textwidth]{figures/diagrammes/schémas/DISTRISIM AE.drawio}}}
-        \caption{Modèle RC utilisé pour modéliser un bâtiment DISTRISIM \textit(tiré de \cite{TST} et inspiré de \cite{aoun})}
-    \end{figure}
+\section{Optimisation des paramètres du modèle}\label{sec:optimisation-des-parametres-du-modele}
 
-    \section{Optimisation des paramètres du modèle}
-        \subsection{Optimisation par essaims particulaires (PSO)}
-            \cite{NIA}
+        \subsection{Optimisation par essaim particulaires (PSO)}\label{subsec:optimisation-par-essaims-particulaires-(pso)}
+
 
             \cite{gad_particle_2022}
 
-            \cite{yt_pso}
+
+            L'algorithme complet est donné ci-dessous.
+            Le lecteur peut consulter \cite{yt_pso} et \cite{NIA} pour une description plus détaillée\footnote{En particulier, on peut montrer que le nombre de paramètres peut être réduit sous l'hypothèse forte de l'indépendance des paramètres.}
 
             \begin{algorithm}
                 \caption{Optimisation par essaim de particules (PSO)}\label{alg:pso}
                 \begin{algorithmic}
                     \Require
-                    \Ensure
-                    \State
+                    Taille de l'essaim $S\in\mathbb N$,
+                    Dimensionnalité de l'espace de recherche $D\in\mathbb N$,
+                    Fonction objectif $J:\mathbb R^D\to\mathbb R$,
+                    Nombre d'itérations max $n$,
+                    Bornes $\mathbf p_{\min}, \mathbf p_{\max}$,
+                    Coefficients social et cognitif $\alpha,\beta \in \mathbb R_+$,
+                    Variables stochastiques $\epsilon_1,\epsilon_2 \sim \mathcal U(0,1)$
+                    \Ensure Vecteur de paramètres optimisés $\hat {\mathbf{p}}$
+                    \State $\mathbf{X}^0 \sim \mathcal U\!\left([\mathbf p_{\min}, \mathbf p_{\max}]^S\right)$
+                    \State $\mathbf{V}^0 \sim \mathcal U\!\left([-1,1]^{S \times D}\right)$
+                    \State $\mathbf{P}^0 \gets \mathbf{X}^0$
+                    \State $\hat{\mathbf{p}}^0 \gets \arg\min_{1 \le i \le S} J(\mathbf{p}_i^0)$
+
+
+                    \For{$t = 0$ \textbf{to} $n-1$}
+                        \For{$i = 1$ \textbf{to} $S$}
+                            \State $\mathbf v_i^{t+1} \gets \mathbf v_i^t
+                            + \alpha \epsilon_1 (\hat{\mathbf{p}}^t - \mathbf x_i^t)
+                            + \beta \epsilon_2 (\mathbf p_i^t - \mathbf x_i^t)$
+                            \State $\mathbf x_i^{t+1} \gets \mathbf x_i^t + \mathbf v_i^{t+1}$
+                        \EndFor
+
+                        \State $\mathbf{P}^{t+1} \gets \mathbf{P}^t$
+                        \For{$i = 1$ \textbf{to} $S$}
+                            \If{$J(\mathbf x_i^{t+1}) < J(\mathbf p_i^t)$}
+                                \State $\mathbf p_i^{t+1} \gets \mathbf x_i^{t+1}$
+                            \EndIf
+                        \EndFor
+
+                        \State $\hat{\mathbf{p}}^{t+1} \gets \arg\min_{1 \le i \le S} J(\mathbf p_i^{t+1})$
+                    \EndFor
                 \end{algorithmic}
             \end{algorithm}
 
@@ -32,7 +82,7 @@
                         \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST_air_predit_VS_energyplus}}}\qquad
                     \subfloat[Besoins de chauffage, $RMSE = 16.31 \bf kW$]{\fbox{
                         \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST_besoin_chauffage_VS_energyplus}}}\qquad
-                \caption{Comparaison entre les modélisations d'Energy Plus et les prévisions du précédent stage \textit{(Bâtiment Thales)}}
+                \caption{Exemple de comparaison entre les modélisations d'Energy Plus et les prévisions du précédent stage \textit{(Bâtiment Thales sur le mois de janvier)}}
 
             \end{figure}
 
@@ -48,3 +98,145 @@
                 \State
             \end{algorithmic}
         \end{algorithm}
+
+
+    \section{Synthèse }
+
+        \subsection{Reproductibilité des précédents résultats}
+
+        \setdivergentmin{0}
+        \setdivergentmid{3}
+        \setdivergentmax{12}
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{lcccccccccccc}
+                \toprule
+                 & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
+                \midrule
+                Jan & \divergentcell{0.53} & \divergentcell{0.83} & \divergentcell{1.44} & \divergentcell{0.88} & \divergentcell{2.27} & \divergentcell{2.8} & \divergentcell{6.96} & \divergentcell{7.93} & \divergentcell{2.68} & \divergentcell{2.3} & \divergentcell{0.95} & \divergentcell{0.69} \\
+                Fév & \divergentcell{0.66} & \divergentcell{0.96} & \divergentcell{1.15} & \divergentcell{0.8} & \divergentcell{3.4} & \divergentcell{3.47} & \divergentcell{5.84} & \divergentcell{7.72} & \divergentcell{3.4} & \divergentcell{1.9} & \divergentcell{0.8} & \divergentcell{0.82} \\
+                Mar & \divergentcell{1.55} & \divergentcell{1.74} & \divergentcell{1.05} & \divergentcell{1.19} & \divergentcell{5.81} & \divergentcell{5.6} & \divergentcell{4.69} & \divergentcell{7.79} & \divergentcell{5.72} & \divergentcell{1.45} & \divergentcell{1.04} & \divergentcell{1.55} \\
+                Avr & \divergentcell{2.61} & \divergentcell{2.47} & \divergentcell{1.78} & \divergentcell{1.78} & \divergentcell{7.97} & \divergentcell{7.56} & \divergentcell{6.37} & \divergentcell{8.24} & \divergentcell{7.7} & \divergentcell{1.79} & \divergentcell{1.69} & \divergentcell{2.28} \\
+                Mai & \divergentcell{3.41} & \divergentcell{8.5} & \divergentcell{7.6} & \divergentcell{8.19} & \divergentcell{0.68} & \divergentcell{0.72} & \divergentcell{2.04} & \divergentcell{1.47} & \divergentcell{0.79} & \divergentcell{8.8} & \divergentcell{7.54} & \divergentcell{7.07} \\
+                Jui & \divergentcell{3.2} & \divergentcell{10.1} & \divergentcell{8.47} & \divergentcell{9.3} & \divergentcell{0.8} & \divergentcell{0.75} & \divergentcell{1.02} & \divergentcell{0.97} & \divergentcell{0.89} & \divergentcell{9.9} & \divergentcell{8.3} & \divergentcell{8.12} \\
+                Juil & \divergentcell{3} & \divergentcell{11.1} & \divergentcell{9.22} & \divergentcell{10.1} & \divergentcell{0.95} & \divergentcell{0.84} & \divergentcell{0.79} & \divergentcell{1.12} & \divergentcell{1.15} & \divergentcell{10} & \divergentcell{9.09} & \divergentcell{8.86} \\
+                Aoû & \divergentcell{2.86} & \divergentcell{8.12} & \divergentcell{6.94} & \divergentcell{7.5} & \divergentcell{1.03} & \divergentcell{0.95} & \divergentcell{1.01} & \divergentcell{0.92} & \divergentcell{0.96} & \divergentcell{8.1} & \divergentcell{6.86} & \divergentcell{6.48} \\
+                Sep & \divergentcell{2.94} & \divergentcell{6.4} & \divergentcell{5.95} & \divergentcell{6.3} & \divergentcell{0.81} & \divergentcell{0.79} & \divergentcell{1.7} & \divergentcell{1.34} & \divergentcell{0.76} & \divergentcell{6.9} & \divergentcell{5.8} & \divergentcell{5.36} \\
+                Oct & \divergentcell{2.28} & \divergentcell{1.98} & \divergentcell{1.47} & \divergentcell{1.4} & \divergentcell{5.76} & \divergentcell{5.52} & \divergentcell{4.79} & \divergentcell{6.44} & \divergentcell{5.67} & \divergentcell{1.33} & \divergentcell{5.88} & \divergentcell{2.05} \\
+                Nov & \divergentcell{0.75} & \divergentcell{1} & \divergentcell{0.84} & \divergentcell{0.75} & \divergentcell{3.36} & \divergentcell{3.38} & \divergentcell{4.28} & \divergentcell{6.59} & \divergentcell{3.3} & \divergentcell{1.28} & \divergentcell{0.71} & \divergentcell{5.31} \\
+                Dec & \divergentcell{0.41} & \divergentcell{0.73} & \divergentcell{1.34} & \divergentcell{0.67} & \divergentcell{2.08} & \divergentcell{2.2} & \divergentcell{7.11} & \divergentcell{7.3} & \divergentcell{2} & \divergentcell{1.9} & \divergentcell{0.78} & \divergentcell{0.52} \\
+                \bottomrule
+            \end{tabular}
+            \caption{$\mathrm{RMSE}\left(T_{air}\right)_{\text{CastelO}}$ avec des valeurs de $\mathbf {P_{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois \textit{(résultats du précédent stage)}}
+            \label{tab:my_label}
+        \end{table}
+
+
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{lcccccccccccc}
+                \toprule
+                & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
+                \midrule
+                Jan & \divergentcell{0.67} & \divergentcell{0.73} & \divergentcell{1.51} & \divergentcell{5.64} & \divergentcell{2.64} & \divergentcell{2.77} & \divergentcell{5.74} & \divergentcell{4.59} & \divergentcell{4.59} & \divergentcell{2.23} & \divergentcell{2.23} & \divergentcell{1.07} \\
+                Fév & \divergentcell{0.81} & \divergentcell{0.7} & \divergentcell{1.19} & \divergentcell{4.75} & \divergentcell{3.28} & \divergentcell{3.43} & \divergentcell{5.91} & \divergentcell{4.89} & \divergentcell{4.89} & \divergentcell{1.86} & \divergentcell{1.86} & \divergentcell{1.38} \\
+                Mar & \divergentcell{1.46} & \divergentcell{1.15} & \divergentcell{1.06} & \divergentcell{2.6} & \divergentcell{5.49} & \divergentcell{5.64} & \divergentcell{6.97} & \divergentcell{6.22} & \divergentcell{6.22} & \divergentcell{1.38} & \divergentcell{1.38} & \divergentcell{2.71} \\
+                Avr & \divergentcell{2.17} & \divergentcell{1.87} & \divergentcell{1.81} & \divergentcell{1.52} & \divergentcell{7.5} & \divergentcell{7.56} & \divergentcell{8.17} & \divergentcell{7.58} & \divergentcell{7.58} & \divergentcell{1.66} & \divergentcell{1.66} & \divergentcell{4.45} \\
+                Mai & \divergentcell{7.18} & \divergentcell{7.23} & \divergentcell{7.59} & \divergentcell{7.86} & \divergentcell{0.66} & \divergentcell{0.7} & \divergentcell{1.1} & \divergentcell{0.94} & \divergentcell{0.94} & \divergentcell{8.34} & \divergentcell{8.34} & \divergentcell{8.83} \\
+                Jui & \divergentcell{8.29} & \divergentcell{8.09} & \divergentcell{8.46} & \divergentcell{8.24} & \divergentcell{0.86} & \divergentcell{0.71} & \divergentcell{0.82} & \divergentcell{0.86} & \divergentcell{0.86} & \divergentcell{9.18} & \divergentcell{9.18} & \divergentcell{10.95} \\
+                Juil & \divergentcell{9.1} & \divergentcell{8.79} & \divergentcell{9.21} & \divergentcell{8.82} & \divergentcell{0.96} & \divergentcell{0.78} & \divergentcell{0.88} & \divergentcell{0.96} & \divergentcell{0.96} & \divergentcell{9.92} & \divergentcell{9.92} & \divergentcell{12.1} \\
+                Aoû & \divergentcell{6.66} & \divergentcell{6.6} & \divergentcell{6.92} & \divergentcell{6.76} & \divergentcell{1.13} & \divergentcell{0.93} & \divergentcell{0.98} & \divergentcell{0.9} & \divergentcell{0.9} & \divergentcell{7.53} & \divergentcell{7.53} & \divergentcell{8.72} \\
+                Sep & \divergentcell{5.45} & \divergentcell{5.61} & \divergentcell{5.93} & \divergentcell{6.34} & \divergentcell{0.81} & \divergentcell{0.82} & \divergentcell{1.14} & \divergentcell{0.9} & \divergentcell{0.9} & \divergentcell{6.58} & \divergentcell{6.58} & \divergentcell{7.18} \\
+                Oct & \divergentcell{1.93} & \divergentcell{1.59} & \divergentcell{1.5} & \divergentcell{1.71} & \divergentcell{5.5} & \divergentcell{5.51} & \divergentcell{6.15} & \divergentcell{5.69} & \divergentcell{5.69} & \divergentcell{1.23} & \divergentcell{1.23} & \divergentcell{3.5} \\
+                Nov & \divergentcell{0.96} & \divergentcell{0.8} & \divergentcell{0.87} & \divergentcell{3.39} & \divergentcell{3.21} & \divergentcell{3.32} & \divergentcell{5.26} & \divergentcell{4.46} & \divergentcell{4.46} & \divergentcell{1.26} & \divergentcell{1.26} & \divergentcell{1.45} \\
+                Dec & \divergentcell{0.57} & \divergentcell{0.61} & \divergentcell{1.41} & \divergentcell{5.5} & \divergentcell{2.02} & \divergentcell{2.18} & \divergentcell{5.08} & \divergentcell{3.98} & \divergentcell{3.98} & \divergentcell{2.04} & \divergentcell{2.04} & \divergentcell{0.68} \\
+                \bottomrule
+            \end{tabular}
+            \caption{$\mathrm{RMSE}\left(T_{air}\right)_{\text{CastelO}}$ avec des valeurs de $\mathbf {P_{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois \textit{(résultats de l'alternance)}}
+            \label{tab:my_label2}
+        \end{table}
+
+        \settwotonemin{0}
+        \settwotonemax{5}
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{lcccccccccccc}
+                \toprule
+                & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
+                \midrule
+                Jan & \twotonecell{0.14} & \twotonecell{0.1} & \twotonecell{0.07} & \twotonecell{4.76} & \twotonecell{0.37} & \twotonecell{0.03} & \twotonecell{1.22} & \twotonecell{3.34} & \twotonecell{1.91} & \twotonecell{0.07} & \twotonecell{1.28} & \twotonecell{0.38} \\
+                Fév & \twotonecell{0.15} & \twotonecell{0.26} & \twotonecell{0.04} & \twotonecell{3.95} & \twotonecell{0.12} & \twotonecell{0.04} & \twotonecell{0.07} & \twotonecell{2.83} & \twotonecell{1.49} & \twotonecell{0.04} & \twotonecell{1.06} & \twotonecell{0.56} \\
+                Mar & \twotonecell{0.09} & \twotonecell{0.59} & \twotonecell{0.01} & \twotonecell{1.41} & \twotonecell{0.32} & \twotonecell{0.04} & \twotonecell{2.28} & \twotonecell{1.57} & \twotonecell{0.5} & \twotonecell{0.07} & \twotonecell{0.34} & \twotonecell{1.16} \\
+                Avr & \twotonecell{0.44} & \twotonecell{0.6} & \twotonecell{0.03} & \twotonecell{0.26} & \twotonecell{0.47} & \twotonecell{0.0} & \twotonecell{1.8} & \twotonecell{0.66} & \twotonecell{0.12} & \twotonecell{0.13} & \twotonecell{0.03} & \twotonecell{2.17} \\
+                Mai & \twotonecell{3.77} & \twotonecell{1.27} & \twotonecell{0.01} & \twotonecell{0.33} & \twotonecell{0.02} & \twotonecell{0.02} & \twotonecell{0.94} & \twotonecell{0.53} & \twotonecell{0.15} & \twotonecell{0.46} & \twotonecell{0.8} & \twotonecell{1.76} \\
+                Jui & \twotonecell{5.09} & \twotonecell{2.01} & \twotonecell{0.01} & \twotonecell{1.06} & \twotonecell{0.06} & \twotonecell{0.04} & \twotonecell{0.2} & \twotonecell{0.11} & \twotonecell{0.03} & \twotonecell{0.72} & \twotonecell{0.88} & \twotonecell{2.83} \\
+                Juil & \twotonecell{6.1} & \twotonecell{2.31} & \twotonecell{0.01} & \twotonecell{1.28} & \twotonecell{0.01} & \twotonecell{0.06} & \twotonecell{0.09} & \twotonecell{0.16} & \twotonecell{0.19} & \twotonecell{0.08} & \twotonecell{0.83} & \twotonecell{3.24} \\
+                Aoû & \twotonecell{3.8} & \twotonecell{1.52} & \twotonecell{0.02} & \twotonecell{0.74} & \twotonecell{0.1} & \twotonecell{0.02} & \twotonecell{0.03} & \twotonecell{0.02} & \twotonecell{0.06} & \twotonecell{0.57} & \twotonecell{0.67} & \twotonecell{2.24} \\
+                Sep & \twotonecell{2.51} & \twotonecell{0.79} & \twotonecell{0.02} & \twotonecell{0.04} & \twotonecell{0.0} & \twotonecell{0.03} & \twotonecell{0.56} & \twotonecell{0.44} & \twotonecell{0.14} & \twotonecell{0.32} & \twotonecell{0.78} & \twotonecell{1.82} \\
+                Oct & \twotonecell{0.35} & \twotonecell{0.39} & \twotonecell{0.03} & \twotonecell{0.31} & \twotonecell{0.26} & \twotonecell{0.01} & \twotonecell{1.36} & \twotonecell{0.75} & \twotonecell{0.02} & \twotonecell{0.1} & \twotonecell{4.65} & \twotonecell{1.45} \\
+                Nov & \twotonecell{0.21} & \twotonecell{0.2} & \twotonecell{0.03} & \twotonecell{2.64} & \twotonecell{0.15} & \twotonecell{0.06} & \twotonecell{0.98} & \twotonecell{2.13} & \twotonecell{1.16} & \twotonecell{0.02} & \twotonecell{0.55} & \twotonecell{3.86} \\
+                Dec & \twotonecell{0.16} & \twotonecell{0.12} & \twotonecell{0.07} & \twotonecell{4.83} & \twotonecell{0.06} & \twotonecell{0.02} & \twotonecell{2.03} & \twotonecell{3.32} & \twotonecell{1.98} & \twotonecell{0.14} & \twotonecell{1.26} & \twotonecell{0.16} \\
+                \bottomrule
+            \end{tabular}
+            \caption{Erreur absolue entre les deux précédentes figures}
+            \label{tab:my_label3}
+        \end{table}
+
+        \begin{figure}[htp]
+            \centering
+            \fbox{\includegraphics[width=0.8\textwidth]{figures/diagrammes/courbes/heatmap_series}}
+            \caption{Heatmap de $\mathrm{RMSE}\left(T_{air}\right)_{\text{Bâtiment}}$ pour chaque bâtiment}
+        \end{figure}
+
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{lcccccccccccc}
+                \toprule
+                & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
+                \midrule
+                Jan & \divergentcell{0.83} & \divergentcell{0.86} & \divergentcell{1.26} & \divergentcell{2.15} & \divergentcell{1.87} & \divergentcell{7.36} & \divergentcell{14.97} & \divergentcell{8.84} & \divergentcell{2.76} & \divergentcell{1.87} & \divergentcell{1.11} & \divergentcell{0.94} \\
+                Fév & \divergentcell{0.8} & \divergentcell{0.8} & \divergentcell{1.05} & \divergentcell{1.87} & \divergentcell{1.63} & \divergentcell{6.48} & \divergentcell{13.2} & \divergentcell{7.94} & \divergentcell{2.47} & \divergentcell{1.67} & \divergentcell{0.97} & \divergentcell{0.91} \\
+                Mar & \divergentcell{1.12} & \divergentcell{1.05} & \divergentcell{0.91} & \divergentcell{1.24} & \divergentcell{1.78} & \divergentcell{4.59} & \divergentcell{8.87} & \divergentcell{5.8} & \divergentcell{2.29} & \divergentcell{1.36} & \divergentcell{1.06} & \divergentcell{1.2} \\
+                Avr & \divergentcell{1.42} & \divergentcell{1.35} & \divergentcell{1.19} & \divergentcell{1.01} & \divergentcell{2.27} & \divergentcell{3.13} & \divergentcell{4.45} & \divergentcell{3.72} & \divergentcell{2.29} & \divergentcell{1.23} & \divergentcell{1.45} & \divergentcell{1.77} \\
+                Mai & \divergentcell{1.59} & \divergentcell{1.92} & \divergentcell{1.83} & \divergentcell{1.88} & \divergentcell{0.81} & \divergentcell{1.52} & \divergentcell{3.04} & \divergentcell{1.88} & \divergentcell{1.17} & \divergentcell{2.65} & \divergentcell{1.71} & \divergentcell{2.51} \\
+                Jui & \divergentcell{2.37} & \divergentcell{2.5} & \divergentcell{2.57} & \divergentcell{2.43} & \divergentcell{1.53} & \divergentcell{1.07} & \divergentcell{1.46} & \divergentcell{1.32} & \divergentcell{1.5} & \divergentcell{3.16} & \divergentcell{2.43} & \divergentcell{3.2} \\
+                Juil & \divergentcell{2.86} & \divergentcell{2.93} & \divergentcell{2.84} & \divergentcell{2.59} & \divergentcell{1.78} & \divergentcell{1.29} & \divergentcell{1.07} & \divergentcell{1.53} & \divergentcell{1.74} & \divergentcell{3.27} & \divergentcell{2.83} & \divergentcell{3.7} \\
+                Aoû & \divergentcell{2.41} & \divergentcell{2.41} & \divergentcell{2.37} & \divergentcell{2.27} & \divergentcell{1.82} & \divergentcell{1.29} & \divergentcell{1.32} & \divergentcell{1.14} & \divergentcell{1.43} & \divergentcell{2.7} & \divergentcell{2.4} & \divergentcell{2.96} \\
+                Sep & \divergentcell{1.62} & \divergentcell{1.82} & \divergentcell{1.65} & \divergentcell{1.64} & \divergentcell{1.16} & \divergentcell{1.35} & \divergentcell{2.46} & \divergentcell{1.47} & \divergentcell{0.94} & \divergentcell{2.1} & \divergentcell{1.66} & \divergentcell{2.3} \\
+                Oct & \divergentcell{1.52} & \divergentcell{1.37} & \divergentcell{1.23} & \divergentcell{1.11} & \divergentcell{2.05} & \divergentcell{3.13} & \divergentcell{5.0} & \divergentcell{3.86} & \divergentcell{2.25} & \divergentcell{0.99} & \divergentcell{1.49} & \divergentcell{1.42} \\
+                Nov & \divergentcell{0.79} & \divergentcell{0.78} & \divergentcell{0.8} & \divergentcell{1.23} & \divergentcell{1.37} & \divergentcell{4.7} & \divergentcell{9.86} & \divergentcell{6.27} & \divergentcell{2.16} & \divergentcell{1.13} & \divergentcell{0.7} & \divergentcell{0.74} \\
+                Dec & \divergentcell{0.86} & \divergentcell{0.88} & \divergentcell{1.18} & \divergentcell{2.02} & \divergentcell{1.8} & \divergentcell{6.99} & \divergentcell{14.43} & \divergentcell{8.51} & \divergentcell{2.64} & \divergentcell{1.65} & \divergentcell{1.03} & \divergentcell{0.83} \\
+                \bottomrule
+            \end{tabular}
+            \caption{Moyenne des $\mathrm{RMSE}\left(T_{air}\right)_{\text{Bâtiment}}$ avec des valeurs de $\mathbf {P_{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois pour l'ensemble des bâtiments}
+            \label{tab:my_label5}
+        \end{table}
+
+
+    \subsection{Limites de la PSO et continuité des travaux}\label{subsec:limites-de-la-pso-et-continuite-des-travaux}
+
+        \setdivergentmin{-100}
+        \setdivergentmid{0}
+        \setdivergentmax{100}
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{lccccccccc}
+                \toprule
+                \textbf{Bâtiment} & $U_{air-env}$ &  $U_{air-ext}$ &  $U_{env-ext}$ & $C_{air}$ & $C_{env}$ & $k_1$ & $k_2$ & $\mathrm{RMSE}\left(T_{air}\right)$ & $\mathrm{RMSE}\left(\phi_{em}\right)$ \\
+                \midrule
+                CastelO & \divergentcell{42} & \divergentcell{0} & \divergentcell{84} & \divergentcell{1} & \divergentcell{42} & \divergentcell{3.0} & \divergentcell{44} & \divergentcell{1} & \divergentcell{3} \\
+                CastelR & \divergentcell{0} & \divergentcell{0} & \divergentcell{31} & \divergentcell{0} & \divergentcell{313} & X & \divergentcell{316} & \divergentcell{1} & \divergentcell{0} \\
+                Ceva & \divergentcell{36} & \divergentcell{1} & \divergentcell{95} & \divergentcell{32} & \divergentcell{45} & \divergentcell{32.0} & \divergentcell{25} & \divergentcell{4} & \divergentcell{60} \\
+                Novae & \divergentcell{16} & \divergentcell{1} & \divergentcell{134} & \divergentcell{7} & \divergentcell{37} & \divergentcell{7.0} & \divergentcell{56} & \divergentcell{5} & \divergentcell{3} \\
+                Panache & \divergentcell{23} & \divergentcell{0} & \divergentcell{51} & \divergentcell{1} & \divergentcell{33} & \divergentcell{2.0} & \divergentcell{30} & \divergentcell{1} & \divergentcell{2} \\
+                Python & \divergentcell{14} & \divergentcell{1} & \divergentcell{149} & \divergentcell{6} & \divergentcell{45} & \divergentcell{8.0} & \divergentcell{52} & \divergentcell{6} & \divergentcell{3} \\
+                Soleil & \divergentcell{15} & \divergentcell{1} & \divergentcell{138} & \divergentcell{5} & \divergentcell{29} & \divergentcell{8.0} & \divergentcell{34} & \divergentcell{4} & \divergentcell{4} \\
+                Thales & \divergentcell{2} & \divergentcell{0} & \divergentcell{213} & \divergentcell{3} & \divergentcell{38} & \divergentcell{4.0} & \divergentcell{49} & \divergentcell{2} & \divergentcell{3} \\
+                Up & \divergentcell{21} & \divergentcell{2} & \divergentcell{69} & \divergentcell{10} & \divergentcell{46} & \divergentcell{6.0} & \divergentcell{35} & \divergentcell{5} & \divergentcell{5} \\
+                Zenae & \divergentcell{7} & \divergentcell{1} & \divergentcell{66} & \divergentcell{2} & \divergentcell{28} & \divergentcell{5.0} & \divergentcell{28} & \divergentcell{3} & \divergentcell{2} \\
+                \bottomrule
+            \end{tabular}
+            \caption{Écart-type normalisé en \% des données de sorties de la PSO sur dix calculs, par bâtiment, pour le mois de janvier}
+            \label{tab:my_label4}
+        \end{table}
+

@@ -1,6 +1,7 @@
 # Introduction
 
 - Rapport se veut auto-portant d'où la présence de 3 glossaires et de nombreuses équations / définitions + la dissociation des aspects modélisation et développement
+- Warning : ce rapport présente un bilan intermédiaire, ainsi de nombreuses figures sont amenées à évoluer
 
 # De l'énergétique du bâtiment au CEA : rappels historiques et contextualisation
 
@@ -39,7 +40,13 @@
 
 ## Modélisation des besoins énergétiques du quartier DISTRISIM
 
-- Diagrame Tikz représentant tout le pipeline de calcul (drafter sur draw.io)
+### Position du problème
+
+- Expliquer chaque paramètre et donner l'équation différentielle
+
+- Considérations sur la fonction \textit{(convexe, différentiable etc)} pour poser le contexte de l'optimisation 
+- Figure : schéma $RC$
+
 - Figure : courbes de visualisation des données de mesure d'un bâtiment (Thales ou Apache ...)
 - Algo : méthode de la sécante
   - Citer num_anal :
@@ -54,29 +61,64 @@
       section ends with the description of Brent’s Method, a hybrid method which combines the
       best features of iterative and bracketing methods.
 
-- Reprendre paragraphe 5.1 de TST dans un logigramme 
+- Figure : Reprendre paragraphe 5.1 de TST dans un logigramme 
 
 - Figure : logigramme pour expliquer la démarche pour reproduire figure 18
 
-- Tableau : reproduire figure 18 de TST 
+
+
+- Diagrame Tikz représentant tout le pipeline de calcul (drafter sur draw.io)
+
+### Rapide analyse des données d'entrée
+
+### Conclusion intermédiaire
+
+- Tableau : reproduire figure 18 de TST
   - l'originale pour harmoniser la charte graphique
   - un nouveau run sur le même bâtiment pour comparer les résultats
   - le même tableau avec les moyennes et écart-types de chaque bâtiment
 - Tableau : reproduire figure 14
 
-## Étude et développement de nouvelles approches pour la modélisation énergétiques de bâtiments
+##### Limitations de la PSO
 
-Figure introductive : graphe en trois colonnes 
+L'algorithme ne converge pas tout le temps (nb max d'itérations atteint) alors qu'on peut encore minimiser la fonction de façon importante.
+
+Figure pour montrer que la PSO engendre une grande plage de résultats.
+
+-> Lancer une série de 10 PSO pour chaque bâtiment
+
+- En $x$, les paramètres thermiques $RC$
+- En $y$, l'écart-type de chaque paramètre normalisé par z_score, un point par paramètre, une couleur de points par bâtiment
+>La PSO produit des résultats très différents et de fiabilités inégales. Les données de sortie le montrent. Trois pistes doivent alors être envisagées :
+> 1. Consolider l'algorithme ou envisager des algorithmes similaires
+> 2. Revoir la data utilisée pour être plus fiable dès l'entrée
+
+## Étude et développement de nouvelles approches pour la modélisation énergétique de bâtiments
+
+Figure introductive = Données d'entrée, modèle de calculs et résultats obtenus pour l'ensemble du projet IBIS : graphe en trois colonnes 
+
 1. Datasets d'entrée
 2. Modèles développés
 3. Résultats obtenus
+
 Éventuellement 
 
-### Couple modèle-dataset1
-### Couple modèle-dataset2
-### Couple modèle-datasetN
+>Encadré : Réflexion de proche en proche, en essayant de se baser sur les travaux précédemment conduits. C'est pourquoi les conclusions présentées ici sont similaires aux précédentes. 
 
-# Considérations sur l'architecture logicielle du projet \texttt{TherModBuild} : aspects techniques et sécuritaires
+### Retour sur la méthode de la sécante : généralisation et perfectionnement
+
+- Algorithme : méthode de Brent
+
+### Limites de la PSO, autre méta-heuristiques
+
+- Principal avantage de la PSO = ne pas utiliser le gradient de la fonction, et donc pas besoin que la fonction soit dérivable
+- Avantage relatif dans le sens où notre fonction est différentiable
+- Il a été considéré de changer la fonction objectif mais celle-ci étant très standard _(RMSE)_, ce n'est pas la priorité
+- De même, pas d'étude comparative sur les hyperparamètres de la PSO _(nombre d'itérations, taille de la population etc)_ car on a déjà atteint les limites conceptuelles. Il est raisonnable alors de penser que l'algorithme se heurterait aux mêmes difficultés pour d'autres cas limites si ceux-ci étaient changés. 
+
+### Vers de nouvelles données d'entraînemnent
+
+# Considérations sur l'architecture logicielle du projet \texttt{IBIS} : aspects techniques et sécuritaires
 
 
 ## Conception logicielle, refactoring et bonnes pratiques de développement
@@ -86,7 +128,6 @@ Figure introductive : graphe en trois colonnes
 - Citer Clean Code et les bonnes pratiques mises en oeuvre
 - Si possible, citer Serious Python
 - Donner un listing exemple de fonction refactorisée
-- Donner les mêmes courbes (avec Seaborn quand-même) pour montrer que les résultats sont similaires
 
 - Faire un avant / après qualitatif et quantitatif :
   - Nombre de lignes totales
@@ -103,13 +144,22 @@ Figure introductive : graphe en trois colonnes
 
 Axes d'amélioration (probablement non explorés fin S9)
 - Nombre de paramètres d'entrée et de sortie des fonctions
-
 - Assertions et tests autant que possible
+
+#### Approche orientée objet
+
+#### Utilisation de librairies standards
+
+- `scipy` 
 
 ### Évaluation qualitative des performances du projet
 
+Citer figure PSO pour montrer qu'elle est lente.
+
 #### Complexité des algorithmes appelés
 - Complexité des algorithmes mis en jeu
+- PSO : citer NIA p33 5.4 pour complexité 
+- Trouver complexité du solveur d'Euler et de la méthode de Newton
 #### Outils retenus pour garantir la performance
 
 
@@ -142,9 +192,11 @@ Axes d'amélioration (probablement non explorés fin S9)
     - Donner la procédure pour mener un petit pentest par inférence d'appartenance sur le modèle. Citer le rapport MIA
     - Randomiser les données d'entrée pour compliquer la compréhension du modèle
 
-#### 
+#### Applications au projet DISTRISIM
 
 Insister sur ce qui est applicable et ce qui ne l'est pas (recommendations des normes VS réalité dans les bureaux)
+
+- + de Cyber by design puisque ce travail bibliographique va nourrir les prochaines réflexions
 
 - Reprise du scénario de rapport d'incident sur l'approvisionnement énergétique
 
@@ -172,6 +224,10 @@ Tableau d'analyse du risque :
 - Bonne pratique adoptée : ne jamais push sans update la documentation
 
 # Conclusion
+
+> La synthèse des cinq premières semaines d'alterance  
+> En particulier, la portée et la limite de plusieurs algorithmes permettant de modéliser le comportement énergétique d'un bâtiment ont été présentées \textit{Optimisation par Essaim de Particules (PSO), Méthode de la sécante ...)} en s'appuyant sur des données simulées d'un précédent projet.
+> Par ailleurs, . Enfin, une analyse de l'architecture logicielle du projet a été menée. Celle-ci est très largement complétable mais peut servir de support pour de futurs travaux plus ambitieux.
 
 > Conclure avec l'image cartographie d'IA pour se représenter la multitude d'algos existants et leur portée (conv LinkedIn Selyan)
 

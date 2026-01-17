@@ -45,7 +45,6 @@
 \usepackage{float}                 % Improved figure placement
 
 %% Colors and Boxes
-\usepackage[dvipsnames, x11names, table]{xcolor}  % Color support
 \usepackage[most]{tcolorbox}       % Colored boxes
 
 %% Code and Algorithms
@@ -56,11 +55,15 @@
 
 %% Drawing and Diagrams
 \usepackage{tikz}                  % Drawing capabilities
+\usepackage{pgfkeys}
 \usetikzlibrary{positioning, shapes.multipart, arrows.meta, shapes.geometric}
 \usetikzlibrary{calc,positioning, trees}
 
+
 %% References and Glossaries
-\usepackage[acronym,automake]{glossaries-extra}  % Glossaries and acronyms
+%\usepackage[record, % Active l'enregistrement pour bib2gls
+%    acronym,
+%    automake]{glossaries-extra}
 
 %% Bibliography and Citations
 \usepackage[backend=biber,
@@ -80,3 +83,7 @@
 
 %% Hyperlinks (typically loaded last)
 \usepackage[plainpages=false, pdfpagelabels=false]{hyperref}
+
+
+
+%% TO SORT

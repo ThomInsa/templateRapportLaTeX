@@ -1,20 +1,4 @@
-%% ==================== DOCUMENT COLORS ====================
-% Define global colors for hyperlinks and URLs
-\definecolor{linkborderColor}{rgb}{0.1329,0.247,0.467}   % Blue for link borders
-\definecolor{urlborderColor}{rgb}{0,1,1}                % Cyan for URL borders
-\definecolor{urlColor}{rgb}{1,0,0}                      % Red for URL text
 
-%% ==================== HYPERREF SETUP ====================
-\hypersetup{
-    %author = {Thomas AUBIN},                            % Uncomment to set PDF author
-    %pdftitle = {Nom du Projet - Sujet du Projet},       % Uncomment to set PDF title
-    pdfsubject = {Mémoire de Projet},                    % PDF document subject
-    pdfkeywords = {Tag1, Tag2, Tag3, \dots},             % PDF keywords for indexing
-    pdfstartview={FitH},                                 % Default PDF view (fit width)
-    linkbordercolor = {linkborderColor}                 % Color for hyperlink borders
-    %urlbordercolor = \color{urlborderColor},           % Uncomment to set URL border color
-    %urlcolor = \color{urlColor}                        % Uncomment to set URL text color
-}
 
 %% ==================== CHAPTER & SECTION FORMATTING ====================
 
@@ -89,15 +73,6 @@
     \Huge\bfseries #1\par\nobreak\vskip 40pt}
 }
 
-%\renewcommand{\lstlistoflistings}{%
-%    \nochapterpage{\lstlistlistingname}%
-%    \@starttoc{lol}%
-%}
-%
-%\renewcommand{\listofalgorithms}{%
-%    \nochapterpage{\listalgorithmname}%
-%    \@starttoc{loa}%
-%}
 \makeatother
 
 
@@ -177,22 +152,23 @@
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 
 %% ==================== GLOSSARY SETUP ====================
-\setglossarystyle{long}
-\setabbreviationstyle[acronym]{long-short}
+% Supprimer les anciennes commandes makeglossaries
+% \setglossarystyle{long}
+% \setabbreviationstyle[acronym]{long-short}
+% \newglossary[slg]{symbols}{sym}{sbl}{Symboles}
+% \makeglossaries
 
-% Définir le glossaire des symboles AVANT \makeglossaries
-\newglossary[slg]{symbols}{sym}{sbl}{Symboles}
+%% ==================== GLOSSARY SETUP ====================
 
-% Créer les glossaires
-\makeglossaries
+
 
 %% ==================== BIBLIOGRAPHY SETUP ====================
-%\DeclareCiteCommand{\cite}[\mkbibbrackets]
-%{\usebibmacro{prenote}}
-%{\printtext[bibhyperref]{%
-%    \printfield{labelnumber}%
-%    \addcomma\space
-%    \printnames{labelname}}}
-%{\multicitedelim}
-%{\usebibmacro{postnote}}
+\DeclareCiteCommand{\cite}[\mkbibbrackets]
+{\usebibmacro{prenote}}
+{\printtext[bibhyperref]{%
+    \printfield{labelnumber}%
+    \addcomma\space
+    \printnames{labelname}}}
+{\multicitedelim}
+{\usebibmacro{postnote}}
 \addbibresource{main.bib}                     % Set bibliography resource file

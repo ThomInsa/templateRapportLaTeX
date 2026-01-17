@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="LiveLatexTikzKnotStore">
+    <option name="entries">
+      <list>
+        <Entry>
+          <option name="name" value="★ 5₁ Cinquefoil (Muon)" />
+          <option name="points">
+            <list>
+              <PointBean>
+                <option name="x" value="575" />
+                <option name="y" value="225" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="475" />
+                <option name="y" value="450" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="525" />
+                <option name="y" value="500" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="750" />
+                <option name="y" value="350" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="725" />
+                <option name="y" value="300" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="475" />
+                <option name="y" value="300" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="450" />
+                <option name="y" value="350" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="675" />
+                <option name="y" value="500" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="725" />
+                <option name="y" value="450" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="625" />
+                <option name="y" value="225" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="575" />
+                <option name="y" value="225" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="575" />
+                <option name="y" value="225" />
+              </PointBean>
+            </list>
+          </option>
+        </Entry>
+        <Entry>
+          <option name="name" value="★ 3₁ Trefoil (Electron)" />
+          <option name="points">
+            <list>
+              <PointBean>
+                <option name="x" value="600" />
+                <option name="y" value="200" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="500" />
+                <option name="y" value="300" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="500" />
+                <option name="y" value="400" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="700" />
+                <option name="y" value="500" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="800" />
+                <option name="y" value="400" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="600" />
+                <option name="y" value="325" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="400" />
+                <option name="y" value="400" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="500" />
+                <option name="y" value="500" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="700" />
+                <option name="y" value="400" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="700" />
+                <option name="y" value="300" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="600" />
+                <option name="y" value="200" />
+              </PointBean>
+              <PointBean>
+                <option name="x" value="600" />
+                <option name="y" value="200" />
+              </PointBean>
+            </list>
+          </option>
+        </Entry>
+      </list>
+    </option>
+  </component>
+</project>

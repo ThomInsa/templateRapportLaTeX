@@ -1,0 +1,70 @@
+
+
+\begin{tikzpicture}[
+    node distance=2cm,
+    every node/.style={font=\small},
+    input/.style={
+        rectangle, rounded corners,
+        draw, fill=orange!20,
+        minimum width=1cm, minimum height=1cm,
+        text width=1cm, align=center
+    },
+    output/.style={
+        rectangle, rounded corners,
+        draw, fill=blue!20,
+        minimum width=3cm, minimum height=1cm
+    },
+    process/.style={
+        rectangle,
+        draw, fill=gray!15,
+        minimum width=3cm, minimum height=1cm,
+        align=center
+    },
+    decision/.style={
+        diamond,
+        draw, fill=green!15,
+        aspect=2,
+        inner sep=1pt
+    },
+    arrow/.style={
+        thick, ->, >=Stealth
+    }
+]
+
+% Nodes
+    \node (start) [process] {Récupération des \\ profils temporels du bâtiment};
+
+    \node (Text) [input, below right=of start] {$\overrightarrow{\mathbf{T_{air}}}(t)$};
+    \node (Tint) [input, below right=of start, xshift = 2cm] {$\overrightarrow{\mathbf{T_{env}}}(t)$};
+    \node (phiheat) [input, below right=of start, xshift = 4cm] {$\overrightarrow{\mathbf{\phi}}_{\text{heat}}(t)$};
+    \node (phisol) [input, below right=of start, xshift = 6cm] {$\overrightarrow{\mathbf{\phi}_{\text{sol}}}(t)$};
+
+    \node (fext) [input, below=of Tint, xshift=1cm] {$\overrightarrow{\mathbf{F}}_{\text{ext}}(t)$};
+
+    \node (init) [process, below=of start] {Initialisation};
+    \node (compute) [process, below=of init] {Calcul principal};
+    \node (test) [decision, below=of compute, yshift=-0.5cm] {Condition vraie ?};
+    \node (update) [process, below left=of test, xshift=-1cm] {Mise à jour};
+
+% Arrows
+    \draw [arrow] (start) -- (init);
+    \draw [arrow] (init) -- (compute);
+    \draw [arrow] (compute) -- (test);
+
+    \draw [arrow] (start.east) -| (Text.north);
+    \draw [arrow] (start.east) -| (Tint.north);
+    \draw [arrow] (start.east) -| (phiheat.north);
+    \draw [arrow] (start.east) -| (phisol.north);
+
+
+    \draw [arrow] (Text.south) -- ++(0,-0.5) -| (fext.north);
+    \draw [arrow] (Tint.south) -- ++(0,-0.5) -| (fext.north);
+    \draw [arrow] (phiheat.south) -- ++(0,-0.5) -| (fext.north);
+    \draw [arrow] (phisol.south) -- ++(0,-0.5) -| (fext.north);
+
+    \draw [arrow] (test) -- node[left] {oui} (update);
+    \draw [arrow] (update) |- (compute);
+
+
+\end{tikzpicture}
+

@@ -3,41 +3,36 @@
 
 % Preamble
 \documentclass[a4paper, 10pt]{report}
-\usepackage{glossaries}
+\usepackage[dvipsnames, x11names, table]{xcolor}  % Color support
 \usepackage{amsopn}
 \usepackage{stmaryrd}
 
 % Inclusion des paramètres
 \input{parametres/packages}
+\input{parametres/graph}
+\input{parametres/colors}
 \input{parametres/parametres1}
-\input{parametres/parametres2}
+\input{parametres/traductions}
 
 \input{biblio/bibConfig}
-\input{additional_content/glossaries_entries}
+%\input{additional_content/glossaries_entries}
 
-% Document
 \begin{document}
-    % Page de Garde
-    \input{TO_REMERGE_HUMA/pageDeGardeHuma}
-    \input{TO_REMERGE_HUMA/introHuma}
-    \tableofcontents \newpage
-    \input{TO_REMERGE_HUMA/part1Huma/part1Huma}
-    \input{TO_REMERGE_HUMA/part2Huma/part2Huma}
-    \newpage\input{TO_REMERGE_HUMA/concluHuma}
+    \input{pageDeGarde}
 %    % Remerciements without page number
 %    \pagenumbering{gobble} % Removes page numbers
 %    \input{resume_intro_conclu/remerciements}
 %
 %    % Start page numbering with Arabic numerals at abstract
-%    \pagenumbering{arabic} % Start page 1 here
-%    \input{resume_intro_conclu/abstract}
-%
-%
-%    \listoffigures
-%    \listoftables
-%    \listofmyequations
-%    \listofalgorithms
-%    \lstlistoflistings
+    \pagenumbering{arabic} % Start page 1 here
+    \newpage\input{resume_intro_conclu/abstract}
+
+    \newpage\tableofcontents
+    \listoffigures
+    \listoftables
+    \listofmyequations
+    \listofalgorithms
+    \lstlistoflistings
 %
 %
 %
@@ -45,28 +40,28 @@
 %    \glsresetall
 %
 %%    \input{annexes/annexe3}
-%    \input{resume_intro_conclu/introduction}
-%
+    \input{resume_intro_conclu/introduction}
+    \input{resume_intro_conclu/notations}
+
 %    % Inclusion des parties
 %    \input{part1/part1}
-%    \input{part2/part2}
-%    \input{part3/part3}
+    \input{part2/part2}
+    \input{part3/part3}
 %    \input{resume_intro_conclu/conclusion}
 %    % Inclusion des annexes
 %%    \input{annexes/annexes}
 %
-%    % Imprimer uniquement les entrées du glossaire principal (type=main)
-%    \printglossary[type=main, title=Glossaire]
+% Imprimer uniquement les entrées du glossaire principal
+%    \printunsrtglossary[type=main, title=Glossaire]
 %
-%    % Imprimer uniquement les acronymes
-%    \printglossary[type=\acronymtype, title=Acronymes]
+%% Imprimer uniquement les acronymes
+%    \printunsrtglossary[type=acronym, title=Acronymes]
 %
-%    % Imprimer uniquement les symboles
-%    \printglossary[type=symbols, title=Symboles]
+%% Imprimer uniquement les symboles
+%    \printunsrtglossary[type=symbols, title=Symboles]
+
 
 %    \printglossaries
 
-    \input{biblio/biblio}
-%    \nocite{*} % récupère toutes les citations
-
+      \input{biblio/biblio}
 \end{document}

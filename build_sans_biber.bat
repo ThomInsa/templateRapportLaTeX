@@ -25,7 +25,6 @@ echo === Compilation LaTeX rapide (1/2) ===
 %TECTONIC% --outdir=%OUT_DIR% --keep-logs %SRC_DIR%\%MAIN_FILE%.tex
 if errorlevel 1 (
     echo Erreur lors de la compilation LaTeX. Arrêt.
-    pause
     exit /b 1
 )
 
@@ -33,7 +32,6 @@ echo === Compilation finale pour références (2/2) ===
 %TECTONIC% --outdir=%OUT_DIR% --keep-logs %SRC_DIR%\%MAIN_FILE%.tex
 if errorlevel 1 (
     echo Erreur lors de la compilation LaTeX. Arrêt.
-    pause
     exit /b 1
 )
 

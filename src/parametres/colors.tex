@@ -1,0 +1,72 @@
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+%% ==================== DOCUMENT COLORS ====================
+% Define global colors for hyperlinks and URLs
+\definecolor{linkborderColor}{rgb}{0.1329,0.247,0.467}   % Blue for link borders
+\definecolor{urlborderColor}{rgb}{0,1,1}                % Cyan for URL borders
+\definecolor{urlColor}{rgb}{1,0,0}                      % Red for URL text
+
+%% ==================== HYPERREF SETUP ====================
+\hypersetup{
+%author = {Thomas AUBIN},                            % Uncomment to set PDF author
+%pdftitle = {Nom du Projet - Sujet du Projet},       % Uncomment to set PDF title
+    pdfsubject = {Mémoire de Projet},                    % PDF document subject
+    pdfkeywords = {Tag1, Tag2, Tag3, \dots},             % PDF keywords for indexing
+    pdfstartview={FitH},                                 % Default PDF view (fit width)
+    linkbordercolor = {linkborderColor}                 % Color for hyperlink borders
+%urlbordercolor = \color{urlborderColor},           % Uncomment to set URL border color
+%urlcolor = \color{urlColor}                        % Uncomment to set URL text color
+}
+
+
+%% Divergence palette for heatmaps
+
+\definecolor{errmax}{RGB}{215,48,39}   % rouge
+\definecolor{neu}{RGB}{255,255,255} % blanc
+\definecolor{errmin}{RGB}{69,117,180}  % bleu
+
+\pgfplotsset{compat=1.18}
+
+% Commandes pour définir les seuils min, milieu et max de la coloration
+\newcommand{\setdivergentmin}[1]{\def\divergentminval{#1}}
+\newcommand{\setdivergentmid}[1]{\def\divergentmidval{#1}}
+\newcommand{\setdivergentmax}[1]{\def\divergentmaxval{#1}}
+
+% Définir des valeurs par défaut
+\setdivergentmin{0}
+\setdivergentmid{3}
+\setdivergentmax{12}
+
+\newcommand{\divergentcell}[1]{%
+    \pgfmathparse{
+        #1 < \divergentmidval ?
+        (min(100, max(0, (\divergentmidval - #1) / (\divergentmidval - \divergentminval) * 100))) :
+        (min(100, max(0, (#1 - \divergentmidval) / (\divergentmaxval - \divergentmidval) * 100)))
+    }%
+    \let\percent=\pgfmathresult
+    \ifdim #1pt < \divergentmidval pt
+        \edef\temp{\noexpand\cellcolor{errmin!\percent!neu}}%
+    \else
+        \edef\temp{\noexpand\cellcolor{errmax!\percent!neu}}%
+    \fi
+    \temp
+    #1%
+}
+
+% Commandes pour la coloration à 2 niveaux (ex: blanc à rouge)
+\newcommand{\settwotonemin}[1]{\def\twotoneminval{#1}}
+\newcommand{\settwotonemax}[1]{\def\twotonemaxval{#1}}
+
+% Définir des valeurs par défaut
+\settwotonemin{0}
+\settwotonemax{5}
+
+\newcommand{\twotonecell}[1]{%
+    % Calculer le pourcentage de la valeur dans l'intervalle [min, max]
+    \pgfmathparse{min(100, max(0, ((#1 - \twotoneminval) / (\twotonemaxval - \twotoneminval)) * 100))}%
+    \let\percent=\pgfmathresult
+    % Appliquer la couleur de neu (blanc) à errmax (rouge)
+    \edef\temp{\noexpand\cellcolor{errmax!\percent!neu}}%
+    \temp
+    #1%
+}

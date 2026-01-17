@@ -22,47 +22,25 @@ if not exist %OUT_DIR% (
     echo Création du dossier de sortie %OUT_DIR%...
     mkdir %OUT_DIR%
 )
+echo === Copie des fichiers glossaires ===
+copy /Y %SRC_DIR%\additional_content\glossaries_entries.bib %OUT_DIR%\glossaries_entries.bib
 
 :: --------------------------------------------------
-echo === Compilation LaTeX initiale ===
-%TECTONIC% --outdir=%OUT_DIR% --keep-logs --keep-intermediates --reruns 0 %SRC_DIR%\%MAIN_FILE%.tex
-if errorlevel 1 (
-    echo Erreur lors de la compilation LaTeX. Arrêt.
-    pause
-    exit /b 1
-)
+echo === Compilation LaTeX initiale (avec enregistrement) ===
+ %TECTONIC% --outdir=%OUT_DIR% --keep-logs --keep-intermediates --reruns 0 %SRC_DIR%\%MAIN_FILE%.tex
+ rem Ignorer les erreurs de glossaire manquant lors de la première passe
 
-echo === Exécution de Biber ===
-%BIBER% --input-directory %OUT_DIR% --output-directory %OUT_DIR% %MAIN_FILE%
-if errorlevel 1 (
-    echo Erreur lors de Biber. Arrêt.
-    pause
-    exit /b 1
-)
+ echo === Exécution de Biber ===
+ %BIBER% --input-directory %OUT_DIR% --output-directory %OUT_DIR% %MAIN_FILE%
 
-echo === Génération des glossaires ===
+echo === Génération des glossaires avec bib2gls ===
 cd /d %OUT_DIR%
-texlua %MAKEGLOSSARIES% %MAIN_FILE%
-if errorlevel 1 (
-    echo Avertissement : Erreur lors de makeglossaries (peut être ignoré si les fichiers .gls existent)
-)
+C:\Users\TA285040\.jdks\temurin-17.0.17\bin\java.exe -jar %PROJECT_DIR%\bib2gls\bib2gls.jar main
 cd /d %PROJECT_DIR%
 
-echo === Compilation LaTeX pour bibliographie et glossaires (2/2) ===
-%TECTONIC% --outdir=%OUT_DIR% --keep-logs --keep-intermediates --reruns 0 %SRC_DIR%\%MAIN_FILE%.tex
-if errorlevel 1 (
-    echo Erreur lors de la compilation LaTeX. Arrêt.
-    pause
-    exit /b 1
-)
 
-echo === Compilation finale pour mises à jour des références (3/3) ===
-%TECTONIC% --outdir=%OUT_DIR% --keep-logs --keep-intermediates %SRC_DIR%\%MAIN_FILE%.tex
-if errorlevel 1 (
-    echo Erreur lors de la compilation LaTeX. Arrêt.
-    pause
-    exit /b 1
-)
+ echo === Compilation LaTeX finale ===
+ %TECTONIC% --outdir=%OUT_DIR% --keep-logs --keep-intermediates %SRC_DIR%\%MAIN_FILE%.tex
+
 
 echo === Compilation terminée ! Le PDF est dans %OUT_DIR% ===
-pause
