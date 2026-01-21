@@ -23,10 +23,6 @@
 
 ## État de l'art en modélisation de bâtiments : courte étude bibliographique
 
-### Analogie avec les circuits électriques
-
-- Schéma Excalidraw de l'analogie électrique (reprendre cours en ligne partie 6.2)
-
 ### Modèle de Contrôle Prédictif pour les bâtiments
 
 - Reproduire figure 1 de MPC needs
@@ -77,7 +73,7 @@
   - l'originale pour harmoniser la charte graphique
   - un nouveau run sur le même bâtiment pour comparer les résultats
   - le même tableau avec les moyennes et écart-types de chaque bâtiment
-- Tableau : reproduire figure 14
+- Tableau : reproduire figure  14
 
 ##### Limitations de la PSO
 

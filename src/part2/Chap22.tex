@@ -13,7 +13,7 @@
             \begin{split}
                 C_{air}\frac{\mathrm dT_{air}}{\mathrm dt}&=U_{air-env}\left(T_{env}-T_{air}\right) + U_{air-ext}\left(T_{env}-T_{ext}\right) + k_2\phi_{sol}+\phi_{em} \\
                 C_{env}\frac{\mathrm dT_{env}}{\mathrm dt}&=U_{env-ext}\left(T_{ext}-T_{env}\right) + U_{air-env}\left(T_{air}-T_{env}\right) + \left( k_1-k_2 \right)\phi_{sol} \\
-            \end{split}
+            \end{split}\label{diffTST}
         \end{equation}\myequations{Équations différentielles régissant la température d'un modèle thermique à 7 paramètres}
 
         \begin{figure}[htp]
@@ -27,14 +27,11 @@
 
 \section{Optimisation des paramètres du modèle}\label{sec:optimisation-des-parametres-du-modele}
 
-        \subsection{Optimisation par essaim particulaires (PSO)}\label{subsec:optimisation-par-essaims-particulaires-(pso)}
-
-
-            \cite{gad_particle_2022}
+        \subsection{Optimisation par essaim particulaires (PSO)}\label{subsec:optimisation-par-essaims-particulaires-(pso)}~\cite{gad_particle_2022}
 
 
             L'algorithme complet est donné ci-dessous.
-            Le lecteur peut consulter \cite{yt_pso} et \cite{NIA} pour une description plus détaillée\footnote{En particulier, on peut montrer que le nombre de paramètres peut être réduit sous l'hypothèse forte de l'indépendance des paramètres.}
+            Le lecteur peut consulter \cite{yt_pso} et \cite{NIA} pour une description plus détaillée\footnote{En particulier, on peut montrer que le nombre de paramètres du modèle peut être réduit sous l'hypothèse forte de l'indépendance des paramètres à optimiser.}
 
             \begin{algorithm}
                 \caption{Optimisation par essaim de particules (PSO)}\label{alg:pso}
@@ -76,8 +73,7 @@
 
             \cite{TST}
 
-            \begin{figure}[H]
-                \centering
+            \begin{figure}[H] \centering
                     \subfloat[Température d'air intérieur, $RMSE = 0.55^ \circ \bf C$]{\fbox{
                         \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST_air_predit_VS_energyplus}}}\qquad
                     \subfloat[Besoins de chauffage, $RMSE = 16.31 \bf kW$]{\fbox{
@@ -86,21 +82,23 @@
 
             \end{figure}
 
-    \section{}
+    \section{Résolution des équations du modèle}
 
-        \cite{numerical_analysis}
+        \subsection{}
+        \subsection{}
 
-        \begin{algorithm}
-            \caption{Méthode de la sécante}\label{alg:sec}
-            \begin{algorithmic}
-                \Require
-                \Ensure
-                \State
-            \end{algorithmic}
-        \end{algorithm}
+            \cite{numerical_analysis}
+
+            \begin{algorithm}
+                \caption{Méthode de la sécante}\label{alg:sec}\begin{algorithmic}
+                    \Require
+                    \Ensure
+                    \State
+                \end{algorithmic}
+            \end{algorithm}
 
 
-    \section{Synthèse }
+    \section{Promesses et limites de la méthode actuellement implémentée²²}
 
         \subsection{Reproductibilité des précédents résultats}
 

@@ -1,50 +1,54 @@
 
-\chapter{État de l'art en modélisation de bâtiments : courte étude bibliographique}
-    \section{Modèle de Contrôle Prédictif et analogie avec les circuits électriques}
+\chapter{État de l'art en modélisation de bâtiments : courte étude bibliographique}\label{ch:etat-de-l'art-en-modelisation-de-batiments-:-courte-etude-bibliographique}
 
 
-    ~\cite[chap.~VI]{manuel_energie_batiment}
-    \section{}~\cite[chap.~I--IV]{MPC_needs}
-%        \begin{figure}
-%            \centering
-%            \begin{tikzpicture}[node distance=1.5cm]
-%
-%                % Nodes
-%                \node (timek) [startstop] {@ temps $t_k$};
-%                \node (measurements) [process, below of=timek] {Prendre les mesures du processus};
-%                \node (model) [process, below of=measurements, minimum width=8cm] {%
-%                    \textbf{Modèle du processus} \\[1ex]
-%                    \begin{minipage}{7cm}
-%                        \textbf{Entrées :} \\
-%                        - Actions de contrôle actuelles et futures \\
-%                        - Perturbations \\[1ex]
-%                        $\Rightarrow$ \textbf{Sorties futures du processus}
-%                    \end{minipage}
-%                    \hspace{0.5cm}
-%                    \begin{minipage}{3cm}
-%                        \textbf{Objectifs} \\
-%                        \textbf{Contraintes}
-%                    \end{minipage}
-%                };
-%                \node (optimization) [process, below of=model] {Résoudre le problème d'optimisation ci-dessus \\ $\Downarrow$ Meilleures actions de contrôle actuelles et futures};
-%                \node (implement) [process, below of=optimization] {Mettre en œuvre la meilleure action de contrôle \textit{actuelle}};
-%                \node (timek1) [startstop, below of=implement] {temps $t_{k+1}$};
-%
-%                % Arrows
-%                \draw [arrow] (timek) -- (measurements);
-%                \draw [arrow] (measurements) -- (model);
-%                \draw [arrow] (model) -- (optimization);
-%                \draw [arrow] (optimization) -- (implement);
-%                \draw [arrow] (implement) -- (timek1);
-%                \draw [arrow] (timek1.east) .. controls +(2,0) and +(2,0) .. (timek.east);
-%
-%            \end{tikzpicture}
-%            \caption{Schéma résumant le principe du MPC (\cite{MPC_needs})}
-%            \label{fig:mpc}
-%        \end{figure}
+\section{Introduction à l'énergétique du bâtiment}\label{sec:introduction-a-l'energetique-du-batiment}
 
-    \section{Machine Learning pour le bâtiment}\label{sec:machine-learning-pour-le-batiment}
+    Pour des raisons évidentes et de plus en plus actuelles, la caractérisation du comportement énergétique d'un bâtiment est un sujet scientifique de premier plan, pour l'ingénierie comme pour la recherche.
+    Ce domaine mêlant physique théorique et ingénierie du bâtiment est confronté à de nombreuses contraintes, la plus importante étant probablement la difficulté à proposer un modèle ou une méthode d'évaluation facilement généralisable.
+    En effet, les bâtiments ont pour la majorité d'entre eux des caractéristiques individuelles et dépendent de facteurs très nombreux.
 
-\subsection{Approches traditionnelles}\label{subsec:approches-traditionnelles}~\cite{WML}
-        \subsection{Réseaux de neurones}\label{subsec:reseaux-de-neurones}
-\cite{LeCun_DL,UDL}
+    L'énergétique du bâtiment n'en reste pas moins une science riche et active, en particulier depuis ces vingt dernières années.
+    Les méthodes pour évaluer la consommation d'énergie d'un bâtiment sont nombreuses, et un audit détaillé d'un bâtiment comprend souvent de nombreux aspects, parmi lesquels~\cite{audit_energy_engineering}:
+    \begin{enumerate}
+        \item L'instrumentation sur site pour un bâtiment entier ou des composants de celui-ci \textit{(lumières, climatisation…)}
+        \item Une ou plusieurs simulations pour cartographier la consommation d'énergie \textit{(mêmes exemples)}, à l'aide des outils de calcul scientifique classique \textit{(Python, SciPy)} ou de logiciels spécialisés \it{(EnergyPlus)}
+        \item La compréhension du fonctionnement du bâtiment par l'introduction d'un modèle plus ou moins abstrait \textit{(modélisation 3D, négligence ou non de certains paramètres…)}
+    \end{enumerate}
+
+    Notons que certains bâtiments très sensibles comme les centrales nucléaires sont parfois modélisés par des jumeaux numériques, une méthode très technique, reposant sur une science encore jeune et concernant souvent des installations dont les études ne se limitent pas à la consommation énergétique.
+    Elles dépassent de fait le cadre de ce rapport.
+
+    En pratique, les modélisations détaillées de type CFD sont généralement très complexes dans le cas des bâtiments et généralement évitées, car trop coûteuses en ressources de calcul.
+    Elles sont alors remplacées par des approches plus pragmatiques et minimalistes, comme celle présentée dans la section suivante : le contrôle prédictif.
+
+    \section{Modèle de Contrôle Prédictif pour l'énergétique du bâtiment}\label{sec:modele-de-controle-predictif-pour-l'energetique-du-batiment}
+
+        \subsection{Principes fondamentaux du MPC}\label{subsec:principes-fondamentaux-du-mpc}
+
+            Comme c'est le cas pour d'autres domaines d'ingénierie, le problème posé par les temps de calcul de la modélisation 3D peut être contournée en considérant les bâtiments comme des systèmes dynamiques dont le comportement peut être formalisé par les concepts fondamentaux de la théorie du contrôle et de l'optimisation sous contraintes.
+            En particulier, 
+            Le principal avantage du MPC est d'optimiser l'état présent tout en tenant compte des états futurs\cite{wiki_MPC}.
+
+                    ~\cite[chap.~I--IV]{MPC_needs}~\cite{allyouneedtoknowaboutMPCforbuildings}
+        \subsection{Analogie avec les circuits électriques}
+
+            ~\cite[chap.~VI]{manuel_energie_batiment}
+
+            \begin{figure}[htp]
+                \centering
+                {\fbox{\includegraphics[width = 0.5\textwidth]{figures/diagrammes/schémas/AEsimple}}}~\caption{Modèle $RC$ simple régi par l'équation $C_z\frac{\mathrm dT_z}{\mathrm dt} = \frac{T_a-T_z}{R_w}+\dot Q_h +gA\dot Q_{sun}$ \textit{(\cite{allyouneedtoknowaboutMPCforbuildings})}}\label{fig:rcsimple}
+            \end{figure}
+
+\section{Machine Learning pour le bâtiment}\label{sec:machine-learning-pour-le-batiment}
+
+    \subsection{Approches traditionnelles}\label{subsec:approches-traditionnelles}~\cite{WML}
+        \subsection{Réseaux de neurones}\label{subsec:reseaux-de-neurones}~\cite{LeCun_DL,UDL}
+
+\section{Vers une étude croisée des différentes méthodes et une généralisation sur un grand volume de données}
+
+\begin{figure}[htp]
+    \centering
+    \fbox{\input{figures/diagrammes/schémas/modelisationprincipe.tikz}}
+    \caption{Schéma de principe des attendus finaux de l'alternance}\label{fig:methode}
+\end{figure}

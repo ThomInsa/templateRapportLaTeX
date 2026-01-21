@@ -3,16 +3,22 @@
 \begin{tikzpicture}[
     node distance=2cm,
     every node/.style={font=\small},
-    input/.style={
+    inputshort/.style={
         rectangle, rounded corners,
         draw, fill=orange!20,
-        minimum width=1cm, minimum height=1cm,
-        text width=1cm, align=center
+        minimum width=1.2cm, minimum height=1cm,
+        text width=1.2cm, align=center
     },
-    output/.style={
+    inputlong/.style={
+        rectangle, rounded corners,
+        draw, fill=orange!20,
+        minimum width=3cm, minimum height=1cm,
+        text width=3cm, align=center
+    },
+    outputshort/.style={
         rectangle, rounded corners,
         draw, fill=blue!20,
-        minimum width=3cm, minimum height=1cm
+        minimum width=1cm, minimum height=1cm
     },
     process/.style={
         rectangle,
@@ -24,7 +30,9 @@
         diamond,
         draw, fill=green!15,
         aspect=2,
-        inner sep=1pt
+        inner sep=1pt,
+        text width=3cm,
+        align=center
     },
     arrow/.style={
         thick, ->, >=Stealth
@@ -34,22 +42,34 @@
 % Nodes
     \node (start) [process] {Récupération des \\ profils temporels du bâtiment};
 
-    \node (Text) [input, below right=of start] {$\overrightarrow{\mathbf{T_{air}}}(t)$};
-    \node (Tint) [input, below right=of start, xshift = 2cm] {$\overrightarrow{\mathbf{T_{env}}}(t)$};
-    \node (phiheat) [input, below right=of start, xshift = 4cm] {$\overrightarrow{\mathbf{\phi}}_{\text{heat}}(t)$};
-    \node (phisol) [input, below right=of start, xshift = 6cm] {$\overrightarrow{\mathbf{\phi}_{\text{sol}}}(t)$};
+    \node (Text) [inputshort, below right=of start] {$\overrightarrow{\mathbf{T_{air}}}(t)$};
+    \node (Tint) [inputshort, below right=of start, xshift = 2cm] {$\overrightarrow{\mathbf{T_{env}}}(t)$};
+    \node (phiheat) [inputshort, below right=of start, xshift = 4cm] {$\overrightarrow{\mathbf{\phi}}_{\text{heat}}(t)$};
+    \node (phisol) [inputshort, below right=of start, xshift = 6cm] {$\overrightarrow{\mathbf{\phi}_{\text{sol}}}(t)$};
 
-    \node (fext) [input, below=of Tint, xshift=1cm] {$\overrightarrow{\mathbf{F}}_{\text{ext}}(t)$};
+    \node (fext) [inputshort, below=of Tint, xshift=1cm] {$\overrightarrow{\mathbf{F}}_{\text{ext}}(t)$};
+    \node (PSOparam) [inputlong, below=of fext, yshift=1.5cm] {Fonction objectif \\ Bornes de recherche \\ Taille de l'essaim \\ Nb max d'itérations};
 
-    \node (init) [process, below=of start] {Initialisation};
-    \node (compute) [process, below=of init] {Calcul principal};
-    \node (test) [decision, below=of compute, yshift=-0.5cm] {Condition vraie ?};
-    \node (update) [process, below left=of test, xshift=-1cm] {Mise à jour};
+    \node (PSOyn) [decision, below=of start] {Paramètres thermiques \\ fixés ?};
+
+    \node (Pth) [inputlong, below=of PSOyn, yshift=-2cm] {Vecteur Paramètres thermiques $\mathbf{P}_{\text{th}}$};
+    \node (REME) [process, below=of Pth] {Résolution de l'équation \ref{diffTST} \\ par la méthode d'Euler};
+    \node (PSO) [process, right=of Pth, xshift=-0.5cm] {PSO \\ pour déterminer \\ les paramètres thermiques};
+    \node (secante) [process, below=of REME] {Détermination du besoin de chauffage \\ par la méthode de la sécante};
+
+
+    \node (Tairpred) [outputshort, below=of REME, xshift=-4.cm, yshift = 1.5cm] {$\ThatAir{t}$};
+    \node (Tenvpred) [outputshort, below=of REME, xshift=4.cm, yshift = 1.5cm] {$\ThatEnv{t}$};
+
+
+    \node (phiheatpred) [outputshort, below=of secante, xshift=-4cm, yshift = 1.5cm] {$\PhihatHeat{t}$};
+    \node (phisolpred) [outputshort, below=of secante, xshift=4cm, yshift = 1.5cm] {$\PhihatSol{t}$};
+
+    \node (Tconsext) [inputshort, right=of secante, xshift=2cm, yshift = 0.75cm] {$\Tconsext$};
+    \node (Tconsint) [inputshort, right=of secante, xshift=2cm, yshift = -0.75cm] {$\Tconsint$};
 
 % Arrows
-    \draw [arrow] (start) -- (init);
-    \draw [arrow] (init) -- (compute);
-    \draw [arrow] (compute) -- (test);
+    \draw [arrow] (start) -- (PSOyn);
 
     \draw [arrow] (start.east) -| (Text.north);
     \draw [arrow] (start.east) -| (Tint.north);
@@ -62,9 +82,23 @@
     \draw [arrow] (phiheat.south) -- ++(0,-0.5) -| (fext.north);
     \draw [arrow] (phisol.south) -- ++(0,-0.5) -| (fext.north);
 
-    \draw [arrow] (test) -- node[left] {oui} (update);
-    \draw [arrow] (update) |- (compute);
+    \draw [arrow] (PSOyn.south) -- node[left, text width=4cm, align=center] {oui \textit{(déterminés par la méthode 3CL ou par une précédente PSO)}} (Pth.north);
+%    \draw [arrow] (PSOyn.east) -- node[left, text width=4cm, align=center] {Non} (Pth.north);
+    \draw [arrow] (Pth.south) -- (REME.north);
+    \draw [arrow] (REME.south) -- (secante.north);
 
+    \draw [arrow] (fext.west) -| (PSO.north);
+    \draw [arrow] (PSOparam.west) -| (PSO.north);
+    \draw [arrow] (PSO.west) -- (Pth.east);
+
+    \draw [arrow] (Tconsext.west) -- ++(-1, 0) |- ([yshift=0.2cm]secante.east);
+    \draw [arrow] (Tconsint.west) -- ++(-1, 0) |- ([yshift=-0.2cm]secante.east);
+
+    \draw [arrow] (REME.west) -| (Tairpred.north);
+    \draw [arrow] (REME.east) -| (Tenvpred.north);
+
+    \draw [arrow] (secante.west) -| (phiheatpred.north);
+    \draw [arrow] (secante.east) -| (phisolpred.north);
 
 \end{tikzpicture}
 
