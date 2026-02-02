@@ -1,38 +1,103 @@
 %! suppress = MissingImport
-\chapter{Modélisation des besoins énergétiques du quartier DISTRISIM}
-
+\chapter{Modélisation des besoins énergétiques du quartier DISTRISIM}\label{chap:distrisim}
+    \begin{bluebox}
+        Les travaux rapportés ici font suite à un stage de fin d'études d'ingénieurs en énergétique
+        réalisé en 2023.
+        De nombreuses explications et figures sont donc adaptés du rapport associé\cite{TST}.
+        Les résultats de ce stage tiennent lieu de point de départ pour le projet IBIS.
+        Aussi, les deux enjeux majeurs de ce chapitre sont la compréhension théorique des
+        différents composants du modèle, et la reproductibilité des résultats obtenus pendant ce
+        stage avec des données similaires et un code refactorisé permettant une extension du
+        modèle dans le cadre du projet IBIS.
+    \end{bluebox}
+    
     \section{Position du problème}
 
-        \begin{figure}[htp]
-            \centering
-            {\fbox{\includegraphics[width = 0.8\textwidth]{figures/diagrammes/schémas/DISTRISIM AE.drawio}}}
-            \caption{Modèle RC utilisé pour modéliser un bâtiment DISTRISIM \textit(tiré de \cite{TST} et inspiré de \cite{aoun})}\label{fig:figure}
-        \end{figure}
+        \subsection{Bâtiments étudiés et datasets d'entraînement}
+            \subsubsection{Quelques commentaires sur les données d'entrée}
+            \label{subsec:quelques-commentaires-sur-les-donnees-d'entree}
+                \begin{bluebox}
+                        (27/01) : La détermination rigoureuse d'un modèle d'entraînement statistique
+                    doit en toute logique être précédée d'une analyse de fond des données
+                    impliquées.
+                    Cette partie souffre pour l'instant d'un manque de profondeur, mais les
+                    futurs travaux impliquant de gros volumes de données corrigeront cet écueuil.
+                \end{bluebox}
+        
+        \subsection{Modèle $RC$ sélectionné}
+            
+            On s'inspire de l'architecture proposée par~\cite{aoun} en 2019, celle-ci offrant un
+            compromis intéressant entre complétude des paramètres et simplicité de résolution.
+    
+            Le modèle d'origine introduit les paramètres suivants :
+            \begin{itemize}
+                \item 5 noeuds de température$\TAir{t}$, $\TEnv{t}$, $\TMass{t}$, $\TEm{t}$ et $\TCirc{t}$, représentant respectivement les températures du bâtiment, de l'enveloppe \textit{(intérieur du mur)}, de la masse thermique, de l'émissivité et de la circulation d'air ;
+                \item
+            \end{itemize}
+            
+            Cependant, en raison de datasets moins riches que ceux utilisés dans l'article, et à
+            des fins de simplicité, les paramètres \ldots sont négligés et on retient donc la
+            configuration suivante :
+        
+            \begin{figure}[H]
+                \centering
+                {\fbox{\includegraphics[width = 0.8\textwidth]{figures/diagrammes/schémas/DISTRISIM AE.drawio}}}
+                \caption{Modèle RC utilisé pour modéliser un bâtiment DISTRISIM \textit(tiré de \cite{TST} et inspiré de \cite{aoun})}\label{fig:figure}
+            \end{figure}
+            
+            On peut montrer que ce modèle obéit aux deux équations différentielles suivantes,
+            qu'il est alors nécessaire de résoudre.
 
-        \begin{equation}
-            \begin{split}
-                C_{air}\frac{\mathrm dT_{air}}{\mathrm dt}&=U_{air-env}\left(T_{env}-T_{air}\right) + U_{air-ext}\left(T_{env}-T_{ext}\right) + k_2\phi_{sol}+\phi_{em} \\
-                C_{env}\frac{\mathrm dT_{env}}{\mathrm dt}&=U_{env-ext}\left(T_{ext}-T_{env}\right) + U_{air-env}\left(T_{air}-T_{env}\right) + \left( k_1-k_2 \right)\phi_{sol} \\
-            \end{split}\label{diffTST}
-        \end{equation}\myequations{Équations différentielles régissant la température d'un modèle thermique à 7 paramètres}
+            \begin{equation}
+                \begin{split}
+                    C_{air}\frac{\mathrm d\TAir{t}}{\mathrm dt}&=U_{air-env}\left(\TAir{t}\right) + U_{air-ext}\left(\TEnv{t}-T_{ext}\right) + k_2\PhiSol{t}+\PhiHeat{t} \\
+                    C_{env}\frac{\mathrm d\TEnv{t}}{\mathrm dt}&=U_{env-ext}\left(\TEnv{t}\right) +
+                    U_{air-env}\left(\TAir{t}-\TEnv{t}\right) + \left( k_1-k_2 \right)\PhiSol{t} \\
+                \end{split}\label{eq:diffTST}
+            \end{equation}\myequations{Équations différentielles régissant la température d'un modèle thermique à 7 paramètres}
 
-        \begin{figure}[htp]
-            \centering
-            \fbox{\input{figures/diagrammes/logigrammes/DISTRISIM_behavior.tikz}}
-            \caption{Logigramme des étapes de calcul pour le projet \texttt{DISTRISIM}}\label{fig:figure2}
-        \end{figure}
+            
+            \begin{figure}[H]
+                \centering
+                \fbox{\input{figures/diagrammes/logigrammes/DISTRISIM_behavior.tikz}}
+                \caption{Logigramme des étapes de calcul pour le projet \texttt{DISTRISIM}}\label{fig:figure2}
+            \end{figure}
 
-        \subsection{Quelques commentaires sur les données d'entrée}\label{subsec:quelques-commentaires-sur-les-donnees-d'entree}
 
-
-\section{Optimisation des paramètres du modèle}\label{sec:optimisation-des-parametres-du-modele}
+    \section{Identification des paramètres}\label{sec:optimisation-des-parametres-du-modele}
+        
+        \subsection{Définition de la fonction objectif}
+        
+            \begin{bluebox}
+                (28/01) : Cette sous-section mérite d'être étoffée.
+                Par souci de simplicité on utilise la RMSE par défaut, mais il peut être
+                intéressant de justifier le choix ou le rejet d'autres fonctions.
+            \end{bluebox}
+            
+            \begin{equation}
+                \mathrm{RMSE}\left(\ThatAir{t}\right) =
+                \sqrt{\sum_{i=1}^{n}
+                    \displaystyle{
+                    \frac{\left(\widehat {T_{\text{air}}}_{t_i} - {\Tconsint}_{t_i}\right)^2}{n}}}
+                    \label{eq:RMSE}
+                \end{equation}\myequations{Racine de l'erreur quadratique moyenne entre la température prédite et la température consigne intérieure}
 
         \subsection{Optimisation par essaim particulaires (PSO)}\label{subsec:optimisation-par-essaims-particulaires-(pso)}~\cite{gad_particle_2022}
 
 
             L'algorithme complet est donné ci-dessous.
-            Le lecteur peut consulter \cite{yt_pso} et \cite{NIA} pour une description plus détaillée\footnote{En particulier, on peut montrer que le nombre de paramètres du modèle peut être réduit sous l'hypothèse forte de l'indépendance des paramètres à optimiser.}
+            Le lecteur peut consulter \cite{PSO_overview} et \cite{NIA} pour une description
+            plus détaillée\footnote{En particulier, on peut montrer que le nombre de paramètres du modèle peut être réduit sous l'hypothèse forte de l'indépendance des paramètres à optimiser.}
 
+            \begin{figure}[H] \centering
+                    \subfloat[]{\fbox{
+                        \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/PSO/PSOi}}}\qquad
+                    \subfloat[]{\fbox{
+                        \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/PSO/PSOf}}}\qquad
+                \caption{Représentation visuelle d'une optimisation de fonction à deux
+                paramètres par PSO \it{(\cite{yt_pso})}}
+            \end{figure}
+            
             \begin{algorithm}
                 \caption{Optimisation par essaim de particules (PSO)}\label{alg:pso}
                 \begin{algorithmic}
@@ -82,23 +147,75 @@
 
             \end{figure}
 
-    \section{Résolution des équations du modèle}
+    \section{Résolution des équations différentielles}
+    
+        Une fois les paramètres $RC$ déterminés, il devient possible de calculer une solution
+        numérique à l'équation \ref{eq:diffTST} pour obtenir les profils de température sur un
+        horizon temporel donné.
+        Deux méthodes différentes sont employées pour résoudre d'une part
 
-        \subsection{}
-        \subsection{}
+        \subsection{Températures dans la paroi et à l'intérieur du bâtiment}
+        
+            On admet qu'il est difficile de trouver une solution explicite à l'équation
+            présentée.
+            Pour ce type de problème, il est courant d'utiliser
+            Le principe de cette méthode est de partir d'une condition initiale et de se
+            déplacer d'une distance très faible sur la pente de la fonction dans l'espace des
+            solutions, et de recalculer cette pente itérativement jusqu'à convergence des
+            valeurs calculées.
+        
+            \begin{algorithm}[H]
+                \caption{Méthode d'Euler explicite}
+                \label{alg:euler}
+                \begin{algorithmic}[1]
+                    \Require
+                    Fonction $f(t,y)$, condition initiale $y_0$, temps initial $t_0$, pas $h$,
+                    nombre d'itérations $N$
+                    \Ensure
+                    Approximation numérique $(t_n, y_n)$ de la solution de $\displaystyle y'(t)=f(t,y(t))$
+                    
+                    \State Initialiser $t_0 \gets t_0$
+                    \State Initialiser $y_0 \gets y_0$
+                    
+                    \For{$n = 0$ \textbf{à} $N-1$}
+                        \State $t_{n+1} \gets t_n + h$
+                        \State $y_{n+1} \gets y_n + h\, f(t_n, y_n)$
+                    \EndFor
+                    
+                    \State \Return $\{(t_n, y_n)\}_{n=0}^{N}$
+                \end{algorithmic}
+            \end{algorithm}
+
+        
+        \subsection{Flux de chaleur solaire et besoin de chauffage}
 
             \cite{numerical_analysis}
 
             \begin{algorithm}
-                \caption{Méthode de la sécante}\label{alg:sec}\begin{algorithmic}
-                    \Require
-                    \Ensure
-                    \State
+                \caption{Méthode de la sécante \it{(Tiré de \cite{numerical_analysis_2})}}
+                \label{alg:sec}\begin{algorithmic}
+                    \Require Approximations initiales $p_0, p_1$, tolérance $\varepsilon$,
+                    nombre d'itérations $N$
+                    \Ensure Solution approximative $p$ ou message d'erreur
+                    \State i $\gets 2$
+                    \State $q_0\gets f\left( p_0 \right)$
+                    \State $q_1\gets f\left( p_1 \right)$
+                    \While{$i\leq N$}
+                        \State $p\gets p=p_1-q_1\left( \frac{p_1 - p_0}{q_1-q_0} \right)$
+                        \If{$|p - p_1| < \varepsilon$}
+                            \State \Return $p$
+                        \EndIf
+                        \State $i\gets i+1$
+                        \State $p_0\gets p_1$
+                        \State $q_0\gets q_1$
+                        \State $p_1\gets p$
+                        \State $q_1\gets f\left( p \right)$
+                    \EndWhile
+                    \State \Return \texttt{Erreur : pas de convergence}
                 \end{algorithmic}
             \end{algorithm}
-
-
-    \section{Promesses et limites de la méthode actuellement implémentée²²}
+            
+    \section{Promesses et limites de la méthode actuellement implémentées}
 
         \subsection{Reproductibilité des précédents résultats}
 
@@ -176,7 +293,7 @@
                 Dec & \twotonecell{0.16} & \twotonecell{0.12} & \twotonecell{0.07} & \twotonecell{4.83} & \twotonecell{0.06} & \twotonecell{0.02} & \twotonecell{2.03} & \twotonecell{3.32} & \twotonecell{1.98} & \twotonecell{0.14} & \twotonecell{1.26} & \twotonecell{0.16} \\
                 \bottomrule
             \end{tabular}
-            \caption{Erreur absolue entre les deux précédentes figures}
+            \caption{Erreur absolue entre les deux précédentes tableaux}
             \label{tab:my_label3}
         \end{table}
 
@@ -237,4 +354,6 @@
             \caption{Écart-type normalisé en \% des données de sorties de la PSO sur dix calculs, par bâtiment, pour le mois de janvier}
             \label{tab:my_label4}
         \end{table}
+        
+        
 

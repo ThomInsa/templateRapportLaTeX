@@ -6,13 +6,7 @@
 # De l'énergétique du bâtiment au CEA : rappels historiques et contextualisation
 
 ## Généralités
-
-- Chiffres-clés = checker document déjà en biblio dernière page
-
 ## Direction des énergies et Centre de Grenoble
-
-- Citer livre CEA
-
 ## LITEN, INES et DTS
 
 ## SIRE et LELA
@@ -24,24 +18,18 @@
 ## État de l'art en modélisation de bâtiments : courte étude bibliographique
 
 ### Modèle de Contrôle Prédictif pour les bâtiments
-
-- Reproduire figure 1 de MPC needs
-
 ### Machine Learning pour le bâtiment
 
 #### Approches traditionnelles
-
 #### Réseaux de neurones
-
 
 ## Modélisation des besoins énergétiques du quartier DISTRISIM
 
 ### Position du problème
 
-- Expliquer chaque paramètre et donner l'équation différentielle
+- Introduire et expliquer chaque paramètre
 
 - Considérations sur la fonction \textit{(convexe, différentiable etc)} pour poser le contexte de l'optimisation 
-- Figure : schéma $RC$
 
 - Figure : courbes de visualisation des données de mesure d'un bâtiment (Thales ou Apache ...)
 - Algo : méthode de la sécante
@@ -60,26 +48,15 @@
 - Figure : Reprendre paragraphe 5.1 de TST dans un logigramme 
 
 - Figure : logigramme pour expliquer la démarche pour reproduire figure 18
-
-
-
-- Diagrame Tikz représentant tout le pipeline de calcul (drafter sur draw.io)
-
 ### Rapide analyse des données d'entrée
 
 ### Conclusion intermédiaire
 
-- Tableau : reproduire figure 18 de TST
-  - l'originale pour harmoniser la charte graphique
-  - un nouveau run sur le même bâtiment pour comparer les résultats
-  - le même tableau avec les moyennes et écart-types de chaque bâtiment
 - Tableau : reproduire figure  14
 
 ##### Limitations de la PSO
 
 L'algorithme ne converge pas tout le temps (nb max d'itérations atteint) alors qu'on peut encore minimiser la fonction de façon importante.
-
-Figure pour montrer que la PSO engendre une grande plage de résultats.
 
 -> Lancer une série de 10 PSO pour chaque bâtiment
 
@@ -91,21 +68,13 @@ Figure pour montrer que la PSO engendre une grande plage de résultats.
 
 ## Étude et développement de nouvelles approches pour la modélisation énergétique de bâtiments
 
-Figure introductive = Données d'entrée, modèle de calculs et résultats obtenus pour l'ensemble du projet IBIS : graphe en trois colonnes 
-
-1. Datasets d'entrée
-2. Modèles développés
-3. Résultats obtenus
-
-Éventuellement 
-
 >Encadré : Réflexion de proche en proche, en essayant de se baser sur les travaux précédemment conduits. C'est pourquoi les conclusions présentées ici sont similaires aux précédentes. 
 
 ### Retour sur la méthode de la sécante : généralisation et perfectionnement
 
 - Algorithme : méthode de Brent
 
-### Limites de la PSO, autre méta-heuristiques
+### Autres méta-heuristiques
 
 - Principal avantage de la PSO = ne pas utiliser le gradient de la fonction, et donc pas besoin que la fonction soit dérivable
 - Avantage relatif dans le sens où notre fonction est différentiable
@@ -114,8 +83,9 @@ Figure introductive = Données d'entrée, modèle de calculs et résultats obten
 
 ### Vers de nouvelles données d'entraînemnent
 
-# Considérations sur l'architecture logicielle du projet \texttt{IBIS} : aspects techniques et sécuritaires
+citer article Lyse
 
+# Considérations sur l'architecture logicielle du projet \texttt{IBIS} : aspects techniques et sécuritaires
 
 ## Conception logicielle, refactoring et bonnes pratiques de développement
 
@@ -188,7 +158,7 @@ Citer figure PSO pour montrer qu'elle est lente.
     - Donner la procédure pour mener un petit pentest par inférence d'appartenance sur le modèle. Citer le rapport MIA
     - Randomiser les données d'entrée pour compliquer la compréhension du modèle
 
-#### Applications au projet DISTRISIM
+#### Applications au projet IBIS
 
 Insister sur ce qui est applicable et ce qui ne l'est pas (recommendations des normes VS réalité dans les bureaux)
 
@@ -236,11 +206,7 @@ Tableau d'analyse du risque :
 
 ### Organisation
 
-- Deux figures sur le volume horaire
-  - Multihistogramme par semaine sur le volume horaire dédié à chaque tâche
-  - Répartition horaire totale dans un diagramme circulaire 
-    - Développement 
-      - dont revues d'issues et rédaction de doc
+- Planning de l'alternance par phases
 
 ### Framework
 

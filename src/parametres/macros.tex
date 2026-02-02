@@ -1,17 +1,48 @@
 \newcommand{\physder}[2]{\frac{\mathrm d #1}{\mathrm d #2}}
 \newcommand{\tempder}[1]{\frac{\mathrm d #1}{\mathrm dt}}
 
-\DeclareMathOperator{\ThatOpAir}{\widehat{\overrightarrow{\mathbf{T}}_{\text{air}}}}
+\DeclareMathOperator{\ThatOpAir}{\widehat{\overrightarrow{\mathbf{T}}_{\text{Air}}}}
 \newcommand{\ThatAir}[1]{\ThatOpAir(#1)}
 
-\DeclareMathOperator{\ThatOpEnv}{\widehat{\overrightarrow{\mathbf{T}}_{\text{env}}}}
+\DeclareMathOperator{\ThatOpEnv}{\widehat{\overrightarrow{\mathbf{T}}_{\text{Env}}}}
 \newcommand{\ThatEnv}[1]{\ThatOpEnv(#1)}
 
-\DeclareMathOperator{\PhihatOpHeat}{\widehat{\overrightarrow{\phi}_{{heat}}}}
+\DeclareMathOperator{\PhihatOpHeat}{\widehat{\overrightarrow{\phi_{{Heat}}}}}
 \newcommand{\PhihatHeat}[1]{\PhihatOpHeat(#1)}
 
-\DeclareMathOperator{\PhihatOpSol}{\widehat{\overrightarrow{\phi}_{{sol}}}}
+\DeclareMathOperator{\PhihatOpSol}{\widehat{\overrightarrow{\phi_{{Sol}}}}}
 \newcommand{\PhihatSol}[1]{\PhihatOpSol(#1)}
 
-\newcommand{\Tconsext}{T_{\text{cons}-\texttt{ext}}}
-\newcommand{\Tconsint}{T_{\text{cons}-\texttt{int}}}
+\DeclareMathOperator{\OpAir}{\overrightarrow{\mathbf{T}_{\text{Air}}}}
+\newcommand{\TAir}[1]{\OpAir(#1)}
+
+\DeclareMathOperator{\OpEnv}{\overrightarrow{\mathbf{T}_{\text{env}}}}
+\newcommand{\TEnv}[1]{\OpEnv(#1)}
+
+\DeclareMathOperator{\OpMass}{\overrightarrow{\mathbf{T}_{\text{Mass}}}}
+\newcommand{\TMass}[1]{\OpMass(#1)}
+
+\DeclareMathOperator{\OpEm}{\overrightarrow{\mathbf{T}_{\text{Em}}}}
+\newcommand{\TEm}[1]{\OpEm(#1)}
+
+\DeclareMathOperator{\OpCirc}{\overrightarrow{\mathbf{T}_{\text{Circ}}}}
+\newcommand{\TCirc}[1]{\OpCirc(#1)}
+
+\DeclareMathOperator{\OpHeat}{\overrightarrow{\phi_{{heat}}}}
+\newcommand{\PhiHeat}[1]{\OpHeat(#1)}
+
+\DeclareMathOperator{\OpSol}{\overrightarrow{\phi_{{Sol}}}}
+\newcommand{\PhiSol}[1]{\OpSol(#1)}
+
+\newcommand{\Tconsext}{T_{\text{cons}-\texttt{Ext}}}
+\newcommand{\Tconsint}{T_{\text{cons}-\texttt{Int}}}
+
+\renewcommand{\it}[1]{\textit{#1}}
+
+\newenvironment{bluebox}
+    {
+        \begin{tcolorbox}[colback=linkborderColor!5!white,colframe=linkborderColor!75!black]
+    }
+    {
+        \end{tcolorbox}
+    }

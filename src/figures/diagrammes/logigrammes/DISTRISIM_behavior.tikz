@@ -30,8 +30,8 @@
         diamond,
         draw, fill=green!15,
         aspect=2,
-        inner sep=1pt,
-        text width=3cm,
+        inner sep=2pt,
+        text width=2cm,
         align=center
     },
     arrow/.style={
@@ -47,13 +47,14 @@
     \node (phiheat) [inputshort, below right=of start, xshift = 4cm] {$\overrightarrow{\mathbf{\phi}}_{\text{heat}}(t)$};
     \node (phisol) [inputshort, below right=of start, xshift = 6cm] {$\overrightarrow{\mathbf{\phi}_{\text{sol}}}(t)$};
 
-    \node (fext) [inputshort, below=of Tint, xshift=1cm] {$\overrightarrow{\mathbf{F}}_{\text{ext}}(t)$};
+    \node (fext) [inputshort, below=of Tint, xshift=1cm] {
+        $\overrightarrow{\mathbf{F}_{\text{ext}}}(t)$};
     \node (PSOparam) [inputlong, below=of fext, yshift=1.5cm] {Fonction objectif \\ Bornes de recherche \\ Taille de l'essaim \\ Nb max d'itérations};
 
     \node (PSOyn) [decision, below=of start] {Paramètres thermiques \\ fixés ?};
 
     \node (Pth) [inputlong, below=of PSOyn, yshift=-2cm] {Vecteur Paramètres thermiques $\mathbf{P}_{\text{th}}$};
-    \node (REME) [process, below=of Pth] {Résolution de l'équation \ref{diffTST} \\ par la méthode d'Euler};
+    \node (REME) [process, below=of Pth] {Résolution de l'équation \ref{eq:diffTST} \\ par la méthode d'Euler};
     \node (PSO) [process, right=of Pth, xshift=-0.5cm] {PSO \\ pour déterminer \\ les paramètres thermiques};
     \node (secante) [process, below=of REME] {Détermination du besoin de chauffage \\ par la méthode de la sécante};
 

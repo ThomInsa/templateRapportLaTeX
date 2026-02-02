@@ -1,46 +1,96 @@
+\def\datasets{d1,d2,d3,d4,dN}
+\def\methods{m1,m2,m3,m4,m5,mM}
+\def\models{model1,model2,model3,model4,model5,model6,model7,model8,model9, model10, modelX}
+
 \begin{tikzpicture}[
     node distance=1.2cm and 2.5cm,
     every node/.style={draw, rectangle, rounded corners, align=center, minimum width=2.8cm, minimum height=0.9cm},
-    arrow/.style={->, thick}
+    arrow/.style={->, thick},
+    dataset/.style={
+        rectangle, rounded corners,
+        draw, fill=blue!20,
+        minimum width=3cm, minimum height=1cm,
+        text width=3cm, align=center
+    },
+    method/.style={
+        rectangle, rounded corners,
+        draw, fill=orange!20,
+        minimum width=3cm, minimum height=1cm,
+        text width=3cm, align=center
+    },
+    model/.style={
+        rectangle, rounded corners,
+        draw, fill=green!20,
+        minimum width=1cm, minimum height=1cm
+    },
 ]
 
 % --- Colonne 1 : Datasets ---
-    \node (d1) {Dataset 1};
-    \node (d2) [below=of d1] {Dataset 2};
-    \node (d3) [below=of d2] {Dataset 3};
-    \node (dN) [below=of d3] {$\vdots$ \\ Dataset N};
+    \node (d1) [dataset] {Projet \\ DISTRISIM};
+    \node (d2) [dataset, below=of d1] {Données de \\ \cite{subhourlysixdatasets}};
+    \node (d3) [dataset, below=of d2] {ASHRAE};
+    \node (d4) [dataset, below=of d3] {BDG2};
+    \node (dN) [dataset, below=of d4, yshift=-6cm] {$\vdots$ \\ Dataset N};
 
     \node[above=0.6cm of d1, draw=none] {\textbf{Datasets}};
 
 % --- Colonne 2 : Méthodes ---
-    \node (m1) [right=of d1] {Contrôle prédictif \\ (MPC)};
-    \node (m2) [below=of m1] {Machine learning};
-    \node (m3) [below=of m2] {Méthodes physiques \\ / hybrides};
-    \node (mM) [below=of m3] {$\vdots$ \\ Méthode M};
+    \node (m1) [method, right=of d1] {Contrôle prédictif \\ par modèle $RC$};
+    \node (m2) [method, below=of m1] {Contrôle prédictif \\ par d'autres modèles};
+    \node (m3) [method, below=of m2] {Machine learning};
+    \node (m4) [method, below=of m3] {Deep learning};
+    \node (m5) [method, below=of m4] {Méthodes physiques / hybrides};
+    \node (mM) [method, right=of dN] {$\vdots$ \\ Méthode M};
 
     \node[above=0.6cm of m1, draw=none] {\textbf{Méthodes}};
 
 % --- Colonne 3 : Modèles ---
-    \node (model1) [right=of m1] {Modèle A \\ Performance};
-    \node (model2) [below=of model1] {Modèle B \\ Performance};
-    \node (model3) [below=of model2] {Modèle C \\ Performance};
-    \node (modelX) [below=of model3] {$\vdots$ \\ Modèle X};
+    \node (model1) [model, right=of m1] {Modèle A \\ Performance $p_A$};
+    \node (model2) [model, below=of model1, yshift=0.75cm] {Modèle B \\ Performance $p_B$};
+    \node (model3) [model, below=of model2, yshift=0.75cm] {Modèle C \\ Performance $p_C$};
+    \node (model4) [model, below=of model3, yshift=0.75cm] {Modèle D \\ Performance $p_D$};
+    \node (model5) [model, below=of model4, yshift=0.75cm] {Modèle E \\ Performance $p_E$};
+    \node (model6) [model, below=of model5, yshift=0.75cm] {Modèle F \\ Performance $p_F$};
+    \node (model7) [model, below=of model6, yshift=0.75cm] {Modèle G \\ Performance $p_G$};
+    \node (model8) [model, below=of model7, yshift=0.75cm] {Modèle H \\ Performance $p_H$};
+    \node (model9) [model, below=of model8, yshift=0.75cm] {Modèle I \\ Performance $p_I$};
+    \node (model10) [model, below=of model9, yshift=0.75cm] {Modèle J \\ Performance $p_J$};
+    \node (modelX) [model, right=of mM] {$\vdots$ \\ Modèle X \\ Performance $p_X$};
 
     \node[above=0.6cm of model1, draw=none] {\textbf{Modèles}};
-
+    
+    \node[
+        draw,
+        dotted,
+        rounded corners,
+        fit=(d1) (m1) (model1),
+        inner sep=6pt,
+        label={[anchor=north west, yshift=0.63cm, font=\sffamily, text=black!70]north
+    west:Résultats après la première période d'alternance}
+    ] {};
+    
+    \foreach \d in \datasets {
+        \foreach \m in \methods {
+            \draw[-] (\d.east) -- (\m.west);
+        }
+    }
+    
+    \draw[-] (m1.east) -- (model1.west);
+    \draw[-] (m1.east) -- (model2.west);
+    \draw[-] (m2.east) -- (model3.west);
+    \draw[-] (m2.east) -- (model4.west);
+    \draw[-] (m3.east) -- (model5.west);
+    \draw[-] (m3.east) -- (model6.west);
+    \draw[-] (m4.east) -- (model7.west);
+    \draw[-] (m4.east) -- (model8.west);
+    \draw[-] (m5.east) -- (model9.west);
+    \draw[-] (m5.east) -- (model10.west);
+    \draw[-] (mM.east) -- (modelX.west);
+    
 % --- Connexions Datasets -> Méthodes ---
-    \draw[arrow] (d1.east) -- (m1.west);
-    \draw[arrow] (d1.east) -- (m2.west);
-    \draw[arrow] (d2.east) -- (m1.west);
-    \draw[arrow] (d2.east) -- (m3.west);
-    \draw[arrow] (d3.east) -- (m2.west);
-    \draw[arrow] (dN.east) -- (mM.west);
+%    \draw[arrow] (dN.east) -- (mM.west);
 
 % --- Connexions Méthodes -> Modèles ---
-    \draw[arrow] (m1.east) -- (model1.west);
-    \draw[arrow] (m1.east) -- (model2.west);
-    \draw[arrow] (m2.east) -- (model2.west);
-    \draw[arrow] (m2.east) -- (model3.west);
-    \draw[arrow] (mM.east) -- (modelX.west);
+%    \draw[arrow] (mM.east) -- (modelX.west);
 
 \end{tikzpicture}

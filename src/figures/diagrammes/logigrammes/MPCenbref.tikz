@@ -1,0 +1,64 @@
+
+
+\begin{tikzpicture}[
+    node distance=2cm,
+    every node/.style={font=\small},
+    inputshort/.style={
+        rectangle, rounded corners,
+        draw, fill=orange!20,
+        minimum width=1.2cm, minimum height=1cm,
+        text width=1.2cm, align=center
+    },
+    inputlong/.style={
+        rectangle, rounded corners,
+        draw, fill=orange!20,
+        minimum width=3cm, minimum height=1cm,
+        text width=3cm, align=center
+    },
+    outputshort/.style={
+        rectangle, rounded corners,
+        draw, fill=blue!20,
+        minimum width=1cm, minimum height=1cm
+    },
+    process/.style={
+        rectangle,
+        draw, fill=gray!15,
+        minimum width=3cm, minimum height=1cm,
+        align=center
+    },
+    decision/.style={
+        diamond,
+        draw, fill=green!15,
+        aspect=2,
+        inner sep=1pt,
+        text width=3cm,
+        align=center
+    },
+    arrow/.style={
+        thick, ->, >=Stealth
+    }
+]
+
+% Nodes
+    \node (start) [inputshort] {À l'instant $t_k$};
+    \node (PSOyn) [process, below=of start, yshift = 1cm] {Mesure de l'état du système};
+
+    \node (Pth) [process, below=of PSOyn, yshift = 1cm] {Redéfinition du modèle \\ selon l'état actuel};
+    \node (OC) [inputlong, right=of Pth] {Objectifs \\ Contraintes};
+
+    \node (SO) [process, below=of Pth, yshift = 1cm] {Résolution du \\ problème d'optimisation};
+    \node (BC) [process, below=of SO, yshift = 1cm] {Détermination de \\ la meilleure action \\ de contrôle};
+
+    \node (tk) [outputshort, below=of BC, yshift = 1cm] {Passage à l'état $t_{k+1}$};
+    
+    \draw [arrow] (tk.west) -| ++(-1,0) |- (start.west);
+    \draw [arrow] (start.south) -- (PSOyn.north);
+    \draw [arrow] (PSOyn.south) -- (Pth.north);
+    \draw [arrow] (Pth.south) -- (SO.north);
+    \draw [arrow] (SO.south) -- (BC.north);
+    \draw [arrow] (BC.south) -- (tk.north);
+    
+    \draw [arrow] (OC.west) -- (Pth.east);
+    
+\end{tikzpicture}
+

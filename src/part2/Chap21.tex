@@ -1,6 +1,5 @@
-
+%! suppress = MissingImport
 \chapter{État de l'art en modélisation de bâtiments : courte étude bibliographique}\label{ch:etat-de-l'art-en-modelisation-de-batiments-:-courte-etude-bibliographique}
-
 
 \section{Introduction à l'énergétique du bâtiment}\label{sec:introduction-a-l'energetique-du-batiment}
 
@@ -9,46 +8,349 @@
     En effet, les bâtiments ont pour la majorité d'entre eux des caractéristiques individuelles et dépendent de facteurs très nombreux.
 
     L'énergétique du bâtiment n'en reste pas moins une science riche et active, en particulier depuis ces vingt dernières années.
+    Du point de vue strict de la modélisation, les problèmes regroupés par ce domaine se
+    rapportent souvent à une prédiction ou une régression sur des séries temporelles\cite{LU2022111718}.
+    
     Les méthodes pour évaluer la consommation d'énergie d'un bâtiment sont nombreuses, et un audit détaillé d'un bâtiment comprend souvent de nombreux aspects, parmi lesquels~\cite{audit_energy_engineering}:
     \begin{enumerate}
         \item L'instrumentation sur site pour un bâtiment entier ou des composants de celui-ci \textit{(lumières, climatisation…)}
-        \item Une ou plusieurs simulations pour cartographier la consommation d'énergie \textit{(mêmes exemples)}, à l'aide des outils de calcul scientifique classique \textit{(Python, SciPy)} ou de logiciels spécialisés \it{(EnergyPlus)}
+        \item Une ou plusieurs simulations pour cartographier la consommation d'énergie
+        \textit{(mêmes exemples)}, à l'aide des outils de calcul scientifique classique
+        \textit{(Python, SciPy)} ou de logiciels spécialisés \it{(EnergyPlus)}
         \item La compréhension du fonctionnement du bâtiment par l'introduction d'un modèle plus ou moins abstrait \textit{(modélisation 3D, négligence ou non de certains paramètres…)}
     \end{enumerate}
+    
 
-    Notons que certains bâtiments très sensibles comme les centrales nucléaires sont parfois modélisés par des jumeaux numériques, une méthode très technique, reposant sur une science encore jeune et concernant souvent des installations dont les études ne se limitent pas à la consommation énergétique.
-    Elles dépassent de fait le cadre de ce rapport.
+    Notons que certains bâtiments très sensibles comme les centrales nucléaires sont parfois
+    modélisés par des jumeaux numériques, une méthode très technique, reposant sur une science
+    encore jeune et concernant souvent des installations dont les études ne se limitent pas à la
+    consommation énergétique\cite{DT}.
+    Elles dépassent de fait le cadre de ce rapport, tout comme les approches utilisant
+    spécifiquement l'IoT.
 
-    En pratique, les modélisations détaillées de type CFD sont généralement très complexes dans le cas des bâtiments et généralement évitées, car trop coûteuses en ressources de calcul.
+    En pratique, les modélisations détaillées de type CFD sont généralement très complexes dans
+        le cas des bâtiments et de fait évitées, car trop coûteuses en ressources de calcul.
     Elles sont alors remplacées par des approches plus pragmatiques et minimalistes, comme celle présentée dans la section suivante : le contrôle prédictif.
 
-    \section{Modèle de Contrôle Prédictif pour l'énergétique du bâtiment}\label{sec:modele-de-controle-predictif-pour-l'energetique-du-batiment}
+\section{Modèle de Contrôle Prédictif pour l'énergétique du bâtiment}\label{sec:modele-de-controle-predictif-pour-l'energetique-du-batiment}
 
         \subsection{Principes fondamentaux du MPC}\label{subsec:principes-fondamentaux-du-mpc}
 
-            Comme c'est le cas pour d'autres domaines d'ingénierie, le problème posé par les temps de calcul de la modélisation 3D peut être contournée en considérant les bâtiments comme des systèmes dynamiques dont le comportement peut être formalisé par les concepts fondamentaux de la théorie du contrôle et de l'optimisation sous contraintes.
-            En particulier, 
-            Le principal avantage du MPC est d'optimiser l'état présent tout en tenant compte des états futurs\cite{wiki_MPC}.
-
-                    ~\cite[chap.~I--IV]{MPC_needs}~\cite{allyouneedtoknowaboutMPCforbuildings}
-        \subsection{Analogie avec les circuits électriques}
-
-            ~\cite[chap.~VI]{manuel_energie_batiment}
-
-            \begin{figure}[htp]
+            Comme c'est le cas pour d'autres domaines d'ingénierie, le problème posé par les
+            temps de calcul de la modélisation 3D peut être contourné en considérant les
+            bâtiments comme des systèmes dynamiques dont on peut formaliser le comportement
+            par les concepts fondamentaux de la théorie du contrôle et de l'optimisation sous contraintes.
+            En particulier, on peut définir un paradigme dans lequel on génère des solutions à
+            un problème d'optimisation à l'instant $t$ que l'on utilise comme données d'entrée à
+            l'instant $t+1$ : c'est la base commune à toute approche par Modèle de Contrôle
+            Prédictif~\cite[chap.~I]{MPC_needs}. Ainsi, le principal avantage du MPC est
+            d'optimiser l'état présent tout en tenant
+            compte des états futurs\cite{wiki_MPC}.
+        
+            \begin{figure}[H]
                 \centering
-                {\fbox{\includegraphics[width = 0.5\textwidth]{figures/diagrammes/schémas/AEsimple}}}~\caption{Modèle $RC$ simple régi par l'équation $C_z\frac{\mathrm dT_z}{\mathrm dt} = \frac{T_a-T_z}{R_w}+\dot Q_h +gA\dot Q_{sun}$ \textit{(\cite{allyouneedtoknowaboutMPCforbuildings})}}\label{fig:rcsimple}
+                \fbox{\input{figures/diagrammes/logigrammes/MPCenbref.tikz}}
+                \caption{Logigramme commun résumant le principe du MPC \it{(\cite{MPC_needs})}}
+                \label{fig:MPC}
             \end{figure}
-
+    
+            Les applications du MPC à la modélisation énergétique sont nombreuses
+            et peuvent être classés de façon incomplète selon les catégories suivantes
+            \cite{allyouneedtoknowaboutMPCforbuildings}\cite{KATHIRGAMANATHAN2021110120}.
+            \begin{enumerate}
+                \item Type du modèle : \begin{itemize}
+                   \item Les modèles
+                \end{itemize}
+                \item Paradigme de modèle : \begin{itemize}
+                    \item Les modèles White-Box sont basés sur la connaissance physique du
+                    modèle et utilisent des simulations de logiciel comme EnergyPlus ou la suite
+                    Ansys. Ils requièrent généralement une connaissance avancée des paramètres 
+                    du bâtiment \textit{(géométrie, matériaux, construction \ldots)}.
+                    \item Les modèles Black-Box ignorent la physique en reposent sur un
+                    empirisme strict. Ils requièrent à ce titre un très grand volume de donneés
+                    de haute qualité et couvrant la totalité des situtations
+                    \textit{(saisons, types d'enveloppe \ldots)} pour être performants.
+                    \item Les modèles Grey-Box combinent les deux approches. Un exemple éloquent
+                    est celui des modèles RC\it{(voir \ref{AE} et \ref{chap:distrisim})}, où l'on identifie des
+                    paramètres physiques à partir de données expérimentales.
+                \end{itemize}
+                \item Algorithme de MPC utilisé :
+            \end{enumerate}
+            D'autres paramètres existent \textit{(classes, types de solution…)}
+        \subsection{Un modèle physique simple et interprétable : analogie avec les circuits électriques}\label{AE}
+            
+            Il a été montré\cite{elec_analog, fraisse_elec_analog} qu'il est possible
+            d'assimiler le comportement de la chaleur dans un bâtiment à
+            celle du flux d'électrons dans un circuit électrique sous certaines hypothèses
+            fortes
+            \textit{(en particulier, en simplifiant l'évolution de la température à travers les murs)}.
+            Dès lors, on peut associer à un mur une résistance thermique $R$ pour caractériser
+            les pertes de chaleur au sein de celui-ci. L'analogie se
+            poursuit avec l'équivalent de la loi d'Ohm :
+            \begin{equation}
+                U_1-U_2=RI\Longleftrightarrow \theta_1 - \theta_2 = \frac e{\lambda S}\phi_L
+            \end{equation}\myequations{Loi d'Ohm pour le transfert de chaleur dans une paroi}
+            Ainsi :
+            \begin{itemize}
+                \item La température $\theta$ est équivalente à la tension $U$
+                \item Le flux de chaleur $\phi_L$ est équivalent à l'intensité $I$
+                \item La résistance thermique par conduction est égale à $\frac e{\lambda S}$ avec
+                $\lambda$ la
+                conductivité thermique en $\bf W.m^{-1}.K^{-1}$, $e$
+                l'épaisseur du mur et $S$ sa surfaceé
+            \end{itemize}
+            Par ailleurs, la plupart des matériaux ont une intertie thermique non négligeable\footnote{On peut citer le verre comme exception notable puisqu'il constitue un élément essentiel de la modélisation de bâtiment.}, c'est-à-dire une propriété d'absorption et de relâchement de la chaleur au cours du temps.
+            C'est en ce sens que l'on définit une capacité thermique $C$ :
+            \begin{equation}
+                C=\rho e c_p
+            \end{equation}\myequations{Définition de la capacité thermique $C$}
+            Avec :\begin{itemize}
+                      \item $\rho$ la masse volumique du matériau
+                      \item $e$ l'épaisseur du mur
+                      \item $c_p$ la capacité thermique massique en $\bf J.kg^{-1}.K^{-1}$
+            \end{itemize}
+            
+            Pour caractériser complètement un bâtiment, il peut suffire d'associer ces deux
+            paramètres à plusieurs noeuds de température $T_{\text{milieu}}(t)$ caractérisant la
+            température à chaque instant dans un espace considéré homogène d'un
+            point de vue thermique. Au sein du circuit thermique, les milieux sont généralement
+            l'intérieur d'une pièce, l'extérieur et l'intérieur d'un mur.
+            
+            \begin{figure}[H]
+                \centering
+                {\fbox{
+                    \includegraphics[width = 0.5\textwidth]{figures/diagrammes/schémas/AEsimple}}}~\caption{Modèle $RC$ simple régi par l'équation $ C_z\frac{\displaystyle\mathrm dT_z}{\displaystyle\mathrm dt} = \displaystyle{\frac{ T_a-T_z}{R_w}+\dot Q_h +gA\dot Q_{sun}}$ \textit{(\cite{allyouneedtoknowaboutMPCforbuildings})}}\label{fig:rcsimple}
+            \end{figure}
+            
+            \begin{bluebox}
+            
+                L'analogie électrique est désormais au coeur d'une littérature scientifique
+                importante et constitue une base de réflexion solide pour l'enseignement, la
+                recherche et l'ingénierie~\cite[chap.~VI]{manuel_energie_batiment}.
+        
+                Ainsi, les modèles $RC$ de bâtiment sont appréciés pour leur simplicité et
+                l'interprétabilité physique de leurs paramètres : en effet, il est immédiat de
+                comprendre qualitativement l'effet d'une résistance ou d'une capacité plus ou moins
+                élevée, ou plus ou moins faible\footnote{Cette réflexion n'est effectivement plus possible lorsque l'on adopte une approche plus statistique, par exemple avec des modèles de Machine Learning comme nous allons le voir dans la prochaine section (\ref{sec:machine-learning-pour-le-batiment})}.
+        
+                Les modèles $RC$ standards sont nombreux \textit{($2R1C$, $3R2C$, $3R4C$\ldots)} et
+                peuvent être beaucoup plus complexes, mais ce qui est décrit ici suffit à comprendre
+                le reste du présent rapport.
+                En particulier, un exemple concret de modèle de bâtiment
+                $RC$ est décrit et résolu dans le chapitre \ref{chap:distrisim}.
+                
+            \end{bluebox}
 \section{Machine Learning pour le bâtiment}\label{sec:machine-learning-pour-le-batiment}
+    
+    Contrairement aux modèles précédemment exposés, il n'existe pas de standard ou de ligne de
+    conduite à proprement parler lorsque l'on envisage d'utiliser des algorithmes de Machine
+    Learning pour modéliser un bâtiment\footnote{(23/01) Du moins aucune n'a émergé lors des recherches bibliographiques synthétisées ici. Notons tout de même que la partie Machine Learning a été beaucoup moins approfondie que la partie MPC car cette dernière était requise pour reprendre les travaux du chapitre \ref{chap:distrisim}.}\cite{ZHANG2021116452}.
+        
+    En dépit de ce constat, l'utilisation croissante de l'instrumentation des bâtiments,
+    l'apparition de l'IoT et le développement du Big Data ont favorisé les approches dites "data-driven", et on peut citer de façon non exaustive les algorithmes relevés dans la
+        littérature\cite{ZHANG2021116452} :
+        \begin{itemize}
+           \item Régression linéaire
+           \item Machines à Support de Vecteurs (SVM)
+           \item Réseaux de Neurones
+           \item Algorithmes à base d'arbres
+           \item Méthodes hybdrides
+           \item Méthodes autorégressives
+        \end{itemize}
+    
+    Comme c'est souvent le cas en Machine Learning, les prochains éléments seront structurés en
+    une partie pour quelques considérations générales, et une autre portant une attention
+    particulière aux modèles plus récents reposant sur les réseaux de neurones, avec un retour
+    qualitatif sur quelques modèles proposés par la communauté internationale.
+    
+    \subsection{Approches traditionnelles}\label{subsec:approches-traditionnelles}
+            
+            Comme vu précédemment, l'énergétique du bâtiment est une discipline ayant connu une
+            évolution importante au cours des cinq dernières décennies, et ce constat est
+            également vrai pour le Machine Learning\cite{WML}.
+            On peut donc s'interroger sur l'impact d'un domaine sur l'autre et évaluer les
+            performances des modèles d'apprentissage sur des situations où on cherche à
+            modéliser un bâtiment. Une synthèse des différents retours en la matière peut être\cite{BPD_AI_DT_review} la suivante :
+            
+            \begin{itemize}
+                \item La littérature scientifique est globalement très enthousiaste sur
+                l'utilisation du Machine Learning pour les modèles de bâtiment
+                \item Un des avantages principaux des algorithmes de ML est leur temps de calcul
+                généralement très inférieur à celui d'une simulation de performances classique,
+                mais cet argument est à tempérer en considérant le temps de réflexion
+                nécessaire à l'élaboration d'un modèle
+                \item Les meilleurs résultats sont obtenus avec des solutions hybrides mêlant
+                ML et méthodes traditionnelles.
+            \end{itemize}
+            
+            Concernant les types de modélisation et leur efficacité, une revue de 2021 relève
+            les performances d'un certain nombre d'études dans le tableau suivant :
+            
+            \begin{table}[H]
+                \centering
+                \begin{adjustbox}{width=\textwidth}
+                    \begin{tabular}{l c l l l l l l}
+                        \toprule
+                        \textbf{Auteurs} & \textbf{Année} & \textbf{Type de Modèle} &
+                        \textbf{Type de Contrôle} & \textbf{Données d'entraînement} &
+                        \textbf{Performances du contrôleur} &
+                         \\
+                        \midrule
+                        Afram, A            & 2017 & Black-box -- NN               & MPC             & Simulées          & 6--73\% (baisse des dépenses)                    \\
+                        Bunning, F          & 2019 & Black Box -- Tree Based        & MPC             & Réelles                & 25\% (récupération d'énergie de refroidissement)            \\
+                        Costanzo, G         & 2016 & Black-box -- NN               & RL              & Réelles + Simulées   & 90\% (approche de l'optimum mathématique théorique)       \\
+                        De Coninck, R       & 2016 & Reduced Order -- SS (RC)       & MPC             & Réelles                & 30\% (baisse des dépenses)                      \\
+                        Gwerder, M          & 2013 & Model-free                    & RBC (Prédictif) & Réelles + Simulées   & 15\% (baisse des dépenses)                       \\
+                        Hilliard, T         & 2017 & Black Box -- Tree Based        & Approx MPC      & Réelles                & 29\% (économies d'énergie)                    \\
+                        Huang, H            & 2015 & Reduced Order -- SS (RC)       & Hybrid MPC      & Réelles + Simulées   & 13\% (baisse des dépenses)                      \\
+                        Marvuglia, A        & 2014 & Black-box -- NN               & Fuzzy Logic     & Réelles                & Non donnée                              \\
+                        Robillart, M        & 2019 & Reduced Order -- SS            & MPC             & Simulées          & 6--13\% (baisse des dépenses)                   \\
+                        Tabares-Velasco, P & 2019 & Regression Based -- ARX        & MPC             & Simulées          & 30\% (baisse des dépenses)                       \\
+                        \bottomrule
+                    \end{tabular}
+                    \end{adjustbox}
+                    \caption{Comparaison de performances quantitatives d'un échantillon d'études
+                implémentant un contrôle prédictif de type "data-driven" \cite{KATHIRGAMANATHAN2021110120}}
+                \label{tab:control_literature_summary}
+            \end{table}
 
-    \subsection{Approches traditionnelles}\label{subsec:approches-traditionnelles}~\cite{WML}
-        \subsection{Réseaux de neurones}\label{subsec:reseaux-de-neurones}~\cite{LeCun_DL,UDL}
+    \subsection{Réseaux de neurones}\label{subsec:reseaux-de-neurones}
+        La dernière décennie a connu une explosion du nombre de cas d'applications de réseaux de
+            neurones à des problèmes scientifiques, historiquement délaissés en raison de leur coût en ressources de calcul\cite{LeCun_DL,UDL}.
+        Ceux-ci mobilisent donc une partie importante de la communauté scientifique, qui
+            travaille depuis plusieurs années à trouver de nouvelles architectures en réseau de
+            neurones pouvant modéliser de nouvelles situations, notamment en énergétique du
+            bâtiment.
+            
+        Trois d'entre elles sont brièvement présentées dans les paragraphes suivants pour donner
+        un aperçu qualitatif d'une méthode de Deep Learning efficace pour la modélisation de bâtiment.
+        
+        \paragraph{(2018) ANN, algorithmes génétiques et contrôle Prédictif}
+            ~\cite{OC_NN}
+                Un réseau de neurones artificiels est développé sur un bâtiment avec comme
+                paramètres d'entrée les données météorologiques, la température intérieure et le
+                taux d'occupation du bâtiment et comme sorties la température intérieure prédite
+                et la consommation d'énergie associée. Un algorithme génétique est ensuite
+                appliqué pour minimiser cette consommation.
+                Faute de méthodologie standardisée, les hyperparamètres du réseau de neurones
+                sont fixées empiriquement par essais-erreurs.
+                \begin{itemize}
+                    \item Nombre et profondeur des couches : 5-20-20-2 ou 6-20-20-2 selon les
+                        zones du bâtiment
+                    \item Algorithme d'entraînement : rétropropagation par l'algorithme de
+                        Levenberg-Marquardt
+                        \textit{(algorithme permettant d'approximer le hessien par une
+                    multiplication du Jacobien par sa transposée $\uuline H= \uuline J^{\text T}\uuline J$)}
+                    \item Fonction d'activation : Tangente hyperbolique
+                \end{itemize}
+        \paragraph{(2019) Contrôle optimal et réseaux convexes}\cite{REYNOLDS2018729}\\
+            Le principal objectif des auteurs est de proposer un réseau de neurones tractable,
+                c'est-à-dire relativement rapide et robuste à l'augmentation du volume de
+                données.
+                À cet égard, il est proposé de modéliser un réseau de neurones convexe
+                \textit{(dont tous les poids sont non négatifs et dont les fonctions d'activation sont convexes et non décroissantes)},
+                minimisant le temps de calcul pour l'optimisation
+                \textit{(en effet, tout minimum local d'une fonction convexe est un minimum
+    global, simplifiant grandement la complexité de cette phase du calcul
+        \cite{convex_optimization})}.
+            Exception faite de la convexité du modèle, les architectures développées sont
+            similaires à des modèles de référence, et présentent des performances légèrement
+                meilleures pour des temps de calcul trois à cinq fois inférieurs.
+        \paragraph{(2026) LSTM et GNN}\cite{refId0}\\
+            Un benchmark reproductible est proposé sur les datasets publics BDG2\cite{bdg2} et
+                ASHRAE\cite{ashrae-energy-prediction}.
+                Le modèle développé sépare l'étude des données en une partie temporelle traitée par
+                un réseau de neurones de type LSTM et une partie spatiale traitée par un réseau
+                de neurones en Graphe \textit{(GNN)}.
+                Un encodeur entraîné sur des données externes annotées apporte une information
+                sur l'occupation des bâtiments.
+                Les sorties des modèles sont ensuite agrégées et pondérées par un mécanisme
+                d'attention pour capturer les relations causales entre les différents paramètres.
+                Les performances sont supérieures à celles obtenues pour un LSTM simple ou un
+                GNN simple, bien qu'inégales selon les paramètres des graphes modélisés
+                \textit{(principalement du fait de la connaissance a priori de leur structure)}.
+        \subsubsection{Principaux défis et perspectives d'avenir}
+            En se basant sur de précédentes revues~\cite{LU2022111718}, on peut identifier plusieurs
+            retours d'expérience avec des réseaux de neurones donnant un contexte pour élaborer de
+            nouveaux modèles.
+            \paragraph{Principaux types de réseaux utilisés}
+            Notons que parmi les modèles présentés ici, la littérature est beaucoup plus
+            abondante au sujet des RNN\footnote{Notamment pour leur robustesse pour modéliser les dépendances temporelles.} et MLP
+                \footnote{On peut toutefois raisonnablement supposer que ces derniers sont présentés pour des raisons historiques et dépassés par les modèles récents.}
+                \begin{itemize}
+                    \item Multi-Layer Perceptron (MLP)
+                    \item Radial Basis Function (RBFN)
+                    \item Extreme Learning Machine (ELM)
+                    \item Recurrent Neural Network (RNN), notamment les RNN spéciaux
+                        suivants :
+                        \begin{itemize}
+                            \item Long Short-Term Memory (LSTM)
+                            \item Wavelet Neural Network (WNN)
+                            \item Nonlinear Auto-Regressive neural network with eXogenous inputs (NARX)
+                            \item Elman Neural Network (ENN)
+                            \item Restricted Boltzmann Machine (RBM)
+                        \end{itemize}
+                \end{itemize}
+                
+            Des précisions sur le fonctionnement de la plupart de ces architectures sont
+            données dans les ouvrages de référence~\cite{Goodfellow-et-al-2016, UDL}.
+            
+            Concernant la revue citée, il est mentionné que la surreprésentation des FFNN n'est
+            pas nécessairement due à une performance indépassable, mais plutôt à la facilité
+            d'implémentation de ceux-ci.
+            \paragraph{Problèmes inhérents à l'implémentation de réseaux de neurones en énergétique du bâtiment}
+                \begin{enumerate}
+                    \item Les NN sont initialisés aléatoirement et génèrent de fait des
+                        solutions localement instables, et présentent parfois une performance
+                        instable à l'entraînement.
+                    \item Il est conceptuellement délicat de déterminer les paramètres d'entrée
+                        d'un réseau de neurones.
+                    \item Le choix des hyperparamètres est également un angle mort de la
+                        littérature, extrêmement chronophage pour les développeurs des modèles.
+                \end{enumerate}
+                
+            \paragraph{Utilisation des méta-heuristiques}
+                Celle-ci est prépondérante dans la littérature et les algorithmes associés peuvent
+                être regroupées en quatre catégories :
+                \begin{enumerate}
+                    \item Algorithmes basés sur l'évolution
+                        \textit{(algorithmes évolutionnaires, algorithmes génétiques…)}
+                    \item Algorithmes basés sur les mathématiques ou la physique
+                    \item Algorithmes basés sur le comportement humain
+                    \item Algorithmes basés sur la conscience collective
+                        \textit{(Swarm Intelligence, Bat Algorithm, Colonies d'Abeilles…)}
+                \end{enumerate}
+                
+                L'étude compare les avantages, inconvénients et cas d'usage  de chacun de ces
+                algorithmes, mais ceci dépasse le cadre du rapport à ce stade de l'alternance.
+                
+            \paragraph{Manque de données d'entraînement}
+                C'est à ce jour le principal frein au développement et à la généralisation de
+                réseaux de neurones pour la modélisation énergétique de bâtiments.
+                Rappelons qu'une des principales contraintes de l'énergétique du bâtiment est la
+                singularité du comportement de chaque construction, rendant difficile
+                l'exploitation de données historiques sur d'autres situations que le bâtiment
+                dont elles sont issues.
+                Toutefois, des travaux sont en cours pour pallier ce problème, certains
+                utilisant le \textit{Transfer Learning} pour capitaliser sur les prédictions
+                obtenues d'un modèle à un autre, d'autres considérant la possibilité de générer
+                des données synthétiques en masse avec par exemple l'apprentissage antagoniste\cite{frwiki:gan}.
+\newpage\section{Vers une étude croisée des différentes méthodes et une généralisation sur un grand
+    volume de données hétérogènes}\label{sec:vers-une-etude-croisee-des-differentes-methodes-et-une-generalisation-sur-un-grand-volume-de-donnees-heterogenes}
 
-\section{Vers une étude croisée des différentes méthodes et une généralisation sur un grand volume de données}
+    Les précédentes sections ont donné un aperçu de l'étendue des possibilités en matière de
+    modélisation thermique des bâtiments, ainsi que les difficultés induites par chacune d'entre
+    elles.
+    
+    Forts de cette étude bibliographique, les prochains chapitres proposent des
+    pistes pour modéliser efficacement un bâtiment et en comparant les comportements des
+    différentes approches envisagées.
+    
+    En particulier, le chapitre suivant décrit un modèle simple, basé sur l'analogie
+    électrique, le MCP et des méthodes d'optimisation et d'analyse numérique classiques.
 
-\begin{figure}[htp]
-    \centering
-    \fbox{\input{figures/diagrammes/schémas/modelisationprincipe.tikz}}
-    \caption{Schéma de principe des attendus finaux de l'alternance}\label{fig:methode}
-\end{figure}
+    \begin{figure}[H]
+        \centering
+        \fbox{\input{figures/diagrammes/schémas/modelisationprincipe.tikz}}
+        \caption{Schéma de principe des attendus finaux de l'alternance}\label{fig:methode}
+    \end{figure}
