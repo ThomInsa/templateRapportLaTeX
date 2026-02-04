@@ -1,32 +1,12 @@
-\chapter{Conception logicielle, refactoring et bonnes pratiques de développement}
-    \section{Refactoring des précédents travaux}
-
-        \cite{clean_code}
-
-\begin{lstlisting}[caption={Exemple de fonction refactorisée}]
-def get_input_parameters(input_parameters_file, input_parameters_row_index=-1):
-    input_parameters_df = pd.read_csv(input_parameters_file)
-
-    studied_building_name = input_parameters_df["building_name"].iloc[input_parameters_row_index]
-    mode_pso = input_parameters_df["enable_parameters_optimization"].iloc[input_parameters_row_index]
-    identification_starting_date = input_parameters_df["identification_starting_date"].iloc[input_parameters_row_index]
-    identification_starting_hour = input_parameters_df["identification_starting_hour"].iloc[input_parameters_row_index]
-    identification_ending_date = input_parameters_df["identification_ending_date"].iloc[input_parameters_row_index]
-    identification_ending_hour = input_parameters_df["identification_ending_hour"].iloc[input_parameters_row_index]
-
-    return studied_building_name, mode_pso, identification_starting_date, identification_starting_hour, identification_ending_date, identification_ending_hour\end{lstlisting}
+\chapter{Conception logicielle, refactoring et bonnes pratiques de développement}\label{ch:conception-logicielle-refactoring-et-bonnes-pratiques-de-developpement}
 
 
-        \begin{figure}[H]
-            \centering
-            \subfloat[Projet de 2023]{\fbox{
-                \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST_air_predit_VS_energyplus}}}\qquad
-            \subfloat[Projet actuel]{\fbox{
-                \includegraphics[width = 0.4\textwidth]{figures/placeholder}}}\qquad
-            \caption{Comparaison entre les sorties des deux programmes}
-        \end{figure}
-        
-        \subsection{Vers un modèle de données uniformisé}
+\section{Refactoring des précédents travaux}\label{sec:refactoring-des-precedents-travaux}
+
+\cite{clean_code}
+
+\begin{lstlisting}[caption={Exemple de fonction refactorisée},label={lst:lstlisting}]
+\end{lstlisting}
 
         \begin{table}[h!]
             \centering
@@ -47,15 +27,25 @@ def get_input_parameters(input_parameters_file, input_parameters_row_index=-1):
                 Librairies utilisées &  &  \\
                 \bottomrule
             \end{tabular}
-            \caption{Comparaison qualitative et quantitative entre le projet de 2023 et le projet actuel}
+            \caption{Comparaison d'architecture qualitative et quantitative entre le projet de 2023 et le projet actuel}\label{tab:table}
         \end{table}
 
+        \subsection{Passage à l'orienté objet}\label{subsec:passage-a-l'oriente-objet}
 
-    \section{Évaluation qualitative des performances du projet}
-        \subsection{Complexité des algorithmes appelés}
-        \subsection{Outils retenus pour garantir la performance}
-            \subsection{\texttt{uv} plutôt que \texttt{conda} ou \texttt{pip}}
-            \subsection{Polars plutôt que Pandas}
+        \subsection{Standardisation des librairies importées}\label{subsec:standardisation-des-librairies-importees}
+
+        \subsection{Vers un modèle de données relationnel uniformisé}\label{subsec:vers-un-modele-de-donnees-relationnel-uniformise}
+
+
+\section{Évaluation qualitative des performances du projet}\label{sec:evaluation-qualitative-des-performances-du-projet}
+
+\subsection{Complexité des algorithmes appelés}\label{subsec:complexite-des-algorithmes-appeles}
+
+\subsection{Outils retenus pour garantir la performance}\label{subsec:outils-retenus-pour-garantir-la-performance}
+
+\subsection{\texttt{uv} plutôt que \texttt{conda} ou \texttt{pip}}\label{subsec:texttt{uv}-plutot-que-texttt{conda}-ou-texttt{pip}}
+
+\subsection{Polars plutôt que Pan²das}\label{subsec:polars-plutot-que-pan2das}
 
                 \begin{table}[h!]
                     \centering
@@ -67,5 +57,5 @@ def get_input_parameters(input_parameters_file, input_parameters_row_index=-1):
                         Couple Dataset-Modèle 2 &  &  \\
                         \bottomrule
                     \end{tabular}
-                    \caption{Benchmark de performance entre \texttt{Pandas} et \texttt{Polars}}
+                    \caption{Benchmark de performance entre \texttt{Pandas} et \texttt{Polars}}\label{tab:table2}
                 \end{table}

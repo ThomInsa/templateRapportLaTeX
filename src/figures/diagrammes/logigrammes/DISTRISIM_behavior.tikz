@@ -42,13 +42,13 @@
 % Nodes
     \node (start) [process] {Récupération des \\ profils temporels du bâtiment};
 
-    \node (Text) [inputshort, below right=of start] {$\overrightarrow{\mathbf{T_{air}}}(t)$};
-    \node (Tint) [inputshort, below right=of start, xshift = 2cm] {$\overrightarrow{\mathbf{T_{env}}}(t)$};
-    \node (phiheat) [inputshort, below right=of start, xshift = 4cm] {$\overrightarrow{\mathbf{\phi}}_{\text{heat}}(t)$};
-    \node (phisol) [inputshort, below right=of start, xshift = 6cm] {$\overrightarrow{\mathbf{\phi}_{\text{sol}}}(t)$};
+    \node (Text) [inputshort, below right=of start] {$\TAir{t}$};
+    \node (Tint) [inputshort, below right=of start, xshift = 2cm] {$\TEnv{t}$};
+    \node (phiheat) [inputshort, below right=of start, xshift = 4cm] {$\PhiHeat{t}$};
+    \node (phisol) [inputshort, below right=of start, xshift = 6cm] {$\PhiSol{t}$};
 
     \node (fext) [inputshort, below=of Tint, xshift=1cm] {
-        $\overrightarrow{\mathbf{F}_{\text{ext}}}(t)$};
+        $\FExt$};
     \node (PSOparam) [inputlong, below=of fext, yshift=1.5cm] {Fonction objectif \\ Bornes de recherche \\ Taille de l'essaim \\ Nb max d'itérations};
 
     \node (PSOyn) [decision, below=of start] {Paramètres thermiques \\ fixés ?};

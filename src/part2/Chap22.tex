@@ -1,20 +1,67 @@
 %! suppress = MissingImport
-\chapter{Modélisation des besoins énergétiques du quartier DISTRISIM}\label{chap:distrisim}
+\chapter{Modélisation des besoins énergétiques du quartier Cambridge dans le cadre du projet DISTRISIM}\label{chap:distrisim}
     \begin{bluebox}
-        Les travaux rapportés ici font suite à un stage de fin d'études d'ingénieurs en énergétique
-        réalisé en 2023.
-        De nombreuses explications et figures sont donc adaptés du rapport associé\cite{TST}.
+        Les travaux rapportés ici font suite à un stage de fin d'études de cycle ingénieur en énergétique
+        réalisé en 2023 et visent à le compléter.
+        De nombreuses explications et figures sont donc adaptées du rapport associé\cite{TST}.
         Les résultats de ce stage tiennent lieu de point de départ pour le projet IBIS.
         Aussi, les deux enjeux majeurs de ce chapitre sont la compréhension théorique des
         différents composants du modèle, et la reproductibilité des résultats obtenus pendant ce
         stage avec des données similaires et un code refactorisé permettant une extension du
         modèle dans le cadre du projet IBIS.
     \end{bluebox}
-    
-    \section{Position du problème}
 
-        \subsection{Bâtiments étudiés et datasets d'entraînement}
-            \subsubsection{Quelques commentaires sur les données d'entrée}
+
+    \section{Position du problème}\label{sec:position-du-probleme}
+
+
+        \subsection{Bâtiments étudiés et datasets d'entraînement}\label{subsec:batiments-etudies-et-datasets-d'entrainement}
+
+            Le projet DISTRISIM est mené par le CEA et vise à évaluer la consommation énergétique des bâtiments du quartier Cambridge, à Grenoble.
+            L'étude de ces bâtiments est facilitée par le caractère récent \it{(moins de douze ans)} de leur construction, garantissant la conformité aux réglementations thermiques de la RT2012\cite{RT2012, TST}.
+            En outre ces bâtiments sont pour la plupart connectés à un réseau énergétique de quartier avec par exemple des panneaux solaires installés sur les toitures\cite{TST}.
+
+            Les propriétés géométriques des bâtiments n'ayant pas été utilisées dans le cadre de ce rapport, elles ne sont pas rappelées formellement ici.
+            On peut toutefois mentionner que ces derniers diffèrent notamment par leur nombre d'étages, leur surface vitrée et leur surface habitable.
+            L'étude se limite aux onze bâtiments suivants :
+
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{lcccccccccc}
+                    \toprule
+                    Alasia &
+                    CastelO &
+                    CastelR &
+                    Ceva &
+                    Novae &
+                    Panache &
+                    Python &
+                    Soleil &
+                    Thales &
+                    Up &
+                    Zenae \\
+                    \bottomrule
+                \end{tabular}
+                \caption{Bâtiments étudiés dans le cadre du stage \cite{TST} et du projet DISTRISIM}
+                \label{tab:building_list}
+            \end{table}
+
+            Pour chacun de ces bâtiments, des données de consommation énergétique synthétiques sont générées à l'aide d'EnergyPlus sous forme de séries temporelles sur une année entière.
+            Celles-ci comprennent la température intérieure du bâtiment \textit{(unique)}, la température dans l'enveloppe, le flux de chauffage dans le bâtiment \textit{(unique également)} et le flux solaire.
+            On peut ainsi regrouper ces séries dans un vecteur constituant le forçage externe du modèle :
+
+            \begin{equation}
+                \FExt = \begin{bmatrix}
+                    \TAir{t}\\
+                    \TEnv{t}\\
+                    \PhiHeat{t}\\
+                    \PhiSol{t}
+                \end{bmatrix}\label{eq:FExt}
+            \end{equation}\myequations{Vecteur forçage externe pour le projet DISTRISIM}
+
+            L'objectif est alors de développer un Modèle de Contrôle Prédictif, utilisant un segment de ces séries temporelles constituant une période de l'année, pour prédire le plus justement possible la fenêtre temporelle suivante.
+
+        \subsubsection{Quelques commentaires sur les données d'entrée}
             \label{subsec:quelques-commentaires-sur-les-donnees-d'entree}
                 \begin{bluebox}
                         (27/01) : La détermination rigoureuse d'un modèle d'entraînement statistique
@@ -23,25 +70,52 @@
                     Cette partie souffre pour l'instant d'un manque de profondeur, mais les
                     futurs travaux impliquant de gros volumes de données corrigeront cet écueuil.
                 \end{bluebox}
-        
-        \subsection{Modèle $RC$ sélectionné}
-            
+
+                \begin{figure}[H] \centering
+                    \subfloat[Température intérieure]{\fbox{
+                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_TAir}}}\\
+                    \subfloat[Besoin de chauffage]{\fbox{
+                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_PhiEm}}}
+                    \caption{Visualisation de la distribution des données d'entrée}\label{fig:DISTRISIMinputData}
+                \end{figure}
+
+\newpage\subsection{Modèle $RC$ sélectionné}\label{subsec:modele-$rc$-selectionne}
+
             On s'inspire de l'architecture proposée par~\cite{aoun} en 2019, celle-ci offrant un
             compromis intéressant entre complétude des paramètres et simplicité de résolution.
     
-            Le modèle d'origine introduit les paramètres suivants :
+            Le modèle d'origine introduit 16 paramètres à identifier :
             \begin{itemize}
-                \item 5 noeuds de température$\TAir{t}$, $\TEnv{t}$, $\TMass{t}$, $\TEm{t}$ et $\TCirc{t}$, représentant respectivement les températures du bâtiment, de l'enveloppe \textit{(intérieur du mur)}, de la masse thermique, de l'émissivité et de la circulation d'air ;
-                \item
+                \item 5 noeuds de température $\TAir{t}$, $\TEnv{t}$, $\TMass{t}$, $\TEm{t}$ et $\TCirc{t}$, représentant respectivement les températures intérieure, de l'enveloppe, de la masse thermique, de la source de chaleur et du circuit de chauffage ;
+                \item 5 capacités thermiques représentant l'inertie de ces mêmes zones $\CAir$, $\CEnv$, $\CMass$, $\CEm$ et $\CCirc$
+                \item 3 ouvertures surfaciques pour l'impact du flux solaire sur l'air intérieur, l'enveloppe et la masse $\kAir$, $\kEnv$, $\kMass$
             \end{itemize}
             
-            Cependant, en raison de datasets moins riches que ceux utilisés dans l'article, et à
-            des fins de simplicité, les paramètres \ldots sont négligés et on retient donc la
-            configuration suivante :
+            Cependant, en raison de l'utilisation de datasets moins riches que ceux utilisés dans l'article, et à
+            des fins de simplicité, on néglige la présence de la masse thermique et du circuit.
+            Par ailleurs, les gains solaires sont simplifiés en deux ouvertures dépendantes l'une de l'autre, l'une sur l'enveloppe et l'autre sur l'air intérieur.
+            On définit alors les paramètres thermiques suivants :
+
+            \begin{equation}
+                {\PTh}_{(\text{DISTRISIM})} = \begin{bmatrix}
+                \UAirExt \\
+                \UAirEnv\\
+                \UEnvExt \\
+                \CAir \\
+                \CEnv \\
+                k_1 \\
+                k_2
+            \end{bmatrix}
+                \label{eq:Pth}
+            \end{equation}\myequations{Vecteur des paramètres thermiques pour le projet DISTRISIM}
+
+            Enfin, et pour correspondre aux paramètres d'entrée définis en \ref{subsec:batiments-etudies-et-datasets-d'entrainement} on définit deux sources de chaleur $\PhiSol{t}$ et $\PhiHeat{t}$, dépendant évidemment du temps.
+
+            On peut donc visualiser le modèle comme suit :
         
             \begin{figure}[H]
                 \centering
-                {\fbox{\includegraphics[width = 0.8\textwidth]{figures/diagrammes/schémas/DISTRISIM AE.drawio}}}
+                {\fbox{\includegraphics[width = 0.75\textwidth]{figures/diagrammes/schémas/DISTRISIM AE.drawio}}}
                 \caption{Modèle RC utilisé pour modéliser un bâtiment DISTRISIM \textit(tiré de \cite{TST} et inspiré de \cite{aoun})}\label{fig:figure}
             \end{figure}
             
@@ -50,24 +124,38 @@
 
             \begin{equation}
                 \begin{split}
-                    C_{air}\frac{\mathrm d\TAir{t}}{\mathrm dt}&=U_{air-env}\left(\TAir{t}\right) + U_{air-ext}\left(\TEnv{t}-T_{ext}\right) + k_2\PhiSol{t}+\PhiHeat{t} \\
-                    C_{env}\frac{\mathrm d\TEnv{t}}{\mathrm dt}&=U_{env-ext}\left(\TEnv{t}\right) +
-                    U_{air-env}\left(\TAir{t}-\TEnv{t}\right) + \left( k_1-k_2 \right)\PhiSol{t} \\
+                    C_{air}\frac{\mathrm d\TAir{t}}{\mathrm dt}&=\UAirEnv\left(\TAir{t}\right) +\UAirExt\left(\TEnv{t}-T_{ext}\right) + k_2\PhiSol{t}+\PhiHeat{t} \\
+                    C_{env}\frac{\mathrm d\TEnv{t}}{\mathrm dt}&=\UEnvExt\left(\TEnv{t}\right) +
+                    \UAirEnv\left(\TAir{t}-\TEnv{t}\right) + \left( k_1-k_2 \right)\PhiSol{t} \\
                 \end{split}\label{eq:diffTST}
             \end{equation}\myequations{Équations différentielles régissant la température d'un modèle thermique à 7 paramètres}
 
-            
-            \begin{figure}[H]
-                \centering
-                \fbox{\input{figures/diagrammes/logigrammes/DISTRISIM_behavior.tikz}}
-                \caption{Logigramme des étapes de calcul pour le projet \texttt{DISTRISIM}}\label{fig:figure2}
-            \end{figure}
+            La résolution des équations suit les étapes du logigramme~\ref{fig:logigramme}, mais peut être synthétisée en deux parties : d'une part l'idéntification des paramètres de modèle de bâtiment et d'autre part la recherche numérique d'une solution approchée.
+            La première utilise un algorithme méta-heuristique détaillé en~\ref{subsec:optimisation-par-essaims-particulaires-(pso)} et la seconde un solveur numérique simple présenté en\ref{sec:resolution-des-equations-differentielles}.
+            Les résultats obtenus sont décrits en \ref{sec:promesses-et-limites-de-la-methode-actuellement-implementees}.
+
+            \newpage
+                \vspace*{\fill}
+                \begin{center}
+                    \begin{figure}[H]
+                        \centering
+                        \fbox{\input{figures/diagrammes/logigrammes/DISTRISIM_behavior.tikz}}
+                        \caption{Logigramme des étapes de calcul pour le projet \texttt{DISTRISIM}}\label{fig:logigramme}
+                    \end{figure}
+                \end{center}
+                \vspace*{\fill}
+            \newpage
 
 
     \section{Identification des paramètres}\label{sec:optimisation-des-parametres-du-modele}
-        
-        \subsection{Définition de la fonction objectif}
-        
+        La première étape de résolution du problème est la recherche de valeurs cohérente des paramètres $RC$.
+        Il est à cet égard possible de les fixer par différents critères, notamment la méthode 3CL utilisée dans les normes de calcul du DPE.
+
+        Il est également possible de les optimiser par rapport aux données d'entrée.
+        On choisit alors une fonction objectif d'une part et un algorithme de résolution d'autre part, lesquels sont présentés plus bas.
+
+        \subsection{Définition de la fonction objectif}\label{subsec:definition-de-la-fonction-objectif}
+
             \begin{bluebox}
                 (28/01) : Cette sous-section mérite d'être étoffée.
                 Par souci de simplicité on utilise la RMSE par défaut, mais il peut être
@@ -80,24 +168,44 @@
                     \displaystyle{
                     \frac{\left(\widehat {T_{\text{air}}}_{t_i} - {\Tconsint}_{t_i}\right)^2}{n}}}
                     \label{eq:RMSE}
-                \end{equation}\myequations{Racine de l'erreur quadratique moyenne entre la température prédite et la température consigne intérieure}
+            \end{equation}\myequations{Racine de l'erreur quadratique moyenne entre la température prédite et la température consigne intérieure}
 
-        \subsection{Optimisation par essaim particulaires (PSO)}\label{subsec:optimisation-par-essaims-particulaires-(pso)}~\cite{gad_particle_2022}
+        \subsection{Optimisation par essaim particulaires (PSO)}\label{subsec:optimisation-par-essaims-particulaires-(pso)}
+
+            La PSO est une des méta-heuristiques les plus populaires en raison de son faible coût computationnel et sa capacité à modéliser de nombreuses situations.
+
+            Sommairement, l'algorithme consiste en l'initialisation de $N$ particules placées aléatoirement dans l'espace de recherche borné, auxquelles à chaque instant $t$ on attribue une position et une vitesse, c'est-à-dire l'incrément de leur position à l'instant $t+1$, dépendant de la solution trouvée, mise à jour si la fonction objectif est réduite.
+            Ainsi, les particules sont chargées de rechercher un minimum local dans l'espace qu'elles explorent, puis de les comparer pour définir un minimum global.
+
+            Une représentation de l'algorithme en deux dimensions est donnée plus bas :
+            \begin{figure}[H] \centering
+                    \subfloat[À un état quelconque]{\fbox{
+                        \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/PSO/PSOi}}}\qquad
+                    \subfloat[À l'état final]{\fbox{
+                        \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/PSO/PSOf}}}\qquad
+                \caption{Représentation visuelle d'une optimisation de fonction à deux
+                paramètres par PSO \it{(\cite{yt_pso})}}\label{fig:figure4}
+            \end{figure}
+
+\newpage\paragraph{Précisions sur les intervalles de recherche} Ceux-ci dépendent du bâtiment considéré car ils sont obtenus à partir de caractéristiques intrinsèques à ceux-ci \textit{(conductivité thermique, épaisseur des parois, ratio des surfaces vitrées par rapport aux parois etc)}.
+            Pour la majorité des bâtiments, les bornes sont similaires à :
+            \begin{equation}
+                \left\{\mathbf{p}_{\min} ;  \mathbf{p}_{\max} \right\} = \left\{
+                    \begin{bmatrix}
+                        10^3 \\ 10^3 \\ 10^3 \\ 10^6 \\ 10^9 \\ 0 \\ 0 \end{bmatrix}\;;\;
+                    \begin{bmatrix}
+                        10^5 \\ 10^5 \\ 10^5 \\ 10^{10} \\ 10^{12} \\ 4,3.10^2 \\ 4.3.10^2
+                    \end{bmatrix}
+                \right\}\label{eq:bornes}
+            \end{equation}\myequations{Intervalle de recherche typique pour le projet DISTRISIM}
+
 
 
             L'algorithme complet est donné ci-dessous.
-            Le lecteur peut consulter \cite{PSO_overview} et \cite{NIA} pour une description
-            plus détaillée\footnote{En particulier, on peut montrer que le nombre de paramètres du modèle peut être réduit sous l'hypothèse forte de l'indépendance des paramètres à optimiser.}
+            Le lecteur peut consulter\cite{gad_particle_2022}, \cite{PSO_overview} et \cite{NIA} pour une description
+            plus détaillée\footnote{En particulier, on peut montrer que le nombre de paramètres du modèle peut être réduit sous l'hypothèse forte de l'indépendance des paramètres à optimiser.}.
 
-            \begin{figure}[H] \centering
-                    \subfloat[]{\fbox{
-                        \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/PSO/PSOi}}}\qquad
-                    \subfloat[]{\fbox{
-                        \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/PSO/PSOf}}}\qquad
-                \caption{Représentation visuelle d'une optimisation de fonction à deux
-                paramètres par PSO \it{(\cite{yt_pso})}}
-            \end{figure}
-            
+
             \begin{algorithm}
                 \caption{Optimisation par essaim de particules (PSO)}\label{alg:pso}
                 \begin{algorithmic}
@@ -136,32 +244,21 @@
                 \end{algorithmic}
             \end{algorithm}
 
-            \cite{TST}
+\newpage\section{Résolution des équations différentielles}\label{sec:resolution-des-equations-differentielles}
 
-            \begin{figure}[H] \centering
-                    \subfloat[Température d'air intérieur, $RMSE = 0.55^ \circ \bf C$]{\fbox{
-                        \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST_air_predit_VS_energyplus}}}\qquad
-                    \subfloat[Besoins de chauffage, $RMSE = 16.31 \bf kW$]{\fbox{
-                        \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST_besoin_chauffage_VS_energyplus}}}\qquad
-                \caption{Exemple de comparaison entre les modélisations d'Energy Plus et les prévisions du précédent stage \textit{(Bâtiment Thales sur le mois de janvier)}}
-
-            \end{figure}
-
-    \section{Résolution des équations différentielles}
-    
         Une fois les paramètres $RC$ déterminés, il devient possible de calculer une solution
         numérique à l'équation \ref{eq:diffTST} pour obtenir les profils de température sur un
         horizon temporel donné.
-        Deux méthodes différentes sont employées pour résoudre d'une part
+        Deux méthodes différentes sont employées pour déterminer d'une part un profil de température cohérent avec les données d'entraînement et d'autre part un besoin de chauffage pour le bâtiment.
 
-        \subsection{Températures dans la paroi et à l'intérieur du bâtiment}
-        
+        \subsection{Températures dans la paroi et à l'intérieur du bâtiment}\label{subsec:temperatures-dans-la-paroi-et-a-l'interieur-du-batiment}
+
             On admet qu'il est difficile de trouver une solution explicite à l'équation
             présentée.
-            Pour ce type de problème, il est courant d'utiliser
-            Le principe de cette méthode est de partir d'une condition initiale et de se
+            Pour ce type de problème, il est courant d'utiliser un solveur numérique comme celui proposé par la méthode d'Euler.
+            Le principe de celle-ci est de partir d'une condition initiale et de se
             déplacer d'une distance très faible sur la pente de la fonction dans l'espace des
-            solutions, et de recalculer cette pente itérativement jusqu'à convergence des
+            solutions, puis de recalculer cette pente itérativement jusqu'à convergence des
             valeurs calculées.
         
             \begin{algorithm}[H]
@@ -186,10 +283,16 @@
                 \end{algorithmic}
             \end{algorithm}
 
-        
-        \subsection{Flux de chaleur solaire et besoin de chauffage}
+        \subsection{Besoin de chauffage}\label{subsec:flux-de-chaleur-solaire-et-besoin-de-chauffage}
 
-            \cite{numerical_analysis}
+            La méthode de la sécante est un algorithme utilisé pour trouver les racines d'une fonction, présentant l'avantage de ne pas utiliser sa dérivée \cite{numerical_analysis}.
+            Comme les algorithmes précédents, cette méthode consiste à itérer sur un intervalle de recherche, mais il est cette fois-ci redéfini à chaque itération et la valeur finale est l'une de ces bornes.
+
+            Appliqué au présent modèle, on cherche le flux de chauffage pour lequel la température intérieure est égale à la température de consigne.
+            La fonction d'entrée est donc :
+            \begin{equation}
+                \ThatAir {\PhihatHeat{t}}  - \Tconsint\label{eq:fminphiheatdistrisim}
+            \end{equation}\myequations{Fonction à minimiser pour déterminer le besoin de chauffage du projet DISTRISIM}
 
             \begin{algorithm}
                 \caption{Méthode de la sécante \it{(Tiré de \cite{numerical_analysis_2})}}
@@ -214,146 +317,207 @@
                     \State \Return \texttt{Erreur : pas de convergence}
                 \end{algorithmic}
             \end{algorithm}
-            
-    \section{Promesses et limites de la méthode actuellement implémentées}
 
-        \subsection{Reproductibilité des précédents résultats}
+\newpage\section{Promesses et limites de la méthode actuellement implémentée}\label{sec:promesses-et-limites-de-la-methode-actuellement-implementees}
 
-        \setdivergentmin{0}
-        \setdivergentmid{3}
-        \setdivergentmax{12}
-        \begin{table}[H]
-            \centering
-            \begin{tabular}{lcccccccccccc}
-                \toprule
-                 & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
-                \midrule
-                Jan & \divergentcell{0.53} & \divergentcell{0.83} & \divergentcell{1.44} & \divergentcell{0.88} & \divergentcell{2.27} & \divergentcell{2.8} & \divergentcell{6.96} & \divergentcell{7.93} & \divergentcell{2.68} & \divergentcell{2.3} & \divergentcell{0.95} & \divergentcell{0.69} \\
-                Fév & \divergentcell{0.66} & \divergentcell{0.96} & \divergentcell{1.15} & \divergentcell{0.8} & \divergentcell{3.4} & \divergentcell{3.47} & \divergentcell{5.84} & \divergentcell{7.72} & \divergentcell{3.4} & \divergentcell{1.9} & \divergentcell{0.8} & \divergentcell{0.82} \\
-                Mar & \divergentcell{1.55} & \divergentcell{1.74} & \divergentcell{1.05} & \divergentcell{1.19} & \divergentcell{5.81} & \divergentcell{5.6} & \divergentcell{4.69} & \divergentcell{7.79} & \divergentcell{5.72} & \divergentcell{1.45} & \divergentcell{1.04} & \divergentcell{1.55} \\
-                Avr & \divergentcell{2.61} & \divergentcell{2.47} & \divergentcell{1.78} & \divergentcell{1.78} & \divergentcell{7.97} & \divergentcell{7.56} & \divergentcell{6.37} & \divergentcell{8.24} & \divergentcell{7.7} & \divergentcell{1.79} & \divergentcell{1.69} & \divergentcell{2.28} \\
-                Mai & \divergentcell{3.41} & \divergentcell{8.5} & \divergentcell{7.6} & \divergentcell{8.19} & \divergentcell{0.68} & \divergentcell{0.72} & \divergentcell{2.04} & \divergentcell{1.47} & \divergentcell{0.79} & \divergentcell{8.8} & \divergentcell{7.54} & \divergentcell{7.07} \\
-                Jui & \divergentcell{3.2} & \divergentcell{10.1} & \divergentcell{8.47} & \divergentcell{9.3} & \divergentcell{0.8} & \divergentcell{0.75} & \divergentcell{1.02} & \divergentcell{0.97} & \divergentcell{0.89} & \divergentcell{9.9} & \divergentcell{8.3} & \divergentcell{8.12} \\
-                Juil & \divergentcell{3} & \divergentcell{11.1} & \divergentcell{9.22} & \divergentcell{10.1} & \divergentcell{0.95} & \divergentcell{0.84} & \divergentcell{0.79} & \divergentcell{1.12} & \divergentcell{1.15} & \divergentcell{10} & \divergentcell{9.09} & \divergentcell{8.86} \\
-                Aoû & \divergentcell{2.86} & \divergentcell{8.12} & \divergentcell{6.94} & \divergentcell{7.5} & \divergentcell{1.03} & \divergentcell{0.95} & \divergentcell{1.01} & \divergentcell{0.92} & \divergentcell{0.96} & \divergentcell{8.1} & \divergentcell{6.86} & \divergentcell{6.48} \\
-                Sep & \divergentcell{2.94} & \divergentcell{6.4} & \divergentcell{5.95} & \divergentcell{6.3} & \divergentcell{0.81} & \divergentcell{0.79} & \divergentcell{1.7} & \divergentcell{1.34} & \divergentcell{0.76} & \divergentcell{6.9} & \divergentcell{5.8} & \divergentcell{5.36} \\
-                Oct & \divergentcell{2.28} & \divergentcell{1.98} & \divergentcell{1.47} & \divergentcell{1.4} & \divergentcell{5.76} & \divergentcell{5.52} & \divergentcell{4.79} & \divergentcell{6.44} & \divergentcell{5.67} & \divergentcell{1.33} & \divergentcell{5.88} & \divergentcell{2.05} \\
-                Nov & \divergentcell{0.75} & \divergentcell{1} & \divergentcell{0.84} & \divergentcell{0.75} & \divergentcell{3.36} & \divergentcell{3.38} & \divergentcell{4.28} & \divergentcell{6.59} & \divergentcell{3.3} & \divergentcell{1.28} & \divergentcell{0.71} & \divergentcell{5.31} \\
-                Dec & \divergentcell{0.41} & \divergentcell{0.73} & \divergentcell{1.34} & \divergentcell{0.67} & \divergentcell{2.08} & \divergentcell{2.2} & \divergentcell{7.11} & \divergentcell{7.3} & \divergentcell{2} & \divergentcell{1.9} & \divergentcell{0.78} & \divergentcell{0.52} \\
-                \bottomrule
-            \end{tabular}
-            \caption{$\mathrm{RMSE}\left(T_{air}\right)_{\text{CastelO}}$ avec des valeurs de $\mathbf {P_{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois \textit{(résultats du précédent stage)}}
-            \label{tab:my_label}
-        \end{table}
+        Cette section vise à synthétiser les différents résultats obtenus par le modèle, en répondant principalement à deux problématiques :
+        \begin{enumerate}
+            \item La cohérence des résultats avec les conclusions du précédent stage
+            \item Un retour d'expérience identifiant les composantes du modèle, ses failles, et proposant des pistes pour améliorer ses performances
+        \end{enumerate}
+
+        \subsection{Reproductibilité et continuité des précédents résultats}\label{subsec:reproductibilite-des-precedents-resultats}
+
+            Une série de figures représentant $\left\{\TAir{t};\ThatAir{t}\right\}$ et $\left\{ \PhiHeat{t};\PhihatHeat{t} \right\}$ ont été précédemment décrites dans \cite{TST}.
+            L'une d'entre elles est rappelée ici.
+            On remarque que la température prédite adopte une forme similaire à la température réelle, sans pour autant atteindre l'amplitude des pics des données d'entraînement.
+            Le même constat peut être émis pour le besoin de chauffage.
+
+            \begin{figure}[H] \centering
+                \subfloat[Température intérieure, $RMSE = 0.55^ \circ \bf C$]{\fbox{
+                    \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/TST_air_predit_VS_energyplus}}}\qquad
+                \subfloat[Besoins de chauffage, $RMSE = 16.31 \bf kW$]{\fbox{
+                    \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/TST_besoin_chauffage_VS_energyplus}}}\qquad
+                \caption{Exemple de comparaison entre les modélisations d'EnergyPlus et les prévisions du précédent stage \textit{(Bâtiment Thales sur le mois de janvier)}}\label{fig:figure6}
+            \end{figure}
+
+            Les données concluant le rapport \cite{TST} sont celles reportées dans le tableau \ref{tab:tstfinal}.
+            Celles-ci montrent les erreurs de température obtenues par le modèle sur un mois lorsque ses paramètres thermiques sont déterminés avec les données d'entraînement d'un autre, pour un bâtiment.
+            L'expérience est reconduite et synthétisée en \ref{tab:tstfinal_tsa}.
+            Les erreurs calculées décrivent la même tendance intuitivement prévisible : l'application des paramètres calculés sur les mois d'une saison ne parviennent pas à prédire le comportement thermique du bâtiment sur une autre.
+            Quelques différences sont mises en évidence en \ref{tab:abserrtst} et concernent uniquement le premier cas de figure, n'invalidant pas la fiabilité du modèle.
 
 
-        \begin{table}[H]
-            \centering
-            \begin{tabular}{lcccccccccccc}
-                \toprule
-                & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
-                \midrule
-                Jan & \divergentcell{0.67} & \divergentcell{0.73} & \divergentcell{1.51} & \divergentcell{5.64} & \divergentcell{2.64} & \divergentcell{2.77} & \divergentcell{5.74} & \divergentcell{4.59} & \divergentcell{4.59} & \divergentcell{2.23} & \divergentcell{2.23} & \divergentcell{1.07} \\
-                Fév & \divergentcell{0.81} & \divergentcell{0.7} & \divergentcell{1.19} & \divergentcell{4.75} & \divergentcell{3.28} & \divergentcell{3.43} & \divergentcell{5.91} & \divergentcell{4.89} & \divergentcell{4.89} & \divergentcell{1.86} & \divergentcell{1.86} & \divergentcell{1.38} \\
-                Mar & \divergentcell{1.46} & \divergentcell{1.15} & \divergentcell{1.06} & \divergentcell{2.6} & \divergentcell{5.49} & \divergentcell{5.64} & \divergentcell{6.97} & \divergentcell{6.22} & \divergentcell{6.22} & \divergentcell{1.38} & \divergentcell{1.38} & \divergentcell{2.71} \\
-                Avr & \divergentcell{2.17} & \divergentcell{1.87} & \divergentcell{1.81} & \divergentcell{1.52} & \divergentcell{7.5} & \divergentcell{7.56} & \divergentcell{8.17} & \divergentcell{7.58} & \divergentcell{7.58} & \divergentcell{1.66} & \divergentcell{1.66} & \divergentcell{4.45} \\
-                Mai & \divergentcell{7.18} & \divergentcell{7.23} & \divergentcell{7.59} & \divergentcell{7.86} & \divergentcell{0.66} & \divergentcell{0.7} & \divergentcell{1.1} & \divergentcell{0.94} & \divergentcell{0.94} & \divergentcell{8.34} & \divergentcell{8.34} & \divergentcell{8.83} \\
-                Jui & \divergentcell{8.29} & \divergentcell{8.09} & \divergentcell{8.46} & \divergentcell{8.24} & \divergentcell{0.86} & \divergentcell{0.71} & \divergentcell{0.82} & \divergentcell{0.86} & \divergentcell{0.86} & \divergentcell{9.18} & \divergentcell{9.18} & \divergentcell{10.95} \\
-                Juil & \divergentcell{9.1} & \divergentcell{8.79} & \divergentcell{9.21} & \divergentcell{8.82} & \divergentcell{0.96} & \divergentcell{0.78} & \divergentcell{0.88} & \divergentcell{0.96} & \divergentcell{0.96} & \divergentcell{9.92} & \divergentcell{9.92} & \divergentcell{12.1} \\
-                Aoû & \divergentcell{6.66} & \divergentcell{6.6} & \divergentcell{6.92} & \divergentcell{6.76} & \divergentcell{1.13} & \divergentcell{0.93} & \divergentcell{0.98} & \divergentcell{0.9} & \divergentcell{0.9} & \divergentcell{7.53} & \divergentcell{7.53} & \divergentcell{8.72} \\
-                Sep & \divergentcell{5.45} & \divergentcell{5.61} & \divergentcell{5.93} & \divergentcell{6.34} & \divergentcell{0.81} & \divergentcell{0.82} & \divergentcell{1.14} & \divergentcell{0.9} & \divergentcell{0.9} & \divergentcell{6.58} & \divergentcell{6.58} & \divergentcell{7.18} \\
-                Oct & \divergentcell{1.93} & \divergentcell{1.59} & \divergentcell{1.5} & \divergentcell{1.71} & \divergentcell{5.5} & \divergentcell{5.51} & \divergentcell{6.15} & \divergentcell{5.69} & \divergentcell{5.69} & \divergentcell{1.23} & \divergentcell{1.23} & \divergentcell{3.5} \\
-                Nov & \divergentcell{0.96} & \divergentcell{0.8} & \divergentcell{0.87} & \divergentcell{3.39} & \divergentcell{3.21} & \divergentcell{3.32} & \divergentcell{5.26} & \divergentcell{4.46} & \divergentcell{4.46} & \divergentcell{1.26} & \divergentcell{1.26} & \divergentcell{1.45} \\
-                Dec & \divergentcell{0.57} & \divergentcell{0.61} & \divergentcell{1.41} & \divergentcell{5.5} & \divergentcell{2.02} & \divergentcell{2.18} & \divergentcell{5.08} & \divergentcell{3.98} & \divergentcell{3.98} & \divergentcell{2.04} & \divergentcell{2.04} & \divergentcell{0.68} \\
-                \bottomrule
-            \end{tabular}
-            \caption{$\mathrm{RMSE}\left(T_{air}\right)_{\text{CastelO}}$ avec des valeurs de $\mathbf {P_{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois \textit{(résultats de l'alternance)}}
-            \label{tab:my_label2}
-        \end{table}
+            Les résultats précédents confirmés, l'échelle des expérimentations est augmentée pour s'intéresser à l'ensemble des bâtiments.
+            La figure \ref{fig:heatmap} généralise le tableau précédemment présenté et une moyenne de toutes les erreurs de température est reportée dans le tableau \ref{tab:mean_std_by_building_by_month}
+            \newpage\vspace*{\fill}
+            \setdivergentmin{0}
+            \setdivergentmid{3}
+            \setdivergentmax{12}
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{lcccccccccccc}
+                    \toprule
+                     & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
+                    \midrule
+                    Jan & \divergentcell{0.53} & \divergentcell{0.83} & \divergentcell{1.44} & \divergentcell{0.88} & \divergentcell{2.27} & \divergentcell{2.8} & \divergentcell{6.96} & \divergentcell{7.93} & \divergentcell{2.68} & \divergentcell{2.3} & \divergentcell{0.95} & \divergentcell{0.69} \\
+                    Fév & \divergentcell{0.66} & \divergentcell{0.96} & \divergentcell{1.15} & \divergentcell{0.8} & \divergentcell{3.4} & \divergentcell{3.47} & \divergentcell{5.84} & \divergentcell{7.72} & \divergentcell{3.4} & \divergentcell{1.9} & \divergentcell{0.8} & \divergentcell{0.82} \\
+                    Mar & \divergentcell{1.55} & \divergentcell{1.74} & \divergentcell{1.05} & \divergentcell{1.19} & \divergentcell{5.81} & \divergentcell{5.6} & \divergentcell{4.69} & \divergentcell{7.79} & \divergentcell{5.72} & \divergentcell{1.45} & \divergentcell{1.04} & \divergentcell{1.55} \\
+                    Avr & \divergentcell{2.61} & \divergentcell{2.47} & \divergentcell{1.78} & \divergentcell{1.78} & \divergentcell{7.97} & \divergentcell{7.56} & \divergentcell{6.37} & \divergentcell{8.24} & \divergentcell{7.7} & \divergentcell{1.79} & \divergentcell{1.69} & \divergentcell{2.28} \\
+                    Mai & \divergentcell{3.41} & \divergentcell{8.5} & \divergentcell{7.6} & \divergentcell{8.19} & \divergentcell{0.68} & \divergentcell{0.72} & \divergentcell{2.04} & \divergentcell{1.47} & \divergentcell{0.79} & \divergentcell{8.8} & \divergentcell{7.54} & \divergentcell{7.07} \\
+                    Jui & \divergentcell{3.2} & \divergentcell{10.1} & \divergentcell{8.47} & \divergentcell{9.3} & \divergentcell{0.8} & \divergentcell{0.75} & \divergentcell{1.02} & \divergentcell{0.97} & \divergentcell{0.89} & \divergentcell{9.9} & \divergentcell{8.3} & \divergentcell{8.12} \\
+                    Juil & \divergentcell{3} & \divergentcell{11.1} & \divergentcell{9.22} & \divergentcell{10.1} & \divergentcell{0.95} & \divergentcell{0.84} & \divergentcell{0.79} & \divergentcell{1.12} & \divergentcell{1.15} & \divergentcell{10} & \divergentcell{9.09} & \divergentcell{8.86} \\
+                    Aoû & \divergentcell{2.86} & \divergentcell{8.12} & \divergentcell{6.94} & \divergentcell{7.5} & \divergentcell{1.03} & \divergentcell{0.95} & \divergentcell{1.01} & \divergentcell{0.92} & \divergentcell{0.96} & \divergentcell{8.1} & \divergentcell{6.86} & \divergentcell{6.48} \\
+                    Sep & \divergentcell{2.94} & \divergentcell{6.4} & \divergentcell{5.95} & \divergentcell{6.3} & \divergentcell{0.81} & \divergentcell{0.79} & \divergentcell{1.7} & \divergentcell{1.34} & \divergentcell{0.76} & \divergentcell{6.9} & \divergentcell{5.8} & \divergentcell{5.36} \\
+                    Oct & \divergentcell{2.28} & \divergentcell{1.98} & \divergentcell{1.47} & \divergentcell{1.4} & \divergentcell{5.76} & \divergentcell{5.52} & \divergentcell{4.79} & \divergentcell{6.44} & \divergentcell{5.67} & \divergentcell{1.33} & \divergentcell{5.88} & \divergentcell{2.05} \\
+                    Nov & \divergentcell{0.75} & \divergentcell{1} & \divergentcell{0.84} & \divergentcell{0.75} & \divergentcell{3.36} & \divergentcell{3.38} & \divergentcell{4.28} & \divergentcell{6.59} & \divergentcell{3.3} & \divergentcell{1.28} & \divergentcell{0.71} & \divergentcell{5.31} \\
+                    Dec & \divergentcell{0.41} & \divergentcell{0.73} & \divergentcell{1.34} & \divergentcell{0.67} & \divergentcell{2.08} & \divergentcell{2.2} & \divergentcell{7.11} & \divergentcell{7.3} & \divergentcell{2} & \divergentcell{1.9} & \divergentcell{0.78} & \divergentcell{0.52} \\
+                    \bottomrule
+                \end{tabular}
+                \caption{$\mathrm{RMSE}\left(\ThatAir{t}\right)_{\text{CastelO}}$ avec des valeurs de $\mathbf {P}_{\text{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois \textit{(résultats du précédent stage)}}
+                \label{tab:tstfinal}
+            \end{table}
 
-        \settwotonemin{0}
-        \settwotonemax{5}
-        \begin{table}[H]
-            \centering
-            \begin{tabular}{lcccccccccccc}
-                \toprule
-                & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
-                \midrule
-                Jan & \twotonecell{0.14} & \twotonecell{0.1} & \twotonecell{0.07} & \twotonecell{4.76} & \twotonecell{0.37} & \twotonecell{0.03} & \twotonecell{1.22} & \twotonecell{3.34} & \twotonecell{1.91} & \twotonecell{0.07} & \twotonecell{1.28} & \twotonecell{0.38} \\
-                Fév & \twotonecell{0.15} & \twotonecell{0.26} & \twotonecell{0.04} & \twotonecell{3.95} & \twotonecell{0.12} & \twotonecell{0.04} & \twotonecell{0.07} & \twotonecell{2.83} & \twotonecell{1.49} & \twotonecell{0.04} & \twotonecell{1.06} & \twotonecell{0.56} \\
-                Mar & \twotonecell{0.09} & \twotonecell{0.59} & \twotonecell{0.01} & \twotonecell{1.41} & \twotonecell{0.32} & \twotonecell{0.04} & \twotonecell{2.28} & \twotonecell{1.57} & \twotonecell{0.5} & \twotonecell{0.07} & \twotonecell{0.34} & \twotonecell{1.16} \\
-                Avr & \twotonecell{0.44} & \twotonecell{0.6} & \twotonecell{0.03} & \twotonecell{0.26} & \twotonecell{0.47} & \twotonecell{0.0} & \twotonecell{1.8} & \twotonecell{0.66} & \twotonecell{0.12} & \twotonecell{0.13} & \twotonecell{0.03} & \twotonecell{2.17} \\
-                Mai & \twotonecell{3.77} & \twotonecell{1.27} & \twotonecell{0.01} & \twotonecell{0.33} & \twotonecell{0.02} & \twotonecell{0.02} & \twotonecell{0.94} & \twotonecell{0.53} & \twotonecell{0.15} & \twotonecell{0.46} & \twotonecell{0.8} & \twotonecell{1.76} \\
-                Jui & \twotonecell{5.09} & \twotonecell{2.01} & \twotonecell{0.01} & \twotonecell{1.06} & \twotonecell{0.06} & \twotonecell{0.04} & \twotonecell{0.2} & \twotonecell{0.11} & \twotonecell{0.03} & \twotonecell{0.72} & \twotonecell{0.88} & \twotonecell{2.83} \\
-                Juil & \twotonecell{6.1} & \twotonecell{2.31} & \twotonecell{0.01} & \twotonecell{1.28} & \twotonecell{0.01} & \twotonecell{0.06} & \twotonecell{0.09} & \twotonecell{0.16} & \twotonecell{0.19} & \twotonecell{0.08} & \twotonecell{0.83} & \twotonecell{3.24} \\
-                Aoû & \twotonecell{3.8} & \twotonecell{1.52} & \twotonecell{0.02} & \twotonecell{0.74} & \twotonecell{0.1} & \twotonecell{0.02} & \twotonecell{0.03} & \twotonecell{0.02} & \twotonecell{0.06} & \twotonecell{0.57} & \twotonecell{0.67} & \twotonecell{2.24} \\
-                Sep & \twotonecell{2.51} & \twotonecell{0.79} & \twotonecell{0.02} & \twotonecell{0.04} & \twotonecell{0.0} & \twotonecell{0.03} & \twotonecell{0.56} & \twotonecell{0.44} & \twotonecell{0.14} & \twotonecell{0.32} & \twotonecell{0.78} & \twotonecell{1.82} \\
-                Oct & \twotonecell{0.35} & \twotonecell{0.39} & \twotonecell{0.03} & \twotonecell{0.31} & \twotonecell{0.26} & \twotonecell{0.01} & \twotonecell{1.36} & \twotonecell{0.75} & \twotonecell{0.02} & \twotonecell{0.1} & \twotonecell{4.65} & \twotonecell{1.45} \\
-                Nov & \twotonecell{0.21} & \twotonecell{0.2} & \twotonecell{0.03} & \twotonecell{2.64} & \twotonecell{0.15} & \twotonecell{0.06} & \twotonecell{0.98} & \twotonecell{2.13} & \twotonecell{1.16} & \twotonecell{0.02} & \twotonecell{0.55} & \twotonecell{3.86} \\
-                Dec & \twotonecell{0.16} & \twotonecell{0.12} & \twotonecell{0.07} & \twotonecell{4.83} & \twotonecell{0.06} & \twotonecell{0.02} & \twotonecell{2.03} & \twotonecell{3.32} & \twotonecell{1.98} & \twotonecell{0.14} & \twotonecell{1.26} & \twotonecell{0.16} \\
-                \bottomrule
-            \end{tabular}
-            \caption{Erreur absolue entre les deux précédentes tableaux}
-            \label{tab:my_label3}
-        \end{table}
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{lcccccccccccc}
+                    \toprule
+                    & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
+                    \midrule
+                    Jan & \divergentcell{0.67} & \divergentcell{0.73} & \divergentcell{1.51} & \divergentcell{5.64} & \divergentcell{2.64} & \divergentcell{2.77} & \divergentcell{5.74} & \divergentcell{4.59} & \divergentcell{4.59} & \divergentcell{2.23} & \divergentcell{2.23} & \divergentcell{1.07} \\
+                    Fév & \divergentcell{0.81} & \divergentcell{0.7} & \divergentcell{1.19} & \divergentcell{4.75} & \divergentcell{3.28} & \divergentcell{3.43} & \divergentcell{5.91} & \divergentcell{4.89} & \divergentcell{4.89} & \divergentcell{1.86} & \divergentcell{1.86} & \divergentcell{1.38} \\
+                    Mar & \divergentcell{1.46} & \divergentcell{1.15} & \divergentcell{1.06} & \divergentcell{2.6} & \divergentcell{5.49} & \divergentcell{5.64} & \divergentcell{6.97} & \divergentcell{6.22} & \divergentcell{6.22} & \divergentcell{1.38} & \divergentcell{1.38} & \divergentcell{2.71} \\
+                    Avr & \divergentcell{2.17} & \divergentcell{1.87} & \divergentcell{1.81} & \divergentcell{1.52} & \divergentcell{7.5} & \divergentcell{7.56} & \divergentcell{8.17} & \divergentcell{7.58} & \divergentcell{7.58} & \divergentcell{1.66} & \divergentcell{1.66} & \divergentcell{4.45} \\
+                    Mai & \divergentcell{7.18} & \divergentcell{7.23} & \divergentcell{7.59} & \divergentcell{7.86} & \divergentcell{0.66} & \divergentcell{0.7} & \divergentcell{1.1} & \divergentcell{0.94} & \divergentcell{0.94} & \divergentcell{8.34} & \divergentcell{8.34} & \divergentcell{8.83} \\
+                    Jui & \divergentcell{8.29} & \divergentcell{8.09} & \divergentcell{8.46} & \divergentcell{8.24} & \divergentcell{0.86} & \divergentcell{0.71} & \divergentcell{0.82} & \divergentcell{0.86} & \divergentcell{0.86} & \divergentcell{9.18} & \divergentcell{9.18} & \divergentcell{10.95} \\
+                    Juil & \divergentcell{9.1} & \divergentcell{8.79} & \divergentcell{9.21} & \divergentcell{8.82} & \divergentcell{0.96} & \divergentcell{0.78} & \divergentcell{0.88} & \divergentcell{0.96} & \divergentcell{0.96} & \divergentcell{9.92} & \divergentcell{9.92} & \divergentcell{12.1} \\
+                    Aoû & \divergentcell{6.66} & \divergentcell{6.6} & \divergentcell{6.92} & \divergentcell{6.76} & \divergentcell{1.13} & \divergentcell{0.93} & \divergentcell{0.98} & \divergentcell{0.9} & \divergentcell{0.9} & \divergentcell{7.53} & \divergentcell{7.53} & \divergentcell{8.72} \\
+                    Sep & \divergentcell{5.45} & \divergentcell{5.61} & \divergentcell{5.93} & \divergentcell{6.34} & \divergentcell{0.81} & \divergentcell{0.82} & \divergentcell{1.14} & \divergentcell{0.9} & \divergentcell{0.9} & \divergentcell{6.58} & \divergentcell{6.58} & \divergentcell{7.18} \\
+                    Oct & \divergentcell{1.93} & \divergentcell{1.59} & \divergentcell{1.5} & \divergentcell{1.71} & \divergentcell{5.5} & \divergentcell{5.51} & \divergentcell{6.15} & \divergentcell{5.69} & \divergentcell{5.69} & \divergentcell{1.23} & \divergentcell{1.23} & \divergentcell{3.5} \\
+                    Nov & \divergentcell{0.96} & \divergentcell{0.8} & \divergentcell{0.87} & \divergentcell{3.39} & \divergentcell{3.21} & \divergentcell{3.32} & \divergentcell{5.26} & \divergentcell{4.46} & \divergentcell{4.46} & \divergentcell{1.26} & \divergentcell{1.26} & \divergentcell{1.45} \\
+                    Dec & \divergentcell{0.57} & \divergentcell{0.61} & \divergentcell{1.41} & \divergentcell{5.5} & \divergentcell{2.02} & \divergentcell{2.18} & \divergentcell{5.08} & \divergentcell{3.98} & \divergentcell{3.98} & \divergentcell{2.04} & \divergentcell{2.04} & \divergentcell{0.68} \\
+                    \bottomrule
+                \end{tabular}
+                \caption{$\mathrm{RMSE}\left(\ThatAir{t}\right)_{\text{CastelO}}$ avec des valeurs de $\mathbf {P_{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois \textit{(résultats de l'alternance)}}
+                \label{tab:tstfinal_tsa}
+            \end{table}
 
-        \begin{figure}[htp]
-            \centering
-            \fbox{\includegraphics[width=0.8\textwidth]{figures/diagrammes/courbes/heatmap_series}}
-            \caption{Heatmap de $\mathrm{RMSE}\left(T_{air}\right)_{\text{Bâtiment}}$ pour chaque bâtiment}
-        \end{figure}
+            \settwotonemin{0}
+            \settwotonemax{5}
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{lcccccccccccc}
+                    \toprule
+                    & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
+                    \midrule
+                    Jan & \twotonecell{0.14} & \twotonecell{0.1} & \twotonecell{0.07} & \twotonecell{4.76} & \twotonecell{0.37} & \twotonecell{0.03} & \twotonecell{1.22} & \twotonecell{3.34} & \twotonecell{1.91} & \twotonecell{0.07} & \twotonecell{1.28} & \twotonecell{0.38} \\
+                    Fév & \twotonecell{0.15} & \twotonecell{0.26} & \twotonecell{0.04} & \twotonecell{3.95} & \twotonecell{0.12} & \twotonecell{0.04} & \twotonecell{0.07} & \twotonecell{2.83} & \twotonecell{1.49} & \twotonecell{0.04} & \twotonecell{1.06} & \twotonecell{0.56} \\
+                    Mar & \twotonecell{0.09} & \twotonecell{0.59} & \twotonecell{0.01} & \twotonecell{1.41} & \twotonecell{0.32} & \twotonecell{0.04} & \twotonecell{2.28} & \twotonecell{1.57} & \twotonecell{0.5} & \twotonecell{0.07} & \twotonecell{0.34} & \twotonecell{1.16} \\
+                    Avr & \twotonecell{0.44} & \twotonecell{0.6} & \twotonecell{0.03} & \twotonecell{0.26} & \twotonecell{0.47} & \twotonecell{0.0} & \twotonecell{1.8} & \twotonecell{0.66} & \twotonecell{0.12} & \twotonecell{0.13} & \twotonecell{0.03} & \twotonecell{2.17} \\
+                    Mai & \twotonecell{3.77} & \twotonecell{1.27} & \twotonecell{0.01} & \twotonecell{0.33} & \twotonecell{0.02} & \twotonecell{0.02} & \twotonecell{0.94} & \twotonecell{0.53} & \twotonecell{0.15} & \twotonecell{0.46} & \twotonecell{0.8} & \twotonecell{1.76} \\
+                    Jui & \twotonecell{5.09} & \twotonecell{2.01} & \twotonecell{0.01} & \twotonecell{1.06} & \twotonecell{0.06} & \twotonecell{0.04} & \twotonecell{0.2} & \twotonecell{0.11} & \twotonecell{0.03} & \twotonecell{0.72} & \twotonecell{0.88} & \twotonecell{2.83} \\
+                    Juil & \twotonecell{6.1} & \twotonecell{2.31} & \twotonecell{0.01} & \twotonecell{1.28} & \twotonecell{0.01} & \twotonecell{0.06} & \twotonecell{0.09} & \twotonecell{0.16} & \twotonecell{0.19} & \twotonecell{0.08} & \twotonecell{0.83} & \twotonecell{3.24} \\
+                    Aoû & \twotonecell{3.8} & \twotonecell{1.52} & \twotonecell{0.02} & \twotonecell{0.74} & \twotonecell{0.1} & \twotonecell{0.02} & \twotonecell{0.03} & \twotonecell{0.02} & \twotonecell{0.06} & \twotonecell{0.57} & \twotonecell{0.67} & \twotonecell{2.24} \\
+                    Sep & \twotonecell{2.51} & \twotonecell{0.79} & \twotonecell{0.02} & \twotonecell{0.04} & \twotonecell{0.0} & \twotonecell{0.03} & \twotonecell{0.56} & \twotonecell{0.44} & \twotonecell{0.14} & \twotonecell{0.32} & \twotonecell{0.78} & \twotonecell{1.82} \\
+                    Oct & \twotonecell{0.35} & \twotonecell{0.39} & \twotonecell{0.03} & \twotonecell{0.31} & \twotonecell{0.26} & \twotonecell{0.01} & \twotonecell{1.36} & \twotonecell{0.75} & \twotonecell{0.02} & \twotonecell{0.1} & \twotonecell{4.65} & \twotonecell{1.45} \\
+                    Nov & \twotonecell{0.21} & \twotonecell{0.2} & \twotonecell{0.03} & \twotonecell{2.64} & \twotonecell{0.15} & \twotonecell{0.06} & \twotonecell{0.98} & \twotonecell{2.13} & \twotonecell{1.16} & \twotonecell{0.02} & \twotonecell{0.55} & \twotonecell{3.86} \\
+                    Dec & \twotonecell{0.16} & \twotonecell{0.12} & \twotonecell{0.07} & \twotonecell{4.83} & \twotonecell{0.06} & \twotonecell{0.02} & \twotonecell{2.03} & \twotonecell{3.32} & \twotonecell{1.98} & \twotonecell{0.14} & \twotonecell{1.26} & \twotonecell{0.16} \\
+                    \bottomrule
+                \end{tabular}
+                \caption{Erreur absolue entre les deux précédents tableaux}
+                \label{tab:abserrtst}
+            \end{table}
+\vspace*{\fill}\newpage
+            \begin{figure}[H]
+                \centering
+                \fbox{\includegraphics[width=0.8\textwidth]{figures/diagrammes/courbes/heatmap_series}}
+                \caption{Heatmap de $\mathrm{RMSE}\left(T_{air}\right)_{\text{Bâtiment}}$ pour chaque bâtiment}\label{fig:heatmap}
+            \end{figure}
 
-        \begin{table}[H]
-            \centering
-            \begin{tabular}{lcccccccccccc}
-                \toprule
-                & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
-                \midrule
-                Jan & \divergentcell{0.83} & \divergentcell{0.86} & \divergentcell{1.26} & \divergentcell{2.15} & \divergentcell{1.87} & \divergentcell{7.36} & \divergentcell{14.97} & \divergentcell{8.84} & \divergentcell{2.76} & \divergentcell{1.87} & \divergentcell{1.11} & \divergentcell{0.94} \\
-                Fév & \divergentcell{0.8} & \divergentcell{0.8} & \divergentcell{1.05} & \divergentcell{1.87} & \divergentcell{1.63} & \divergentcell{6.48} & \divergentcell{13.2} & \divergentcell{7.94} & \divergentcell{2.47} & \divergentcell{1.67} & \divergentcell{0.97} & \divergentcell{0.91} \\
-                Mar & \divergentcell{1.12} & \divergentcell{1.05} & \divergentcell{0.91} & \divergentcell{1.24} & \divergentcell{1.78} & \divergentcell{4.59} & \divergentcell{8.87} & \divergentcell{5.8} & \divergentcell{2.29} & \divergentcell{1.36} & \divergentcell{1.06} & \divergentcell{1.2} \\
-                Avr & \divergentcell{1.42} & \divergentcell{1.35} & \divergentcell{1.19} & \divergentcell{1.01} & \divergentcell{2.27} & \divergentcell{3.13} & \divergentcell{4.45} & \divergentcell{3.72} & \divergentcell{2.29} & \divergentcell{1.23} & \divergentcell{1.45} & \divergentcell{1.77} \\
-                Mai & \divergentcell{1.59} & \divergentcell{1.92} & \divergentcell{1.83} & \divergentcell{1.88} & \divergentcell{0.81} & \divergentcell{1.52} & \divergentcell{3.04} & \divergentcell{1.88} & \divergentcell{1.17} & \divergentcell{2.65} & \divergentcell{1.71} & \divergentcell{2.51} \\
-                Jui & \divergentcell{2.37} & \divergentcell{2.5} & \divergentcell{2.57} & \divergentcell{2.43} & \divergentcell{1.53} & \divergentcell{1.07} & \divergentcell{1.46} & \divergentcell{1.32} & \divergentcell{1.5} & \divergentcell{3.16} & \divergentcell{2.43} & \divergentcell{3.2} \\
-                Juil & \divergentcell{2.86} & \divergentcell{2.93} & \divergentcell{2.84} & \divergentcell{2.59} & \divergentcell{1.78} & \divergentcell{1.29} & \divergentcell{1.07} & \divergentcell{1.53} & \divergentcell{1.74} & \divergentcell{3.27} & \divergentcell{2.83} & \divergentcell{3.7} \\
-                Aoû & \divergentcell{2.41} & \divergentcell{2.41} & \divergentcell{2.37} & \divergentcell{2.27} & \divergentcell{1.82} & \divergentcell{1.29} & \divergentcell{1.32} & \divergentcell{1.14} & \divergentcell{1.43} & \divergentcell{2.7} & \divergentcell{2.4} & \divergentcell{2.96} \\
-                Sep & \divergentcell{1.62} & \divergentcell{1.82} & \divergentcell{1.65} & \divergentcell{1.64} & \divergentcell{1.16} & \divergentcell{1.35} & \divergentcell{2.46} & \divergentcell{1.47} & \divergentcell{0.94} & \divergentcell{2.1} & \divergentcell{1.66} & \divergentcell{2.3} \\
-                Oct & \divergentcell{1.52} & \divergentcell{1.37} & \divergentcell{1.23} & \divergentcell{1.11} & \divergentcell{2.05} & \divergentcell{3.13} & \divergentcell{5.0} & \divergentcell{3.86} & \divergentcell{2.25} & \divergentcell{0.99} & \divergentcell{1.49} & \divergentcell{1.42} \\
-                Nov & \divergentcell{0.79} & \divergentcell{0.78} & \divergentcell{0.8} & \divergentcell{1.23} & \divergentcell{1.37} & \divergentcell{4.7} & \divergentcell{9.86} & \divergentcell{6.27} & \divergentcell{2.16} & \divergentcell{1.13} & \divergentcell{0.7} & \divergentcell{0.74} \\
-                Dec & \divergentcell{0.86} & \divergentcell{0.88} & \divergentcell{1.18} & \divergentcell{2.02} & \divergentcell{1.8} & \divergentcell{6.99} & \divergentcell{14.43} & \divergentcell{8.51} & \divergentcell{2.64} & \divergentcell{1.65} & \divergentcell{1.03} & \divergentcell{0.83} \\
-                \bottomrule
-            \end{tabular}
-            \caption{Moyenne des $\mathrm{RMSE}\left(T_{air}\right)_{\text{Bâtiment}}$ avec des valeurs de $\mathbf {P_{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois pour l'ensemble des bâtiments}
-            \label{tab:my_label5}
-        \end{table}
+            \begin{table}[H]
+                        \centering
+                        \begin{tabular}{lcccccccccccc}
+                            \toprule
+                            & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
+                            \midrule
+                            Jan & \divergentcell{0.83} & \divergentcell{0.86} & \divergentcell{1.26} & \divergentcell{2.15} & \divergentcell{1.87} & \divergentcell{7.36} & \divergentcell{14.97} & \divergentcell{8.84} & \divergentcell{2.76} & \divergentcell{1.87} & \divergentcell{1.11} & \divergentcell{0.94} \\
+                            Fév & \divergentcell{0.8} & \divergentcell{0.8} & \divergentcell{1.05} & \divergentcell{1.87} & \divergentcell{1.63} & \divergentcell{6.48} & \divergentcell{13.2} & \divergentcell{7.94} & \divergentcell{2.47} & \divergentcell{1.67} & \divergentcell{0.97} & \divergentcell{0.91} \\
+                            Mar & \divergentcell{1.12} & \divergentcell{1.05} & \divergentcell{0.91} & \divergentcell{1.24} & \divergentcell{1.78} & \divergentcell{4.59} & \divergentcell{8.87} & \divergentcell{5.8} & \divergentcell{2.29} & \divergentcell{1.36} & \divergentcell{1.06} & \divergentcell{1.2} \\
+                            Avr & \divergentcell{1.42} & \divergentcell{1.35} & \divergentcell{1.19} & \divergentcell{1.01} & \divergentcell{2.27} & \divergentcell{3.13} & \divergentcell{4.45} & \divergentcell{3.72} & \divergentcell{2.29} & \divergentcell{1.23} & \divergentcell{1.45} & \divergentcell{1.77} \\
+                            Mai & \divergentcell{1.59} & \divergentcell{1.92} & \divergentcell{1.83} & \divergentcell{1.88} & \divergentcell{0.81} & \divergentcell{1.52} & \divergentcell{3.04} & \divergentcell{1.88} & \divergentcell{1.17} & \divergentcell{2.65} & \divergentcell{1.71} & \divergentcell{2.51} \\
+                            Jui & \divergentcell{2.37} & \divergentcell{2.5} & \divergentcell{2.57} & \divergentcell{2.43} & \divergentcell{1.53} & \divergentcell{1.07} & \divergentcell{1.46} & \divergentcell{1.32} & \divergentcell{1.5} & \divergentcell{3.16} & \divergentcell{2.43} & \divergentcell{3.2} \\
+                            Juil & \divergentcell{2.86} & \divergentcell{2.93} & \divergentcell{2.84} & \divergentcell{2.59} & \divergentcell{1.78} & \divergentcell{1.29} & \divergentcell{1.07} & \divergentcell{1.53} & \divergentcell{1.74} & \divergentcell{3.27} & \divergentcell{2.83} & \divergentcell{3.7} \\
+                            Aoû & \divergentcell{2.41} & \divergentcell{2.41} & \divergentcell{2.37} & \divergentcell{2.27} & \divergentcell{1.82} & \divergentcell{1.29} & \divergentcell{1.32} & \divergentcell{1.14} & \divergentcell{1.43} & \divergentcell{2.7} & \divergentcell{2.4} & \divergentcell{2.96} \\
+                            Sep & \divergentcell{1.62} & \divergentcell{1.82} & \divergentcell{1.65} & \divergentcell{1.64} & \divergentcell{1.16} & \divergentcell{1.35} & \divergentcell{2.46} & \divergentcell{1.47} & \divergentcell{0.94} & \divergentcell{2.1} & \divergentcell{1.66} & \divergentcell{2.3} \\
+                            Oct & \divergentcell{1.52} & \divergentcell{1.37} & \divergentcell{1.23} & \divergentcell{1.11} & \divergentcell{2.05} & \divergentcell{3.13} & \divergentcell{5.0} & \divergentcell{3.86} & \divergentcell{2.25} & \divergentcell{0.99} & \divergentcell{1.49} & \divergentcell{1.42} \\
+                            Nov & \divergentcell{0.79} & \divergentcell{0.78} & \divergentcell{0.8} & \divergentcell{1.23} & \divergentcell{1.37} & \divergentcell{4.7} & \divergentcell{9.86} & \divergentcell{6.27} & \divergentcell{2.16} & \divergentcell{1.13} & \divergentcell{0.7} & \divergentcell{0.74} \\
+                            Dec & \divergentcell{0.86} & \divergentcell{0.88} & \divergentcell{1.18} & \divergentcell{2.02} & \divergentcell{1.8} & \divergentcell{6.99} & \divergentcell{14.43} & \divergentcell{8.51} & \divergentcell{2.64} & \divergentcell{1.65} & \divergentcell{1.03} & \divergentcell{0.83} \\
+                            \bottomrule
+                        \end{tabular}
+                        \caption{Moyenne des $\mathrm{RMSE}\left(T_{air}\right)_{\text{Bâtiment}}$ avec des valeurs de $\mathbf {P_{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois pour l'ensemble des bâtiments}
+                        \label{tab:mean_std_by_building_by_month}
+                    \end{table}
 
 
-    \subsection{Limites de la PSO et continuité des travaux}\label{subsec:limites-de-la-pso-et-continuite-des-travaux}
+        \subsection{Pistes d'amélioration du modèle}\label{subsec:limites-de-la-pso-et-continuite-des-travaux}
 
-        \setdivergentmin{-100}
-        \setdivergentmid{0}
-        \setdivergentmax{100}
-        \begin{table}[H]
-            \centering
-            \begin{tabular}{lccccccccc}
-                \toprule
-                \textbf{Bâtiment} & $U_{air-env}$ &  $U_{air-ext}$ &  $U_{env-ext}$ & $C_{air}$ & $C_{env}$ & $k_1$ & $k_2$ & $\mathrm{RMSE}\left(T_{air}\right)$ & $\mathrm{RMSE}\left(\phi_{em}\right)$ \\
-                \midrule
-                CastelO & \divergentcell{42} & \divergentcell{0} & \divergentcell{84} & \divergentcell{1} & \divergentcell{42} & \divergentcell{3.0} & \divergentcell{44} & \divergentcell{1} & \divergentcell{3} \\
-                CastelR & \divergentcell{0} & \divergentcell{0} & \divergentcell{31} & \divergentcell{0} & \divergentcell{313} & X & \divergentcell{316} & \divergentcell{1} & \divergentcell{0} \\
-                Ceva & \divergentcell{36} & \divergentcell{1} & \divergentcell{95} & \divergentcell{32} & \divergentcell{45} & \divergentcell{32.0} & \divergentcell{25} & \divergentcell{4} & \divergentcell{60} \\
-                Novae & \divergentcell{16} & \divergentcell{1} & \divergentcell{134} & \divergentcell{7} & \divergentcell{37} & \divergentcell{7.0} & \divergentcell{56} & \divergentcell{5} & \divergentcell{3} \\
-                Panache & \divergentcell{23} & \divergentcell{0} & \divergentcell{51} & \divergentcell{1} & \divergentcell{33} & \divergentcell{2.0} & \divergentcell{30} & \divergentcell{1} & \divergentcell{2} \\
-                Python & \divergentcell{14} & \divergentcell{1} & \divergentcell{149} & \divergentcell{6} & \divergentcell{45} & \divergentcell{8.0} & \divergentcell{52} & \divergentcell{6} & \divergentcell{3} \\
-                Soleil & \divergentcell{15} & \divergentcell{1} & \divergentcell{138} & \divergentcell{5} & \divergentcell{29} & \divergentcell{8.0} & \divergentcell{34} & \divergentcell{4} & \divergentcell{4} \\
-                Thales & \divergentcell{2} & \divergentcell{0} & \divergentcell{213} & \divergentcell{3} & \divergentcell{38} & \divergentcell{4.0} & \divergentcell{49} & \divergentcell{2} & \divergentcell{3} \\
-                Up & \divergentcell{21} & \divergentcell{2} & \divergentcell{69} & \divergentcell{10} & \divergentcell{46} & \divergentcell{6.0} & \divergentcell{35} & \divergentcell{5} & \divergentcell{5} \\
-                Zenae & \divergentcell{7} & \divergentcell{1} & \divergentcell{66} & \divergentcell{2} & \divergentcell{28} & \divergentcell{5.0} & \divergentcell{28} & \divergentcell{3} & \divergentcell{2} \\
-                \bottomrule
-            \end{tabular}
-            \caption{Écart-type normalisé en \% des données de sorties de la PSO sur dix calculs, par bâtiment, pour le mois de janvier}
-            \label{tab:my_label4}
-        \end{table}
+            \subsubsection{Évaluation des performances}
+                Au cours de l'étude, une priorité plus grande a été donnée à l'appréciation de $\textrm{RMSE}\left(\ThatAir{t}\right)$.
+                Cependant, la figure \ref{fig:TAir_PhiHeat} basée sur les données de sortie du tableau \ref{tab:mean_std_by_building_by_month} montre que l'erreur
+                sur le besoin de chauffage est décorrélée de celle sur la température intérieure.
+                Les prochaines évaluations devront donc tenir compte de cette décorrélation et définir un critère pour pénaliser les erreurs sur $\PhihatHeat{t}$ également.
+
+                \begin{figure}[H]
+                    \centering
+                    \fbox{\includegraphics[width=0.5\textwidth]{figures/diagrammes/courbes/TST/TAir_PhiHeat}}
+                    \caption{$\textrm{RMSE}\left( \PhihatHeat{t} \right)$ en fonction de $\textrm{RMSE}\left( \ThatAir{t} \right)$}\label{fig:TAir_PhiHeat}
+                \end{figure}
+
+            \subsubsection{Limites de la PSO}
+                Les ressources citées précédemment mettent en garde sur le risque lié à l'initialisation aléatoire des particules pendant la PSO.
+                En effet, la convergence vers un minimum global peut fortement dépendre des positions de départ, ce que vérifie le tableau suivant reportant les résultats de dix optimisations
+                parallèles pour lesquelles varient seulement ce paramètre.
+                \setdivergentmin{-100}
+                \setdivergentmid{0}
+                \setdivergentmax{100}
+                \begin{table}[H]
+                    \centering
+                    \begin{tabular}{lccccccccc}
+                        \toprule
+                        \textbf{Bâtiment} & $\UAirEnv$ &  $\UAirExt$ &  $\UEnvExt$ & $\CAir$ & $\CEnv$ & $k_1$ & $k_2$ & $\mathrm{RMSE}\left(\ThatAir{t}\right)$ & $\mathrm{RMSE}\left(\PhiHeat{t}\right)$ \\
+                        \midrule
+                        CastelO & \divergentcell{42} & \divergentcell{0} & \divergentcell{84} & \divergentcell{1} & \divergentcell{42} & \divergentcell{3.0} & \divergentcell{44} & \divergentcell{1} & \divergentcell{3} \\
+                        CastelR & \divergentcell{0} & \divergentcell{0} & \divergentcell{31} & \divergentcell{0} & \divergentcell{313} & X & \divergentcell{316} & \divergentcell{1} & \divergentcell{0} \\
+                        Ceva & \divergentcell{36} & \divergentcell{1} & \divergentcell{95} & \divergentcell{32} & \divergentcell{45} & \divergentcell{32.0} & \divergentcell{25} & \divergentcell{4} & \divergentcell{60} \\
+                        Novae & \divergentcell{16} & \divergentcell{1} & \divergentcell{134} & \divergentcell{7} & \divergentcell{37} & \divergentcell{7.0} & \divergentcell{56} & \divergentcell{5} & \divergentcell{3} \\
+                        Panache & \divergentcell{23} & \divergentcell{0} & \divergentcell{51} & \divergentcell{1} & \divergentcell{33} & \divergentcell{2.0} & \divergentcell{30} & \divergentcell{1} & \divergentcell{2} \\
+                        Python & \divergentcell{14} & \divergentcell{1} & \divergentcell{149} & \divergentcell{6} & \divergentcell{45} & \divergentcell{8.0} & \divergentcell{52} & \divergentcell{6} & \divergentcell{3} \\
+                        Soleil & \divergentcell{15} & \divergentcell{1} & \divergentcell{138} & \divergentcell{5} & \divergentcell{29} & \divergentcell{8.0} & \divergentcell{34} & \divergentcell{4} & \divergentcell{4} \\
+                        Thales & \divergentcell{2} & \divergentcell{0} & \divergentcell{213} & \divergentcell{3} & \divergentcell{38} & \divergentcell{4.0} & \divergentcell{49} & \divergentcell{2} & \divergentcell{3} \\
+                        Up & \divergentcell{21} & \divergentcell{2} & \divergentcell{69} & \divergentcell{10} & \divergentcell{46} & \divergentcell{6.0} & \divergentcell{35} & \divergentcell{5} & \divergentcell{5} \\
+                        Zenae & \divergentcell{7} & \divergentcell{1} & \divergentcell{66} & \divergentcell{2} & \divergentcell{28} & \divergentcell{5.0} & \divergentcell{28} & \divergentcell{3} & \divergentcell{2} \\
+                        \bottomrule
+                    \end{tabular}
+                    \caption{Écart-type normalisé en \% des données de sorties de la PSO sur dix calculs, par bâtiment, pour le mois de janvier}
+                    \label{tab:my_label4}
+                \end{table}
+
+                Ces données ne montrent pas un impact significatif sur les métriques d'évaluation et confirment l'existence de minima locaux présentant des performances similaires.
+                Cependant, les limites de la PSO sont mises en évidence et une question pertinente peut être celle de la portabilité de cet algorithme sur d'autres données.
+
+\newpage\subsubsection{Limites des solveurs}
+                Il a été montré que $\textrm{RMSE}\left( \PhihatHeat{t} \right)$ est décorrélée de $\textrm{RMSE}\left( \ThatAir{t} \right)$ avec le modèle actuel.
+                Cependant, la fonction optimisée pour le besoin de chauffage \ref{eq:fminphiheatdistrisim} dépend directement de la température intérieure prédite.
+                On peut alors émettre l'hypothèse que le modèle n'est fiable, en raison de la non-proportionnalité entre les deux erreurs précédemment décrites.
+                Une piste de travail est donc le remplacement de la méthode de la sécante par une méthode minimisant l'erreur additionnelle s'ajoutant à celle calculée par le solveur d'Euler.
+                À ce titre, la méthode de Brent est généralement un bon concurrent à la sécante et mérite d'être examinée.
+
+            \begin{bluebox}
+                (04/02) : À ce jour, les modifications de modélisation envisagées sont très fortement corrélées à l'architecture logicielle du projet, encore mal définie.
+                Par exemple, il est fastidieux de chercher à challenger la méthode de la sécante ou le solveur Euler car ceux-ci sont implémentés \it{from scratch}.
+                C'est pourquoi la priorité est désormais de continuer le refactoring et l'amélioration de cette architecture, notamment en généralisant l'utilisation de librairies standards comme SciPy,
+                en adoptant une approche orientée objet, et en proposant un modèle relationnel dans une base de données dédiée à l'importation des données actuelles et futures.
+            \end{bluebox}
         
         
 

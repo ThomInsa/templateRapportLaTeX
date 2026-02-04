@@ -33,38 +33,12 @@
 
 - Figure : courbes de visualisation des données de mesure d'un bâtiment (Thales ou Apache ...)
 - Algo : méthode de la sécante
-  - Citer num_anal :
-    >   Apart from multiple roots, Newton’s Method converges at a faster rate than the bisection
-      and FPI methods. It achieves this faster rate because it uses more information—in particular,
-      information about the tangent line of the function, which comes from the function’s
-      derivative. In some circumstances, the derivative may not be available.
-      The Secant Method is a good substitute for Newton’s Method in this case. It replaces the
-      tangent line with an approximation called the secant line, and converges almost as quickly.
-      Variants of the Secant Method replace the line with an approximating parabola, whose
-      axis is either vertical (Muller’s Method) or horizontal (inverse quadratic interpolation). The
-      section ends with the description of Brent’s Method, a hybrid method which combines the
-      best features of iterative and bracketing methods.
 
 - Figure : Reprendre paragraphe 5.1 de TST dans un logigramme 
 
 - Figure : logigramme pour expliquer la démarche pour reproduire figure 18
 ### Rapide analyse des données d'entrée
 
-### Conclusion intermédiaire
-
-- Tableau : reproduire figure  14
-
-##### Limitations de la PSO
-
-L'algorithme ne converge pas tout le temps (nb max d'itérations atteint) alors qu'on peut encore minimiser la fonction de façon importante.
-
--> Lancer une série de 10 PSO pour chaque bâtiment
-
-- En $x$, les paramètres thermiques $RC$
-- En $y$, l'écart-type de chaque paramètre normalisé par z_score, un point par paramètre, une couleur de points par bâtiment
->La PSO produit des résultats très différents et de fiabilités inégales. Les données de sortie le montrent. Trois pistes doivent alors être envisagées :
-> 1. Consolider l'algorithme ou envisager des algorithmes similaires
-> 2. Revoir la data utilisée pour être plus fiable dès l'entrée
 
 ## Étude et développement de nouvelles approches pour la modélisation énergétique de bâtiments
 
@@ -72,18 +46,13 @@ L'algorithme ne converge pas tout le temps (nb max d'itérations atteint) alors 
 
 ### Retour sur la méthode de la sécante : généralisation et perfectionnement
 
-- Algorithme : méthode de Brent
 
 ### Autres méta-heuristiques
 
 - Principal avantage de la PSO = ne pas utiliser le gradient de la fonction, et donc pas besoin que la fonction soit dérivable
 - Avantage relatif dans le sens où notre fonction est différentiable
 - Il a été considéré de changer la fonction objectif mais celle-ci étant très standard _(RMSE)_, ce n'est pas la priorité
-- De même, pas d'étude comparative sur les hyperparamètres de la PSO _(nombre d'itérations, taille de la population etc)_ car on a déjà atteint les limites conceptuelles. Il est raisonnable alors de penser que l'algorithme se heurterait aux mêmes difficultés pour d'autres cas limites si ceux-ci étaient changés. 
 
-### Vers de nouvelles données d'entraînemnent
-
-citer article Lyse
 
 # Considérations sur l'architecture logicielle du projet \texttt{IBIS} : aspects techniques et sécuritaires
 
@@ -93,20 +62,9 @@ citer article Lyse
 
 - Citer Clean Code et les bonnes pratiques mises en oeuvre
 - Si possible, citer Serious Python
+
 - Donner un listing exemple de fonction refactorisée
 
-- Faire un avant / après qualitatif et quantitatif :
-  - Nombre de lignes totales
-  - Traitement des données
-  - Plus longue fonction
-  - Plus courte fonction
-  - Nombre de fonctions
-  - Noms de variables
-  - Arborescence de fichiers
-  - Fonctions implémentées vs fonctions de librairies
-  - Approche objet
-  - Gestion de projet (aucune VS Gitlab)
-  - Librairies utilisées
 
 Axes d'amélioration (probablement non explorés fin S9)
 - Nombre de paramètres d'entrée et de sortie des fonctions
@@ -116,11 +74,18 @@ Axes d'amélioration (probablement non explorés fin S9)
 
 #### Utilisation de librairies standards
 
-- `scipy` 
+- Parler du tradeoff entre l'introduction de dépendances aux librairies et le gain métier / sécu
+
+#### Vers un modèle de données uniformisé
+
+  - Ajd on est sur un modèle relationnel sans le dire
+  - Colonnes pas normalisées = mauvais point de départ pour de l'analyse
+  - Besoin d'avoir le même dataset pour chaque bâtiment
+  - Évolution vers une BDD standard nécessaire _(SQLite)_
+  - Interroger le modèle relationnel va sans doute permettre une meilleure intégration des composants
 
 ### Évaluation qualitative des performances du projet
 
-Citer figure PSO pour montrer qu'elle est lente.
 
 #### Complexité des algorithmes appelés
 - Complexité des algorithmes mis en jeu
@@ -188,7 +153,7 @@ Tableau d'analyse du risque :
     - Tableau similaire pour la fin du S10 
 
 - Bonne pratique adoptée : ne jamais push sans update la documentation
-
+- Autre bonne pratique : après chaque gros commit, vérifier les résultats avec le notebook [mean_err_by_building_by_month.ipynb](../../Projets/IBIS/TSA_Proj/TST_rehandled/DISTRISIM_energy_prediction/notebooks/mean_err_by_building_by_month.ipynb) pour reproduire la grosse figure (remplace un pipeline CI/CD complet) 
 # Conclusion
 
 > La synthèse des cinq premières semaines d'alterance  

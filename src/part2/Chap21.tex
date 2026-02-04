@@ -58,8 +58,10 @@
             et peuvent être classés de façon incomplète selon les catégories suivantes
             \cite{allyouneedtoknowaboutMPCforbuildings}\cite{KATHIRGAMANATHAN2021110120}.
             \begin{enumerate}
-                \item Type du modèle : \begin{itemize}
-                   \item Les modèles
+                \item Composants du modèle de bâtiment : \begin{itemize}
+                   \item L'enveloppe, c'est-à-dire du système comprenant les parois internes et externes, le sol, le plafond, les fenêtres et le reste des éléments séparant l'intérieur du bâtiment de l'extérieur, ou d'une autre de ses zones
+                   \item Le système HVAC, modélisant les comportements croisés des sources de chaleur et de refroidissement du bâtiment \textit{(chaudières, pompes à chaleur, climatiseurs, ventilateurs, tuyauterie \ldots)}
+                   \item Les perturbations, représentant toutes les entrées non contrôlables \textit{(conditions météorologiques, taux d'occupation, prix de l'électricité \ldots)}
                 \end{itemize}
                 \item Paradigme de modèle : \begin{itemize}
                     \item Les modèles White-Box sont basés sur la connaissance physique du
@@ -74,9 +76,12 @@
                     est celui des modèles RC\it{(voir \ref{AE} et \ref{chap:distrisim})}, où l'on identifie des
                     paramètres physiques à partir de données expérimentales.
                 \end{itemize}
-                \item Algorithme de MPC utilisé :
+                \item Algorithme de MPC utilisé
             \end{enumerate}
-            D'autres paramètres existent \textit{(classes, types de solution…)}
+
+            D'autres paramètres existent \textit{(classes, types de solution…)}, et montrent que le Modèle de Contrôle Prédictif propose un ensemble d'approches très large.
+            Une introduction à l'un des modèles les plus répandus est présentée plus bas, et servira de cadre pour les modélisations développées dans les prochains chapitres.
+
         \subsection{Un modèle physique simple et interprétable : analogie avec les circuits électriques}\label{AE}
             
             Il a été montré\cite{elec_analog, fraisse_elec_analog} qu'il est possible
@@ -159,13 +164,13 @@
         \end{itemize}
     
     Comme c'est souvent le cas en Machine Learning, les prochains éléments seront structurés en
-    une partie pour quelques considérations générales, et une autre portant une attention
+    une partie proposant quelques considérations générales, et une autre portant une attention
     particulière aux modèles plus récents reposant sur les réseaux de neurones, avec un retour
-    qualitatif sur quelques modèles proposés par la communauté internationale.
+    qualitatif sur plusieurs modèles proposés par la communauté internationale.
     
     \subsection{Approches traditionnelles}\label{subsec:approches-traditionnelles}
             
-            Comme vu précédemment, l'énergétique du bâtiment est une discipline ayant connu une
+            Comme vu plus haut, l'énergétique du bâtiment est une discipline ayant connu une
             évolution importante au cours des cinq dernières décennies, et ce constat est
             également vrai pour le Machine Learning\cite{WML}.
             On peut donc s'interroger sur l'impact d'un domaine sur l'autre et évaluer les
@@ -230,10 +235,11 @@
                 Un réseau de neurones artificiels est développé sur un bâtiment avec comme
                 paramètres d'entrée les données météorologiques, la température intérieure et le
                 taux d'occupation du bâtiment et comme sorties la température intérieure prédite
-                et la consommation d'énergie associée. Un algorithme génétique est ensuite
+                et la consommation d'énergie associée.
+                Un algorithme génétique est ensuite
                 appliqué pour minimiser cette consommation.
                 Faute de méthodologie standardisée, les hyperparamètres du réseau de neurones
-                sont fixées empiriquement par essais-erreurs.
+                sont fixés empiriquement par essais-erreurs.
                 \begin{itemize}
                     \item Nombre et profondeur des couches : 5-20-20-2 ou 6-20-20-2 selon les
                         zones du bâtiment
@@ -268,7 +274,7 @@
                 d'attention pour capturer les relations causales entre les différents paramètres.
                 Les performances sont supérieures à celles obtenues pour un LSTM simple ou un
                 GNN simple, bien qu'inégales selon les paramètres des graphes modélisés
-                \textit{(principalement du fait de la connaissance a priori de leur structure)}.
+                \textit{(principalement du fait de la connaissance a priori de leur structure)}.\newpage
         \subsubsection{Principaux défis et perspectives d'avenir}
             En se basant sur de précédentes revues~\cite{LU2022111718}, on peut identifier plusieurs
             retours d'expérience avec des réseaux de neurones donnant un contexte pour élaborer de
@@ -311,7 +317,7 @@
                 
             \paragraph{Utilisation des méta-heuristiques}
                 Celle-ci est prépondérante dans la littérature et les algorithmes associés peuvent
-                être regroupées en quatre catégories :
+                être regroupés en quatre catégories :
                 \begin{enumerate}
                     \item Algorithmes basés sur l'évolution
                         \textit{(algorithmes évolutionnaires, algorithmes génétiques…)}
@@ -335,7 +341,9 @@
                 utilisant le \textit{Transfer Learning} pour capitaliser sur les prédictions
                 obtenues d'un modèle à un autre, d'autres considérant la possibilité de générer
                 des données synthétiques en masse avec par exemple l'apprentissage antagoniste\cite{frwiki:gan}.
-\newpage\section{Vers une étude croisée des différentes méthodes et une généralisation sur un grand
+\newpage
+
+    \section{Vers une étude croisée des différentes méthodes et une généralisation sur un grand
     volume de données hétérogènes}\label{sec:vers-une-etude-croisee-des-differentes-methodes-et-une-generalisation-sur-un-grand-volume-de-donnees-heterogenes}
 
     Les précédentes sections ont donné un aperçu de l'étendue des possibilités en matière de
@@ -343,7 +351,7 @@
     elles.
     
     Forts de cette étude bibliographique, les prochains chapitres proposent des
-    pistes pour modéliser efficacement un bâtiment et en comparant les comportements des
+    pistes pour modéliser efficacement un bâtiment en comparant les comportements des
     différentes approches envisagées.
     
     En particulier, le chapitre suivant décrit un modèle simple, basé sur l'analogie
