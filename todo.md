@@ -1,7 +1,6 @@
 # Introduction
 
 - Rapport se veut auto-portant d'où la présence de 3 glossaires et de nombreuses équations / définitions + la dissociation des aspects modélisation et développement
-- Warning : ce rapport présente un bilan intermédiaire, ainsi de nombreuses figures sont amenées à évoluer
 
 # De l'énergétique du bâtiment au CEA : rappels historiques et contextualisation
 

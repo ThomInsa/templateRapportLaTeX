@@ -51,7 +51,7 @@
         $\FExt$};
     \node (PSOparam) [inputlong, below=of fext, yshift=1.5cm] {Fonction objectif \\ Bornes de recherche \\ Taille de l'essaim \\ Nb max d'itérations};
 
-    \node (PSOyn) [decision, below=of start] {Paramètres thermiques \\ fixés ?};
+    \node (PSOyn) [decision, below=of start, yshift=-0.5cm] {Paramètres thermiques \\ fixés ?};
 
     \node (Pth) [inputlong, below=of PSOyn, yshift=-2cm] {Vecteur Paramètres thermiques $\mathbf{P}_{\text{th}}$};
     \node (REME) [process, below=of Pth] {Résolution de l'équation \ref{eq:diffTST} \\ par la méthode d'Euler};
@@ -84,6 +84,7 @@
     \draw [arrow] (phisol.south) -- ++(0,-0.5) -| (fext.north);
 
     \draw [arrow] (PSOyn.south) -- node[left, text width=4cm, align=center] {oui \textit{(déterminés par la méthode 3CL ou par une précédente PSO)}} (Pth.north);
+    \draw [arrow] (PSOyn.east) -| node[text width=1cm, align=left, yshift=0.2cm, xshift=-1cm] {non} (PSO.north);
 %    \draw [arrow] (PSOyn.east) -- node[left, text width=4cm, align=center] {Non} (Pth.north);
     \draw [arrow] (Pth.south) -- (REME.north);
     \draw [arrow] (REME.south) -- (secante.north);

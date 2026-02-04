@@ -1,15 +1,38 @@
 \newpage\renewcommand{\abstractname}{Introduction}
+
 \addcontentsline{toc}{chapter}{Introduction}
 \begin{abstract}
 
-    \ldots
-    
-    La première partie \ldots Celle-ci sert à ce titre de rappels fondamentaux pour comprendre
+    Les chiffres publiés le plus récemment sur la consommation d'énergétique de bâtiments indiquent que celle-ci représente 45\% de la consommation d'énergie finale française \textit{(30\% pour le résidentiel et 15\% pour le tertiaire)}\cite{consoenerfrance}.
+    Au niveau mondial, cette part s'élève à environ 30\%\cite{consoenermonde}.
+
+    Lorsqu'ils sont rapprochés de la part des énergies fossiles dans le mix énergétique mondial \textit{(81\% en 2020, \cite{mixenermonde})} ou de la part du gaz dans les énergies de chauffage en France \textit{(35,8\% en 2020, \cite{mixbatfrance})}, ces indicateurs montrent l'importance
+    de l'impact de la modélisation des bâtiments, sur les aspects de leur construction et de leur monitoring, au regard des enjeux d'efficacité et de sobriété qu'ils engagent.
+
+    La modélisation thermique d'un bâtiment est toutefois un processus complexe devant tenir compte de nombreux paramètres, rendu possible
+    par plusieurs paradigmes, et évoluant nécessairement en phase avec l'état de l'art en calcul scientifique\footnote{On pense immédiatement à la multiplication des modélisations "data-driven" rendues possibles par les récentes avancées de l'Intelligence Artificielle.}
+
+    À cet égard, le CEA et en particulier le Département des Technologies Solaires sur les plateformes de l'INES\footnote{Voir le rapport intermédiaire sur les Aspects Humanités} rattaché au Centre de Grenoble
+    travaille à l'amélioration des modèles existants et à la capitalisation de données de diverses sources.
+
+    C'est dans ce contexte qu'a été créée une alternance d'un an en contrat de professionnalisation au sein du LELA.
+    Son point de départ est l'amélioration d'un algorithme développé lors d'un précédent stage en 2023 modélisant les bâtiments du quartier Cambdrige de Grenoble par l'analogie électrique, une approche répandue de l'énergétique du bâtiment.
+    Cette amélioration vise \textit{in fine} à motiver un certain nombre d'autres modèles plus ou moins proches de celui existant, avec d'autres données provenant notamment des équipements instrumentés du DTS.
+
+    Le présent rapport synthétise les travaux de l'alternant.
+    La première partie aborde les aspects théoriques de l'énergétique du bâtiment puis ouvre la voie à un nouveau projet interne au CEA, nommé IBIS (Identification of Building Insights and Specifications)
+    Celle-ci sert à ce titre de rappels fondamentaux pour comprendre
     la suite du document, et d'ensemble hétérogène de pistes futures pour de nouvelles approches.
-    
+    La seconde partie précise les choix d'architecture logicielle du modèle et rappelle les bonnes pratiques de développement visant à être adoptées à l'échelle de l'équipe du projet IBIS, voire du laboratoire.
+    Celle-ci comporte trois chapitres portant respectivement sur les aspects propreté logicielle, sécurité \textit{(notamment sécurité des données et des algorithmes de machine learning)} et gestion de projet.
+
+    Cette dissociation des aspects de modélisation et d'architecture est volontaire et permet au lecteur de parcourir ou non chacune des parties selon son appétence pour les domaines cités, chaque partie
+    citant l'autre mais ne nécessitant pas sa compréhension fine pour être lue intégralement.
+
     \begin{bluebox}
-        Rapport intermédiaire donc de nombreux points à consolider.
-        Quand une réflexion n'a pas pu aboutir, un commentaire sur de futurs travaux est indiqué
-        avec des pistes pour les prochaines semaines.
+        Cette version du rapport est livrée à l'issue de six semaines sur les quarante prévues par le calendrier d'alternance.
+        De fait, elle comporte de nombreuses zones d'ombre et points à consolider.
+
+        Quand une partie est identifiée comme perfectible, un cadre comme celui-ci vient préciser la continuité des travaux.
     \end{bluebox}
 \end{abstract}
