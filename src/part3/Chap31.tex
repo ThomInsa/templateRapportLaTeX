@@ -3,30 +3,97 @@
 
 \section{Refactoring des précédents travaux}\label{sec:refactoring-des-precedents-travaux}
 
-\cite{clean_code}
+À l'instar de la première partie, le travail sur l'architecture logicielle du projet \gls{IBIS} porte en premier lieu sur le remaniement du code du stage
+effectué sur le projet DISTRISIM, pour l'appropriation du sujet et la montée en compétences dans un premier temps, et pour la conception d'un code plus robuste supportant
+un plus grand volume de données et différents modèles dans un second.
 
-\begin{lstlisting}[caption={Exemple de fonction refactorisée},label={lst:lstlisting}]
-\end{lstlisting}
+Comme c'est le cas dans le projet \gls{IBIS}, on appellera TST le code précédent présenté dans \cite{TST} dans les prochaines parties.
+
+    TST est à l'origine un code de 1000 lignes
+
+    .
+    Le listing suivant n'inclut pas les dossiers \texttt{data}
+
+\begin{lstlisting}[language=bash, caption={Arborescence actuelle du projet},label={lst:tree}]
+|__init__.py
+├---input
+|   |   buildings_parameters.py
+|   |   input_parameters.py
+|   |   __init__.py
+├---models
+|   |   evaluation.py
+|   |   thermal_model.py
+|   |   __init__.py
+├---output
+|   |   export_results.py
+|   |   __init__.py
+|   ├---visualisation
+|   |   |   plots.py
+|   |   |   vis_config.py
+|   |   |   __init__.py
+├---solvers
+|   |   euler.py
+|   |   optimization.py
+|   |   __init__.py\end{lstlisting}
+
+    Ainsi, la fonction \texttt{main} (renommée \texttt{run\_computation}) peut être lancée avec des entrées de fichiers choisies dynamiquement.
+    Ceci facilite son utilisation dans des notebooks Jupyter et donc le lancement de nombreux calculs avec différents paramètres\footnote{La plupart des figures présentées dans la première partie sont obtenues grâce à cette multiplication des calculs, trop fastidieuse pour être lancée dans la première version du code.}.
+
+    L'arborescence du projet ébauchée, l'étape suivante est l'inspection des fonctions pour vérifier leur propreté, leur maintenabilité et la facilité à les faire évoluer.
+    Autant que possible, ce procédé tente de s'appuyer sur les recommendations du livre de Robert C. Martin \cite{clean_code}, faisant figure de référence standardisée dans le milieu du développement du logiciel.
+
+Le nombre de bonnes pratiques décrites dans cet ouvrage est particulièrement élevé et toutes ne sont pas forcément applicables simultanément, en particulier les exemples sont souvent tirés du développement web, un domaine généralement éloigné du calcul scientifique.
+La synthèse la plus élémentaire des techniques de nettoyage du code donnée plus bas a tout de même guidé le développement et les réflexions autour d'\gls{IBIS} :
+
+    \begin{itemize}
+        \item Le nommage des variables doit être explicite.
+        En particulier, allonger le nom d'une variable est généralement une bonne idée même si sa lecture peut sembler fastidieuse.
+        \item Les fonctions, classes, méthodes et fichiers doivent être le plus court possible (une dizaine de lignes maximum) et chaque fonction doit remplir un seul objectif.
+        En général, si une fonction dépasse ce nombre de lignes, alors elle peut être séparée.
+        \item De même, le nombre de paramètres d'une fonction ne doit pas être supérieur à trois.
+        \item Le \gls{TDD} reste la meilleure approche à la quasi-totalité des problèmes de programmation, aussi l'utilisation des tests doit être aussi fréquente que possible
+        \item Les commentaires doivent être utilisés avec parcimonie et ne remplacent en aucun cas l'explication du code par lui-même.
+        La raison d'être de nombreux commentaires est en effet la clarification d'éléments de code mal implémentés, avec pour finalité la présence dans le projet de deux informations floues plutôt qu'une explicite.
+    \end{itemize}
+
+    \begin{bluebox}
+        (05/02) : Ces bonnes pratiques ne sont pour l'instant pas étendues à l'ensemble du projet \gls{IBIS}, encore à un stade très précoce de développement.
+    Elles sont néanmoins appliquées par endroit et nourrissent les réflexions pour la création des issues notamment\textit{(voir chapitre \ref{ch:versionning-et-gestion-de-projet})}.
+        Par ailleurs, d'autres conseils de développement propres spécifiques au langage Python sont données dans \cite{serious_python} mais n'ont pas été explorées à ce jour.
+    \end{bluebox}
+
+    L'une des fonctions d'IBIS est donnée dans le listing suivant.
+    Celle-ci peut servir de référence de fonction "propre", bien qu'il soit en pratique difficile de créer cette architecture pour une grande proportion du code, de nombreuses fonctions étant moins facilement découpables.
+
+\begin{lstlisting}[caption={Exemple de fonction refactorisée idéale},label={lst:lstlisting}]
+def energy_need(heating_flux, living_area, dt):
+energy_need_t = 0
+for i in heating_flux:
+    energy_need_t = energy_need_t + i * dt
+return energy_need_t / 3600 / living_area\end{lstlisting}
+
+        Enfin,
 
         \begin{table}[h!]
             \centering
+            \begin{adjustbox}{width=\textwidth}
             \begin{tabular}{lcc}
                 \toprule
                 \textbf{Critère} & \textbf{Projet de 2023} & \textbf{Projet actuel} \\
                 \midrule
-                Nombre de lignes totales &  &  \\
-                Traitement des données &  &  \\
-                Plus longue fonction &  &  \\
-                Plus courte fonction &  &  \\
-                Nombre de fonctions &  &  \\
-                Noms de variables &  &  \\
-                Arborescence de fichiers &  &  \\
-                Fonctions implémentées vs fonctions de librairies &  &  \\
-                Approche objet &  &  \\
-                Gestion de projet (aucune VS Gitlab) &  &  \\
-                Librairies utilisées &  &  \\
+                Nombre de lignes totales & 1154 & 515 \\
+                Nombre de fichiers source & 1 & 8\\
+                Plus longue fonction & 363 & 85 \\
+                Plus courte fonction & 6 & 4 \\
+                Nombre de fonctions & 13 & 21 \\
+                Traitement des données & En partie hardcodée dans les sources & Dans un dossier dédiée avec une arborescence permettant l'implémentation d'une BDD relationnelle \\
+                Fonctions implémentées vs fonctions de librairies & Aucune & Aucune \textit{(Issues créées pour utiliser des solveurs de librairies)} \\
+                Approche objet & Aucune & En cours de développement \\
+                Gestion de projet (aucune VS Gitlab) & Aucune & GitLab interne déployé avec documentation des commit et suivi des issues \\
+                Librairies utilisées & PySwarm & PySwarm \\
                 \bottomrule
             \end{tabular}
+            \end{adjustbox}
             \caption{Comparaison d'architecture qualitative et quantitative entre le projet de 2023 et le projet actuel}\label{tab:table}
         \end{table}
 
@@ -36,26 +103,31 @@
 
         \subsection{Vers un modèle de données relationnel uniformisé}\label{subsec:vers-un-modele-de-donnees-relationnel-uniformise}
 
+            \begin{figure}[H]
+                \centering
+                {\fbox{
+                    \includegraphics[width = 0.75\textwidth]{figures/diagrammes/SQL_Model}}}~\caption{Ébauche de modèle relationnel pour les données de DISTRISIM}\label{fig:SQL}
+            \end{figure}
 
 \section{Évaluation qualitative des performances du projet}\label{sec:evaluation-qualitative-des-performances-du-projet}
 
-\subsection{Complexité des algorithmes appelés}\label{subsec:complexite-des-algorithmes-appeles}
+    \subsection{Complexité des algorithmes appelés}\label{subsec:complexite-des-algorithmes-appeles}
 
-\subsection{Outils retenus pour garantir la performance}\label{subsec:outils-retenus-pour-garantir-la-performance}
+    \subsection{Outils retenus pour garantir la performance}\label{subsec:outils-retenus-pour-garantir-la-performance}
 
-\subsection{\texttt{uv} plutôt que \texttt{conda} ou \texttt{pip}}\label{subsec:texttt{uv}-plutot-que-texttt{conda}-ou-texttt{pip}}
+    \subsection{{uv} plutôt que {conda} ou {pip}}\label{subsec:texttt{uv}-plutot-que-texttt{conda}-ou-texttt{pip}}
 
-\subsection{Polars plutôt que Pan²das}\label{subsec:polars-plutot-que-pan2das}
+    \subsection{Polars plutôt que Pandas}\label{subsec:polars-plutot-que-pandas}
 
-                \begin{table}[h!]
-                    \centering
-                    \begin{tabular}{lcc}
-                        \toprule
-                        \textbf{Calcul lancé} & \textbf{Avec \texttt{Pandas}} & \textbf{Avec \texttt{Polars}} \\
-                        \midrule
-                        Couple Dataset-Modèle 1 &  &  \\
-                        Couple Dataset-Modèle 2 &  &  \\
-                        \bottomrule
-                    \end{tabular}
-                    \caption{Benchmark de performance entre \texttt{Pandas} et \texttt{Polars}}\label{tab:table2}
-                \end{table}
+        \begin{table}[h!]
+            \centering
+            \begin{tabular}{lcc}
+                \toprule
+                \textbf{Calcul lancé} & \textbf{Avec \texttt{Pandas}} & \textbf{Avec \texttt{Polars}} \\
+                \midrule
+                Couple Dataset-Modèle 1 &  &  \\
+                Couple Dataset-Modèle 2 &  &  \\
+                \bottomrule
+            \end{tabular}
+            \caption{Benchmark de performance entre \texttt{Pandas} et \texttt{Polars}}\label{tab:table2}
+        \end{table}

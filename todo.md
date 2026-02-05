@@ -64,7 +64,6 @@
 
 - Donner un listing exemple de fonction refactorisée
 
-
 Axes d'amélioration (probablement non explorés fin S9)
 - Nombre de paramètres d'entrée et de sortie des fonctions
 - Assertions et tests autant que possible

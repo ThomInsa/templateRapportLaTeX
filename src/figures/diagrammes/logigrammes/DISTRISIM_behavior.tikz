@@ -43,7 +43,7 @@
     \node (start) [process] {Récupération des \\ profils temporels du bâtiment};
 
     \node (Text) [inputshort, below right=of start] {$\TAir{t}$};
-    \node (Tint) [inputshort, below right=of start, xshift = 2cm] {$\TEnv{t}$};
+    \node (Tint) [inputshort, below right=of start, xshift = 2cm] {$\TExt{t}$};
     \node (phiheat) [inputshort, below right=of start, xshift = 4cm] {$\PhiHeat{t}$};
     \node (phisol) [inputshort, below right=of start, xshift = 6cm] {$\PhiSol{t}$};
 
@@ -53,7 +53,7 @@
 
     \node (PSOyn) [decision, below=of start, yshift=-0.5cm] {Paramètres thermiques \\ fixés ?};
 
-    \node (Pth) [inputlong, below=of PSOyn, yshift=-2cm] {Vecteur Paramètres thermiques $\mathbf{P}_{\text{th}}$};
+    \node (Pth) [inputlong, below=of PSOyn, yshift=-2cm] {Vecteur Paramètres thermiques $\PTh$};
     \node (REME) [process, below=of Pth] {Résolution de l'équation \ref{eq:diffTST} \\ par la méthode d'Euler};
     \node (PSO) [process, right=of Pth, xshift=-0.5cm] {PSO \\ pour déterminer \\ les paramètres thermiques};
     \node (secante) [process, below=of REME] {Détermination du besoin de chauffage \\ par la méthode de la sécante};

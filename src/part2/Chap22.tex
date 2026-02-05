@@ -47,13 +47,13 @@
             \end{table}
 
             Pour chacun de ces bâtiments, des données de consommation énergétique synthétiques sont générées à l'aide d'EnergyPlus sous forme de séries temporelles sur une année entière.
-            Celles-ci comprennent la température intérieure du bâtiment \textit{(unique)}, la température dans l'enveloppe, le flux de chauffage dans le bâtiment \textit{(unique également)} et le flux solaire.
+            Celles-ci comprennent la température intérieure du bâtiment \textit{(unique)}, la température extérieure, le flux de chauffage dans le bâtiment \textit{(unique également)} et le flux solaire.
             On peut ainsi regrouper ces séries dans un vecteur constituant le forçage externe du modèle :
 
             \begin{equation}
                 \FExt = \begin{bmatrix}
                     \TAir{t}\\
-                    \TEnv{t}\\
+                    \TExt{t}\\
                     \PhiHeat{t}\\
                     \PhiSol{t}
                 \end{bmatrix}\label{eq:FExt}
@@ -88,6 +88,7 @@
             \begin{itemize}
                 \item 5 noeuds de température $\TAir{t}$, $\TEnv{t}$, $\TMass{t}$, $\TEm{t}$ et $\TCirc{t}$, représentant respectivement les températures intérieure, de l'enveloppe, de la masse thermique, de la source de chaleur et du circuit de chauffage ;
                 \item 5 capacités thermiques représentant l'inertie de ces mêmes zones $\CAir$, $\CEnv$, $\CMass$, $\CEm$ et $\CCirc$
+                \item 5 conductances pour les transferts de chaleur entre les noeuds $\UAirExt$, $\UAirEnv$, $\UAirMass$, $\UAirEm$ et $\UEnvExt$
                 \item 3 ouvertures surfaciques pour l'impact du flux solaire sur l'air intérieur, l'enveloppe et la masse $\kAir$, $\kEnv$, $\kMass$
             \end{itemize}
             
@@ -115,7 +116,7 @@
         
             \begin{figure}[H]
                 \centering
-                {\fbox{\includegraphics[width = 0.75\textwidth]{figures/diagrammes/schémas/DISTRISIM AE.drawio}}}
+                {\fbox{\includegraphics[width = 0.7\textwidth]{figures/diagrammes/schémas/DISTRISIM AE.drawio}}}
                 \caption{Modèle RC utilisé pour modéliser un bâtiment DISTRISIM \textit(tiré de \cite{TST} et inspiré de \cite{aoun})}\label{fig:figure}
             \end{figure}
             
@@ -508,7 +509,7 @@
 \newpage\subsubsection{Limites des solveurs}
                 Il a été montré que $\textrm{RMSE}\left( \PhihatHeat{t} \right)$ est décorrélée de $\textrm{RMSE}\left( \ThatAir{t} \right)$ avec le modèle actuel.
                 Cependant, la fonction optimisée pour le besoin de chauffage \ref{eq:fminphiheatdistrisim} dépend directement de la température intérieure prédite.
-                On peut alors émettre l'hypothèse que le modèle n'est fiable, en raison de la non-proportionnalité entre les deux erreurs précédemment décrites.
+                On peut alors émettre l'hypothèse que le modèle n'est pas fiable, en raison de la non-proportionnalité entre les deux erreurs précédemment décrites.
                 Une piste de travail est donc le remplacement de la méthode de la sécante par une méthode minimisant l'erreur additionnelle s'ajoutant à celle calculée par le solveur d'Euler.
                 À ce titre, la méthode de Brent est généralement un bon concurrent à la sécante et mérite d'être examinée.
 
