@@ -7,14 +7,25 @@
 effectué sur le projet DISTRISIM, pour l'appropriation du sujet et la montée en compétences dans un premier temps, et pour la conception d'un code plus robuste supportant
 un plus grand volume de données et différents modèles dans un second.
 
-Comme c'est le cas dans le projet \gls{IBIS}, on appellera TST le code précédent présenté dans \cite{TST} dans les prochaines parties.
+Comme c'est le cas dans le projet \gls{IBIS}, on appelle TST le code précédent présenté dans \cite{TST} pour les prochaines parties, et IBIS-DISTRISIM le code récemment remanié.
 
-    TST est à l'origine un code de 1000 lignes
+    TST est à l'origine un code de 1000 lignes écrit sur un fichier donnant des courbes prévisionnelles de
+    consommation d'énergie avec ou sans adaptation des paramètres du modèle aux données
+    de la période précédant celle de la prévision.
+    Ses entrées sont saisies séquentiellement et manuellement dans le terminal du programme.
 
-    .
-    Le listing suivant n'inclut pas les dossiers \texttt{data}
+    Si le code livre des résultats intéressants sur les bâtiments étudiés \ref{tab:tstfinal},
+    son architecture rend difficile la compréhension microscopique du comportement du modèle
+    d'une part \textit{(en particulier la sensibilité d'un paramètre devant un résultat précis)}, et la généralisation des expériences d'autre part \textit{(notamment le lancement d'une série massive de calculs pour apprécier les sorties du modèle à plus grande échelle)}.
 
-\begin{lstlisting}[language=bash, caption={Arborescence actuelle du projet},label={lst:tree}]
+    Ce constat permet de commencer la refactorisation avec en premier lieu la répartition des
+        fonctions existantes dans une arborescence à plusieurs fichiers.
+    Le listing suivant montre l'architecture adoptée, à l'exception de la partie \texttt{data}
+        stockée à l'extérieur des sources comme le suggèrent les lignes de conduite du
+        développement propre.
+
+\begin{lstlisting}[language=bash, caption={Arborescence actuelle du projet IBIS-DISTRISIM},label={
+    lst:tree}]
 |__init__.py
 ├---input
 |   |   buildings_parameters.py
@@ -72,7 +83,6 @@ for i in heating_flux:
     energy_need_t = energy_need_t + i * dt
 return energy_need_t / 3600 / living_area\end{lstlisting}
 
-        Enfin,
 
         \begin{table}[h!]
             \centering
@@ -97,6 +107,17 @@ return energy_need_t / 3600 / living_area\end{lstlisting}
             \caption{Comparaison d'architecture qualitative et quantitative entre le projet de 2023 et le projet actuel}\label{tab:table}
         \end{table}
 
+        L'apport de ce travail de refactorisation est double : \begin{enumerate}
+           \item Les résultats précédents ont pu être consolidés avec la généralisation du
+               tableau \ref{tab:tstfinal} sur un seul bâtiment à l'ensemble du quartier étudié \ref{tab:mean_std_by_building_by_month}, sans que cette tâche soit rendue fastidieuse par une implémentation de code perfectible.
+           \item Il est désormais possible de développer de nouveaux modèles ou de consolider
+                                                                   celui existant en s'appuyant
+                                                                   sur le projet actuel, sans
+                                                                   avoir à en commencer un
+                                                                   nouveau.
+        \end{enumerate}
+        
+        
         \subsection{Passage à l'orienté objet}\label{subsec:passage-a-l'oriente-objet}
 
         \subsection{Standardisation des librairies importées}\label{subsec:standardisation-des-librairies-importees}
@@ -106,7 +127,9 @@ return energy_need_t / 3600 / living_area\end{lstlisting}
             \begin{figure}[H]
                 \centering
                 {\fbox{
-                    \includegraphics[width = 0.75\textwidth]{figures/diagrammes/SQL_Model}}}~\caption{Ébauche de modèle relationnel pour les données de DISTRISIM}\label{fig:SQL}
+%                    \includegraphics[width = 0.75\textwidth]{figures/diagrammes/SQL_Model}
+                }}
+            \caption{Ébauche de modèle relationnel pour les données de DISTRISIM}\label{fig:SQL}
             \end{figure}
 
 \section{Évaluation qualitative des performances du projet}\label{sec:evaluation-qualitative-des-performances-du-projet}
@@ -131,3 +154,47 @@ return energy_need_t / 3600 / living_area\end{lstlisting}
             \end{tabular}
             \caption{Benchmark de performance entre \texttt{Pandas} et \texttt{Polars}}\label{tab:table2}
         \end{table}
+        
+\section{Versionning et gestion de projet}\label{ch:versionning-et-gestion-de-projet}
+    
+     La refonte de TST dans le projet IBIS est accompagnée d'un framework de versionning
+     jusqu'alors inexistant, hébergé sur un GitLab interne au CEA\footnote{La plateforme est par ailleurs très récente et en cours de développement.
+     Dans ce contexte, le projet IBIS a pu servir de retour d'expérience à l'équipe de maintenance pour son amélioration continue.}
+     
+     Ces nouvelles méthodes ont permis une meilleure supervision du projet, notamment grâce à la
+     création d'issues et à leur résolution pendant les phases de développement.
+     Un aperçu d'entre elles est donnée dans le tableau suivant.
+     
+    \begin{table}[h!]
+        \centering
+        \begin{adjustbox}{width=\textwidth}
+            \begin{tabular}{p{6cm} p{6cm} p{6cm}}
+                \toprule
+                \textbf{To Do} & \textbf{Doing} & \textbf{Done} \\
+                \midrule
+                Consider using Seaborn rather than MPL & Refactor previous project & Refactor the mode function \\
+                Allow easy switch feature between models & Translate all variables and methods names in English & Refactor the visualisation functions \\
+                Consider the use of specialised workflow for Data Analysis & Host all data on data format files &  \\
+                Reduce input and output variables of functions &  &  \\
+                Consider using OOP for further development and maintenance &  &  \\
+                ToFix : No output when ending\_date does not start &  &  \\
+                Refactor secant method function &  &  \\
+                Consider calling libraries for Euler solvers &  &  \\
+                Implement better handling of error measurements &  &  \\
+                Consider using polars rather than pandas for dataframes &  &  \\
+                Consider implementing a full front-end architecture &  &  \\
+                Store buildings data in dedicated files &  &  \\
+                Consider refactoring the 3CL method &  &  \\
+                \bottomrule
+            \end{tabular}
+            \end{adjustbox}
+            \caption{Issues créées et traitées jusqu'au 31/10}
+            \label{tab:issues_state_simple}
+        \end{table}
+    
+        
+    \begin{bluebox}
+        (08/02) : Durant la prochaine période, il sera tenté de systématiser le développement
+        piloté par les issues et d'adapter les messages de commit
+    \end{bluebox}
+    

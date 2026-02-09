@@ -18,7 +18,9 @@
         \subsection{Bâtiments étudiés et datasets d'entraînement}\label{subsec:batiments-etudies-et-datasets-d'entrainement}
 
             Le projet DISTRISIM est mené par le CEA et vise à évaluer la consommation énergétique des bâtiments du quartier Cambridge, à Grenoble.
-            L'étude de ces bâtiments est facilitée par le caractère récent \it{(moins de douze ans)} de leur construction, garantissant la conformité aux réglementations thermiques de la RT2012\cite{RT2012, TST}.
+            L'étude de ces bâtiments est facilitée par le caractère récent
+            \it{(moins de douze ans)} de leur construction, garantissant leur conformité aux
+            réglementations thermiques de la RT2012\cite{RT2012, TST}.
             En outre ces bâtiments sont pour la plupart connectés à un réseau énergétique de quartier avec par exemple des panneaux solaires installés sur les toitures\cite{TST}.
 
             Les propriétés géométriques des bâtiments n'ayant pas été utilisées dans le cadre de ce rapport, elles ne sont pas rappelées formellement ici.
@@ -72,10 +74,12 @@
                 \end{bluebox}
 
                 \begin{figure}[H] \centering
-                    \subfloat[Température intérieure]{\fbox{
-                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_TAir}}}\\
-                    \subfloat[Besoin de chauffage]{\fbox{
-                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_PhiEm}}}
+%                    \subfloat[Température intérieure]{\fbox{
+%%                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_TAir}}
+%                    }\\
+%                    \subfloat[Besoin de chauffage]{\fbox{
+%%                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_PhiEm}}
+%                    }
                     \caption{Visualisation de la distribution des données d'entrée}\label{fig:DISTRISIMinputData}
                 \end{figure}
 
@@ -470,7 +474,7 @@
 
                 \begin{figure}[H]
                     \centering
-                    \fbox{\includegraphics[width=0.5\textwidth]{figures/diagrammes/courbes/TST/TAir_PhiHeat}}
+%                    \fbox{\includegraphics[width=0.5\textwidth]{figures/diagrammes/courbes/TST/TAir_PhiHeat}}
                     \caption{$\textrm{RMSE}\left( \PhihatHeat{t} \right)$ en fonction de $\textrm{RMSE}\left( \ThatAir{t} \right)$}\label{fig:TAir_PhiHeat}
                 \end{figure}
 
