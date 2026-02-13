@@ -68,7 +68,7 @@ La synthèse la plus élémentaire des techniques de nettoyage du code donnée p
 
     \begin{bluebox}
         (05/02) : Ces bonnes pratiques ne sont pour l'instant pas étendues à l'ensemble du projet \gls{IBIS}, encore à un stade très précoce de développement.
-    Elles sont néanmoins appliquées par endroit et nourrissent les réflexions pour la création des issues notamment\textit{(voir chapitre \ref{ch:versionning-et-gestion-de-projet})}.
+    Elles sont néanmoins appliquées par endroit et nourrissent les réflexions pour la création des issues notamment\textit{(voir chapitre \ref{sec:versionning-et-gestion-de-projet})}.
         Par ailleurs, d'autres conseils de développement propres spécifiques au langage Python sont données dans \cite{serious_python} mais n'ont pas été explorées à ce jour.
     \end{bluebox}
 
@@ -143,38 +143,43 @@ return energy_need_t / 3600 / living_area\end{lstlisting}
 
 \section{Évaluation qualitative des performances du projet}\label{sec:evaluation-qualitative-des-performances-du-projet}
 
+    IBIS ayant connu un lancement très récent, son architecture ne souffre pas d'un grand nombre de dépendances contraignantes.
+    Il constitue donc un excellent prétexte pour challenger les approches historiques de développement scientifique en utilisant des outils équivalents plus récents.
+
+    Cette section vise à analyser avec précision le projet pour repérer ses avantages et
+
     \subsection{Complexité des algorithmes appelés}\label{subsec:complexite-des-algorithmes-appeles}
 
     \subsection{Outils retenus pour garantir la performance}\label{subsec:outils-retenus-pour-garantir-la-performance}
 
-    \subsection{{uv} plutôt que {conda} ou {pip}}\label{subsec:texttt{uv}-plutot-que-texttt{conda}-ou-texttt{pip}}
+        \subsubsection{uv plutôt que conda ou pip}\label{subsubsec:{uv}-plutot-que-{conda}-ou-{pip}}
 
-    \subsection{Polars plutôt que Pandas}\label{subsec:polars-plutot-que-pandas}
+        \sububssection{Polars plutôt que Pandas}\label{subsec:polars-plutot-que-pandas}
 
-        \begin{table}[h!]
-            \centering
-            \begin{tabular}{lcc}
-                \toprule
-                \textbf{Calcul lancé} & \textbf{Avec \texttt{Pandas}} & \textbf{Avec \texttt{Polars}} \\
-                \midrule
-                Couple Dataset-Modèle 1 &  &  \\
-                Couple Dataset-Modèle 2 &  &  \\
-                \bottomrule
-            \end{tabular}
-            \caption{Benchmark de performance entre \texttt{Pandas} et \texttt{Polars}}\label{tab:table2}
-        \end{table}
+            \begin{table}[h!]
+                \centering
+                \begin{tabular}{lcc}
+                    \toprule
+                    \textbf{Calcul lancé} & \textbf{Avec \texttt{Pandas}} & \textbf{Avec \texttt{Polars}} \\
+                    \midrule
+                    Couple Dataset-Modèle 1 &  &  \\
+                    Couple Dataset-Modèle 2 &  &  \\
+                    \bottomrule
+                \end{tabular}
+                \caption{Benchmark de performance entre \texttt{Pandas} et \texttt{Polars}}\label{tab:table2}
+            \end{table}
         
-\section{Versionning et gestion de projet}\label{ch:versionning-et-gestion-de-projet}
+\section{Versionning et gestion de projet}\label{sec:versionning-et-gestion-de-projet}
 
-La refonte de TST dans le projet IBIS est accompagnée d'un framework de versionning
-jusqu'alors inexistant, hébergé sur un GitLab interne au \gls{CEA}\footnote{La plateforme est par ailleurs très récente et en cours de développement.
+    La refonte de TST dans le projet IBIS est accompagnée d'un framework de versionning
+    jusqu'alors inexistant, hébergé sur un GitLab interne au \gls{CEA}\footnote{La plateforme est par ailleurs très récente et en cours de développement.
      Dans ce contexte, le projet IBIS a pu servir de retour d'expérience à l'équipe de maintenance pour son amélioration continue.}
      
      Ces nouvelles méthodes ont permis une meilleure supervision du projet, notamment grâce à la
      création d'issues et à leur résolution pendant les phases de développement.
      Un aperçu d'entre elles est donnée dans le tableau suivant.
 
-    Par ailleurs, une bonne pratique adoptée pour la suite du projet est la mise à jour de sa documentation \textit{(fichiers ReadMe)} avant chaque commit.
+     Par ailleurs, une bonne pratique adoptée pour la suite du projet est la mise à jour de sa documentation \textit{(fichiers ReadMe)} avant chaque commit.
 
      \begin{table}[h!]
         \centering
@@ -216,9 +221,4 @@ jusqu'alors inexistant, hébergé sur un GitLab interne au \gls{CEA}\footnote{La
             \label{tab:issuesstatesimple}
         \end{table}
     
-        
-    \begin{bluebox}
-        (08/02) : Durant la prochaine période, il sera tenté de systématiser le développement
-        piloté par les issues et d'adapter les messages de commit en conséquence.
-    \end{bluebox}
-    
+    \subsection{Retour sur chaque sprint}
