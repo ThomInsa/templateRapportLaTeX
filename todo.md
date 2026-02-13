@@ -59,9 +59,6 @@
 
 ### Refactoring des précédents travaux
 
-- Citer Clean Code et les bonnes pratiques mises en oeuvre
-- Si possible, citer Serious Python
-
 - Donner un listing exemple de fonction refactorisée
 
 Axes d'amélioration (probablement non explorés fin S9)
@@ -96,6 +93,12 @@ Axes d'amélioration (probablement non explorés fin S9)
 ##### Polars plutôt que Pandas
 - Benchmark Pandas vs Polars _(avec petite introduction sur les deux librairies)_
 - Tableau de lancement d'algos entre pandas et Polars
+### Versionnage et gestion de projet
+- Suivi du projet = tableau :
+  - Tableau des issues ouvertes, en cours et fermées à la fin du S9
+  - Tableau similaire pour la fin du S10
+
+- Autre bonne pratique : après chaque gros commit, vérifier les résultats avec le notebook [mean_err_by_building_by_month.ipynb](../../Projets/IBIS/TSA_Proj/TST_rehandled/DISTRISIM_energy_prediction/notebooks/mean_err_by_building_by_month.ipynb) pour reproduire la grosse figure (remplace un pipeline CI/CD complet)
 
 ## Eléments de sécurisation des algorithmes et bases de données
 - Cf Obsidian
@@ -145,13 +148,6 @@ Tableau d'analyse du risque :
 |                  |                            |                  |                          |                      |                              |                                        |      
 |                  |                            |                  |                          |                      |                              |                                        |      
 
-## Versionnage et gestion de projet
-- Suivi du projet = tableau :
-    - Tableau des issues ouvertes, en cours et fermées à la fin du S9
-    - Tableau similaire pour la fin du S10 
-
-- Bonne pratique adoptée : ne jamais push sans update la documentation
-- Autre bonne pratique : après chaque gros commit, vérifier les résultats avec le notebook [mean_err_by_building_by_month.ipynb](../../Projets/IBIS/TSA_Proj/TST_rehandled/DISTRISIM_energy_prediction/notebooks/mean_err_by_building_by_month.ipynb) pour reproduire la grosse figure (remplace un pipeline CI/CD complet) 
 # Conclusion
 
 > La synthèse des cinq premières semaines d'alterance  

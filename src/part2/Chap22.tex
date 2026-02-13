@@ -8,7 +8,7 @@
         Aussi, les deux enjeux majeurs de ce chapitre sont la compréhension théorique des
         différents composants du modèle, et la reproductibilité des résultats obtenus pendant ce
         stage avec des données similaires et un code refactorisé permettant une extension du
-        modèle dans le cadre du projet IBIS.
+        modèle dans le cadre du projet \gls{IBIS}.
     \end{bluebox}
 
 
@@ -17,8 +17,8 @@
 
         \subsection{Bâtiments étudiés et datasets d'entraînement}\label{subsec:batiments-etudies-et-datasets-d'entrainement}
 
-            Le projet DISTRISIM est mené par le CEA et vise à évaluer la consommation énergétique des bâtiments du quartier Cambridge, à Grenoble.
-            L'étude de ces bâtiments est facilitée par le caractère récent
+Le projet DISTRISIM est mené par le \gls{CEA} et vise à évaluer la consommation énergétique des bâtiments du quartier Cambridge, à Grenoble.
+L'étude de ces bâtiments est facilitée par le caractère récent
             \it{(moins de douze ans)} de leur construction, garantissant leur conformité aux
             réglementations thermiques de la RT2012\cite{RT2012, TST}.
             En outre ces bâtiments sont pour la plupart connectés à un réseau énergétique de quartier avec par exemple des panneaux solaires installés sur les toitures\cite{TST}.
@@ -74,12 +74,12 @@
                 \end{bluebox}
 
                 \begin{figure}[H] \centering
-%                    \subfloat[Température intérieure]{\fbox{
-%%                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_TAir}}
-%                    }\\
-%                    \subfloat[Besoin de chauffage]{\fbox{
-%%                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_PhiEm}}
-%                    }
+                    \subfloat[Température intérieure]{\fbox{
+                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_TAir}}
+                    }\\
+                    \subfloat[Besoin de chauffage]{\fbox{
+                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_PhiEm}}
+                    }
                     \caption{Visualisation de la distribution des données d'entrée}\label{fig:DISTRISIMinputData}
                 \end{figure}
 
@@ -96,8 +96,8 @@
                 \item 3 ouvertures surfaciques pour l'impact du flux solaire sur l'air intérieur, l'enveloppe et la masse $\kAir$, $\kEnv$, $\kMass$
             \end{itemize}
             
-            Cependant, en raison de l'utilisation de datasets moins riches que ceux utilisés dans l'article, et à
-            des fins de simplicité, on néglige la présence de la masse thermique et du circuit.
+            Cependant, l'objectif de l'étude se limite aux besoins de chauffage et utilise à ce titre des datasets moins riches ne donnant pas d'information sur le système de chauffage.
+            C'est la raison pour laquelle on néglige la présence de la masse thermique et du circuit.
             Par ailleurs, les gains solaires sont simplifiés en deux ouvertures dépendantes l'une de l'autre, l'une sur l'enveloppe et l'autre sur l'air intérieur.
             On définit alors les paramètres thermiques suivants :
 
@@ -114,7 +114,7 @@
                 \label{eq:Pth}
             \end{equation}\myequations{Vecteur des paramètres thermiques pour le projet DISTRISIM}
 
-            Enfin, et pour correspondre aux paramètres d'entrée définis en \ref{subsec:batiments-etudies-et-datasets-d'entrainement} on définit deux sources de chaleur $\PhiSol{t}$ et $\PhiHeat{t}$, dépendant évidemment du temps.
+            Enfin, et pour correspondre aux paramètres d'entrée définis en \ref{subsec:batiments-etudies-et-datasets-d'entrainement} on définit deux sources de chaleur $\PhiSol{t}$ et $\PhiHeat{t}$, dépendant évidemment du temps\footnote{En théorie, il existe également un flux de chaleur interne \textit{produit par les occupants et leurs activités}, mais comme cette information n'est généralement pas mesurable, on fait le choix de négliger cette donnée dans le modèle à identifier. Cette décision engendre nécessairement une erreur d'estimation, que les paramètres identifiés visent à limiter.}.
 
             On peut donc visualiser le modèle comme suit :
         
@@ -177,9 +177,9 @@
 
         \subsection{Optimisation par essaim particulaires (PSO)}\label{subsec:optimisation-par-essaims-particulaires-(pso)}
 
-            La PSO est une des méta-heuristiques les plus populaires en raison de son faible coût computationnel et sa capacité à modéliser de nombreuses situations.
+La \gls{PSO} est une des méta-heuristiques les plus populaires en raison de son faible coût computationnel et sa capacité à modéliser de nombreuses situations.
 
-            Sommairement, l'algorithme consiste en l'initialisation de $N$ particules placées aléatoirement dans l'espace de recherche borné, auxquelles à chaque instant $t$ on attribue une position et une vitesse, c'est-à-dire l'incrément de leur position à l'instant $t+1$, dépendant de la solution trouvée, mise à jour si la fonction objectif est réduite.
+Sommairement, l'algorithme consiste en l'initialisation de $N$ particules placées aléatoirement dans l'espace de recherche borné, auxquelles à chaque instant $t$ on attribue une position et une vitesse, c'est-à-dire l'incrément de leur position à l'instant $t+1$, dépendant de la solution trouvée, mise à jour si la fonction objectif est réduite.
             Ainsi, les particules sont chargées de rechercher un minimum local dans l'espace qu'elles explorent, puis de les comparer pour définir un minimum global.
 
             Une représentation de l'algorithme en deux dimensions est donnée plus bas :
@@ -474,19 +474,20 @@
 
                 \begin{figure}[H]
                     \centering
-%                    \fbox{\includegraphics[width=0.5\textwidth]{figures/diagrammes/courbes/TST/TAir_PhiHeat}}
+                    \fbox{\includegraphics[width=0.5\textwidth]{figures/diagrammes/courbes/TST/TAir_PhiHeat}}
                     \caption{$\textrm{RMSE}\left( \PhihatHeat{t} \right)$ en fonction de $\textrm{RMSE}\left( \ThatAir{t} \right)$}\label{fig:TAir_PhiHeat}
                 \end{figure}
 
             \subsubsection{Limites de la PSO}
-                Les ressources citées précédemment mettent en garde sur le risque lié à l'initialisation aléatoire des particules pendant la PSO.
-                En effet, la convergence vers un minimum global peut fortement dépendre des positions de départ, ce que vérifie le tableau suivant reportant les résultats de dix optimisations
-                parallèles pour lesquelles varient seulement ce paramètre.
+Les ressources citées précédemment mettent en garde sur le risque lié à l'initialisation aléatoire des particules pendant la \gls{PSO}.
+En effet, la convergence vers un minimum global peut fortement dépendre des positions de départ, ce que vérifie le tableau suivant reportant les résultats de dix optimisations
+parallèles pour lesquelles varient seulement ce paramètre.
                 \setdivergentmin{-100}
                 \setdivergentmid{0}
                 \setdivergentmax{100}
                 \begin{table}[H]
                     \centering
+                    \begin{adjustbox}{width=\textwidth}
                     \begin{tabular}{lccccccccc}
                         \toprule
                         \textbf{Bâtiment} & $\UAirEnv$ &  $\UAirExt$ &  $\UEnvExt$ & $\CAir$ & $\CEnv$ & $k_1$ & $k_2$ & $\mathrm{RMSE}\left(\ThatAir{t}\right)$ & $\mathrm{RMSE}\left(\PhiHeat{t}\right)$ \\
@@ -503,12 +504,13 @@
                         Zenae & \divergentcell{7} & \divergentcell{1} & \divergentcell{66} & \divergentcell{2} & \divergentcell{28} & \divergentcell{5.0} & \divergentcell{28} & \divergentcell{3} & \divergentcell{2} \\
                         \bottomrule
                     \end{tabular}
+                    \end{adjustbox}
                     \caption{Écart-type normalisé en \% des données de sorties de la PSO sur dix calculs, par bâtiment, pour le mois de janvier}
                     \label{tab:my_label4}
                 \end{table}
 
-                Ces données ne montrent pas un impact significatif sur les métriques d'évaluation et confirment l'existence de minima locaux présentant des performances similaires.
-                Cependant, les limites de la PSO sont mises en évidence et une question pertinente peut être celle de la portabilité de cet algorithme sur d'autres données.
+Ces données ne montrent pas un impact significatif sur les métriques d'évaluation et confirment l'existence de minima locaux présentant des performances similaires.
+Cependant, les limites de la \gls{PSO} sont mises en évidence et une question pertinente peut être celle de la portabilité de cet algorithme sur d'autres données.
 
 \newpage\subsubsection{Limites des solveurs}
                 Il a été montré que $\textrm{RMSE}\left( \PhihatHeat{t} \right)$ est décorrélée de $\textrm{RMSE}\left( \ThatAir{t} \right)$ avec le modèle actuel.

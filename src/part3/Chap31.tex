@@ -1,20 +1,19 @@
 \chapter{Conception logicielle, refactoring et bonnes pratiques de développement}\label{ch:conception-logicielle-refactoring-et-bonnes-pratiques-de-developpement}
 
-
 \section{Refactoring des précédents travaux}\label{sec:refactoring-des-precedents-travaux}
 
 À l'instar de la première partie, le travail sur l'architecture logicielle du projet \gls{IBIS} porte en premier lieu sur le remaniement du code du stage
 effectué sur le projet DISTRISIM, pour l'appropriation du sujet et la montée en compétences dans un premier temps, et pour la conception d'un code plus robuste supportant
 un plus grand volume de données et différents modèles dans un second.
 
-Comme c'est le cas dans le projet \gls{IBIS}, on appelle TST le code précédent présenté dans \cite{TST} pour les prochaines parties, et IBIS-DISTRISIM le code récemment remanié.
+Comme c'est le cas dans le projet \gls{IBIS}, on appelle TST le code précédent présenté dans \cite{TST} pour les prochaines parties, et \gls{IBIS}-DISTRISIM le code récemment remanié.
 
-    TST est à l'origine un code de 1000 lignes écrit sur un fichier donnant des courbes prévisionnelles de
-    consommation d'énergie avec ou sans adaptation des paramètres du modèle aux données
-    de la période précédant celle de la prévision.
-    Ses entrées sont saisies séquentiellement et manuellement dans le terminal du programme.
+TST est à l'origine un code de 1000 lignes écrit sur un fichier donnant des courbes prévisionnelles de
+consommation d'énergie avec ou sans adaptation des paramètres du modèle aux données
+de la période précédant celle de la prévision.
+Ses entrées sont saisies séquentiellement et manuellement dans le terminal du programme.
 
-    Si le code livre des résultats intéressants sur les bâtiments étudiés \ref{tab:tstfinal},
+Si le code livre des résultats intéressants sur les bâtiments étudiés \ref{tab:tstfinal},
     son architecture rend difficile la compréhension microscopique du comportement du modèle
     d'une part \textit{(en particulier la sensibilité d'un paramètre devant un résultat précis)}, et la généralisation des expériences d'autre part \textit{(notamment le lancement d'une série massive de calculs pour apprécier les sorties du modèle à plus grande échelle)}.
 
@@ -73,8 +72,8 @@ La synthèse la plus élémentaire des techniques de nettoyage du code donnée p
         Par ailleurs, d'autres conseils de développement propres spécifiques au langage Python sont données dans \cite{serious_python} mais n'ont pas été explorées à ce jour.
     \end{bluebox}
 
-    L'une des fonctions d'IBIS est donnée dans le listing suivant.
-    Celle-ci peut servir de référence de fonction "propre", bien qu'il soit en pratique difficile de créer cette architecture pour une grande proportion du code, de nombreuses fonctions étant moins facilement découpables.
+L'une des fonctions d'\gls{IBIS} est donnée dans le listing suivant.
+Celle-ci peut servir de référence de fonction "propre", bien qu'il soit en pratique difficile de créer cette architecture pour une grande proportion du code, de nombreuses fonctions étant moins facilement découpables.
 
 \begin{lstlisting}[caption={Exemple de fonction refactorisée idéale},label={lst:lstlisting}]
 def energy_need(heating_flux, living_area, dt):
@@ -89,7 +88,7 @@ return energy_need_t / 3600 / living_area\end{lstlisting}
             \begin{adjustbox}{width=\textwidth}
             \begin{tabular}{lcc}
                 \toprule
-                \textbf{Critère} & \textbf{Projet TST (2023)} & \textbf{TST intégré à IBIS (2026)} \\
+                \textbf{Critère} & \textbf{Projet TST (2023)} & \textbf{IBIS-DISTRISIM (2026)} \\
                 \midrule
                 Nombre de lignes totales & 1154 & 515 \\
                 Nombre de fichiers source & 1 & 8\\
@@ -116,9 +115,19 @@ return energy_need_t / 3600 / living_area\end{lstlisting}
                                                                    avoir à en commencer un
                                                                    nouveau.
         \end{enumerate}
-        
-        
-        \subsection{Passage à l'orienté objet}\label{subsec:passage-a-l'oriente-objet}
+
+        \subsection{Implémentation de plusieurs cas test}\label{subsec:implementation-de-plusieurs-cas-test}
+
+            La plupart des futures modifications envisagées pour \gls{IBIS} sont d'une ampleur bien supérieure à celles déjà effectuées.
+            Ainsi, il est important de garder un aperçu des résultats du modèle à chaque étape de développement pour s'assurer de sa performance.
+            Cette vigilance est mise en oeuvre avec l'introduction de tests basés sur le modèle actuel.
+
+            Pour l'instant, le test principal implémenté est la reproductibilité des tableaux \ref{fig:heatmap} et \ref{tab:mean_std_by_building_by_month},
+                rendue possible par leurs notebooks associés, lesquels sont implémentés de sorte à faciliter la modification de leurs fonctions d'entrée pour vérifier cette reproductibilité.
+
+            Ainsi, chaque modification majeure future peut être validée par la vérification de sa sortie avec ces deux cas test.
+
+\subsection{Passage à l'orienté objet}\label{subsec:passage-a-l'oriente-objet}
 
         \subsection{Standardisation des librairies importées}\label{subsec:standardisation-des-librairies-importees}
 
@@ -127,7 +136,7 @@ return energy_need_t / 3600 / living_area\end{lstlisting}
             \begin{figure}[H]
                 \centering
                 {\fbox{
-%                    \includegraphics[width = 0.75\textwidth]{figures/diagrammes/SQL_Model}
+                    \includegraphics[width = 0.75\textwidth]{figures/diagrammes/SQL_Model}
                 }}
             \caption{Ébauche de modèle relationnel pour les données de DISTRISIM}\label{fig:SQL}
             \end{figure}
@@ -156,45 +165,60 @@ return energy_need_t / 3600 / living_area\end{lstlisting}
         \end{table}
         
 \section{Versionning et gestion de projet}\label{ch:versionning-et-gestion-de-projet}
-    
-     La refonte de TST dans le projet IBIS est accompagnée d'un framework de versionning
-     jusqu'alors inexistant, hébergé sur un GitLab interne au CEA\footnote{La plateforme est par ailleurs très récente et en cours de développement.
+
+La refonte de TST dans le projet IBIS est accompagnée d'un framework de versionning
+jusqu'alors inexistant, hébergé sur un GitLab interne au \gls{CEA}\footnote{La plateforme est par ailleurs très récente et en cours de développement.
      Dans ce contexte, le projet IBIS a pu servir de retour d'expérience à l'équipe de maintenance pour son amélioration continue.}
      
      Ces nouvelles méthodes ont permis une meilleure supervision du projet, notamment grâce à la
      création d'issues et à leur résolution pendant les phases de développement.
      Un aperçu d'entre elles est donnée dans le tableau suivant.
-     
-    \begin{table}[h!]
+
+    Par ailleurs, une bonne pratique adoptée pour la suite du projet est la mise à jour de sa documentation \textit{(fichiers ReadMe)} avant chaque commit.
+
+     \begin{table}[h!]
         \centering
         \begin{adjustbox}{width=\textwidth}
-            \begin{tabular}{p{6cm} p{6cm} p{6cm}}
+            \begin{tabular}{p{8cm}p{5cm}p{5cm}}
                 \toprule
                 \textbf{To Do} & \textbf{Doing} & \textbf{Done} \\
                 \midrule
-                Consider using Seaborn rather than MPL & Refactor previous project & Refactor the mode function \\
-                Allow easy switch feature between models & Translate all variables and methods names in English & Refactor the visualisation functions \\
-                Consider the use of specialised workflow for Data Analysis & Host all data on data format files &  \\
-                Reduce input and output variables of functions &  &  \\
-                Consider using OOP for further development and maintenance &  &  \\
-                ToFix : No output when ending\_date does not start &  &  \\
-                Refactor secant method function &  &  \\
-                Consider calling libraries for Euler solvers &  &  \\
+                $\left[\text{Visualization}\right]$ Rename and rescale the x (time) axis on TAir and PhiHeat figures to visualize months instead of seconds & Refactor previous project & Consider using Seaborn rather than MPL \\
+                $\left[\text{PLOTS}\right]$ automatically exports plots after computation & Refactor secant method & Host all data on data format files \\
+                $\left[\text{PLOTS}\right]$ automatically name plots referencing buildings name &  & Merge data and hour input variables to be closer to data architecture \\
+                Consider implementing a full-end architecture to enhance UX &  & Translate all variables and methods names in English \\
+                $\left[\text{Data Storage}\right]$ Make sure data files are stored with LFS framework &  & Refactor the visualisation functions \\
+                Implement the possibility to easily use different values of RC parameters &  & Refactor the mode function \\
+                Reconsider input management, especially filepaths locations &  &  \\
+                Consider using a clean backend data management using PostgreSQL or similar tools &  &  \\
+                Consider using polars rather than pandas for data storage &  &  \\
+                Consider the use of specialised workflow for Data hosting (DVS or others) &  &  \\
+                $\left[\text{OOP}\right]$ Consider using OOP for further development and refactoring &  &  \\
                 Implement better handling of error measurements &  &  \\
-                Consider using polars rather than pandas for dataframes &  &  \\
-                Consider implementing a full front-end architecture &  &  \\
+                Allow easy switch feature between models &  &  \\
+                Consider calling librairies for solvers and optimization problems &  &  \\
                 Store buildings data in dedicated files &  &  \\
+                $\left[\text{OOP}\right]$ Format model data in clean classes &  &  \\
+                ToFix : No output when ending date does not strictly match a value of input data &  &  \\
+                $\left[\text{Computation in series}\right]$ &  &  \\
+                Clean DISTRISIM data &  &  \\
+                $\left[\text{Reporting}\right]$ Analyze, visualise and report input data &  &  \\
+                Consider challenging the secant method (with Newton method for example) &  &  \\
+                Work on how to challenge \gls{PSO}                                                                                                          &  &                                                                       \\
+                $\left[\text{Optimisation}\right]$ Implement brent solving to challenge secant method &  &  \\
                 Consider refactoring the 3CL method &  &  \\
+                Reduce input and output variables of functions &  &  \\
+                $\left[\text{Errors handling}\right]$ Implement errors and assertions in DISTRISIM project &  &  \\
                 \bottomrule
             \end{tabular}
             \end{adjustbox}
             \caption{Issues créées et traitées jusqu'au 31/10}
-            \label{tab:issues_state_simple}
+            \label{tab:issuesstatesimple}
         \end{table}
     
         
     \begin{bluebox}
         (08/02) : Durant la prochaine période, il sera tenté de systématiser le développement
-        piloté par les issues et d'adapter les messages de commit
+        piloté par les issues et d'adapter les messages de commit en conséquence.
     \end{bluebox}
     

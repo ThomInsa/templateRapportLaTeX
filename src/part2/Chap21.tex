@@ -25,11 +25,8 @@
     modélisés par des jumeaux numériques, une méthode très technique, reposant sur une science
     encore jeune et concernant souvent des installations dont les études ne se limitent pas à la
     consommation énergétique\cite{DT}.
-    Elles dépassent de fait le cadre de ce rapport, tout comme les approches utilisant
-    spécifiquement l'IoT.
-
     En pratique, les modélisations détaillées de type CFD sont généralement très complexes dans
-        le cas des bâtiments et de fait évitées, car trop coûteuses en ressources de calcul.
+        pour une estimation d'énergie ou de confort dans un bâtiment, à grandes échelles spatiale et temporelle, et de fait évitées, car trop coûteuses en ressources de calcul.
     Elles sont alors remplacées par des approches plus pragmatiques et minimalistes, comme celle présentée dans la section suivante : le contrôle prédictif.
 
 \section{Modèle de Contrôle Prédictif pour l'énergétique du bâtiment}\label{sec:modele-de-controle-predictif-pour-l'energetique-du-batiment}
@@ -43,10 +40,12 @@
             En particulier, on peut définir un paradigme dans lequel on génère des solutions à
             un problème d'optimisation à l'instant $t$ que l'on utilise comme données d'entrée à
             l'instant $t+1$ : c'est la base commune à toute approche par Modèle de Contrôle
-            Prédictif~\cite[chap.~I]{MPC_needs}. Ainsi, le principal avantage du MPC est
+            Prédictif~\cite[chap.~I]{MPC_needs}.
+            Ainsi, le principal avantage du MPC est
             d'optimiser l'état présent tout en tenant
             compte des états futurs\cite{wiki_MPC}.
         
+            %! suppress = FigureNotReferenced
             \begin{figure}[H]
                 \centering
                 \fbox{\input{figures/diagrammes/logigrammes/MPCenbref.tikz}}
@@ -56,7 +55,7 @@
     
             Les applications du MPC à la modélisation énergétique sont nombreuses
             et peuvent être classées de façon incomplète selon les catégories suivantes
-            \cite{allyouneedtoknowaboutMPCforbuildings}\cite{KATHIRGAMANATHAN2021110120}.
+            \cite{allyouneedtoknowaboutMPCforbuildings,KATHIRGAMANATHAN2021110120}.
             \begin{enumerate}
                 \item Composants du modèle de bâtiment : \begin{itemize}
                    \item L'enveloppe, c'est-à-dire du système comprenant les parois internes et externes, le sol, le plafond, les fenêtres et le reste des éléments séparant l'intérieur du bâtiment de l'extérieur, ou d'une autre de ses zones
@@ -66,15 +65,18 @@
                 \item Paradigme de modèle : \begin{itemize}
                     \item Les modèles White-Box sont basés sur la connaissance physique du
                     modèle et utilisent des simulations de logiciel comme EnergyPlus ou la suite
-                    Ansys. Ils requièrent généralement une connaissance avancée des paramètres 
+                    Ansys.
+                    Ils requièrent généralement une connaissance avancée des paramètres
                     du bâtiment \textit{(géométrie, matériaux, construction \ldots)}.
                     \item Les modèles Black-Box ignorent la physique et reposent sur un
-                    empirisme strict. Ils requièrent à ce titre un très grand volume de donneés
+                    empirisme strict.
+                    Ils requièrent à ce titre un très grand volume de donneés
                     de haute qualité et couvrant la totalité des situtations
                     \textit{(saisons, types d'enveloppe \ldots)} pour être performants.
-                    \item Les modèles Grey-Box combinent les deux approches. Un exemple éloquent
-                    est celui des modèles RC\it{(voir \ref{AE} et \ref{chap:distrisim})}, où l'on identifie des
-                    paramètres physiques à partir de données expérimentales.
+                    \item Les modèles Grey-Box combinent les deux approches.
+                    Un exemple éloquent
+                    est celui des modèles RC\textit{(voir \ref{subsec:AE} et \ref{chap:distrisim})}, où l'on identifie des
+                    paramètres physiques à partir de données expérimentales ou par une estimation théorique.
                 \end{itemize}
                 \item Algorithme de MPC utilisé
             \end{enumerate}
@@ -82,7 +84,7 @@
             D'autres paramètres existent \textit{(classes, types de solution…)}, et montrent que le Modèle de Contrôle Prédictif propose un ensemble d'approches très large.
             Une introduction à l'un des modèles les plus répandus est présentée plus bas, et servira de cadre pour les modélisations développées dans les prochains chapitres.
 
-        \subsection{Un modèle physique simple et interprétable : analogie avec les circuits électriques}\label{AE}
+        \subsection{Un modèle physique simple et interprétable : analogie avec les circuits électriques}\label{subsec:AE}
             
             Il a été montré\cite{elec_analog, fraisse_elec_analog} qu'il est possible
             d'assimiler le comportement de la chaleur dans un bâtiment à
@@ -90,10 +92,10 @@
             fortes
             \textit{(en particulier, en simplifiant l'évolution de la température à travers les murs)}.
             Dès lors, on peut associer à un mur une résistance thermique $R$ pour caractériser
-            les pertes de chaleur au sein de celui-ci. L'analogie se
-            poursuit avec l'équivalent de la loi d'Ohm :
+            les pertes de chaleur au sein de celui-ci.
+            L'analogie se poursuit avec l'équivalent de la loi d'Ohm :
             \begin{equation}
-                U_1-U_2=RI\Longleftrightarrow \theta_1 - \theta_2 = \frac e{\lambda S}\phi_L
+                U_1-U_2=RI\Longleftrightarrow \theta_1 - \theta_2 = \frac e{\lambda S}\phi_L\label{eq:equation2}
             \end{equation}\myequations{Loi d'Ohm pour le transfert de chaleur dans une paroi}
             Ainsi :
             \begin{itemize}
@@ -102,12 +104,12 @@
                 \item La résistance thermique par conduction est égale à $\frac e{\lambda S}$ avec
                 $\lambda$ la
                 conductivité thermique en $\bf W.m^{-1}.K^{-1}$, $e$
-                l'épaisseur du mur et $S$ sa surfaceé
+                l'épaisseur du mur et $S$ sa surface
             \end{itemize}
             Par ailleurs, la plupart des matériaux ont une intertie thermique non négligeable\footnote{On peut citer le verre comme exception notable puisqu'il constitue un élément essentiel de la modélisation de bâtiment.}, c'est-à-dire une propriété d'absorption et de relâchement de la chaleur au cours du temps.
             C'est en ce sens que l'on définit une capacité thermique $C$ :
             \begin{equation}
-                C=\rho e c_p
+                C=\rho e c_p\label{eq:equation}
             \end{equation}\myequations{Définition de la capacité thermique $C$}
             Avec :\begin{itemize}
                       \item $\rho$ la masse volumique du matériau
@@ -118,7 +120,8 @@
             Pour caractériser complètement un bâtiment, il peut suffire d'associer ces deux
             paramètres à plusieurs noeuds de température $T_{\text{milieu}}(t)$ caractérisant la
             température à chaque instant dans un espace considéré homogène d'un
-            point de vue thermique. Au sein du circuit thermique, les milieux sont généralement
+            point de vue thermique.
+            Au sein du circuit thermique, les milieux sont généralement
             l'intérieur d'une pièce, l'extérieur et l'intérieur d'un mur.
             
             \begin{figure}[H]
@@ -357,7 +360,7 @@
     différentes approches envisagées.
     
     En particulier, le chapitre suivant décrit un modèle simple, basé sur l'analogie
-    électrique, le MCP et des méthodes d'optimisation et d'analyse numérique classiques.
+    électrique, le MPC et des méthodes d'optimisation et d'analyse numérique classiques.
 
     \begin{figure}[H]
         \centering
