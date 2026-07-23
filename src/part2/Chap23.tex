@@ -1,20 +1,260 @@
-\chapter{Étude et développement de nouvelles approches pour la modélisation énergétique de bâtiments}
+\chapter{Analyse de données réelles et simulées sur les premières applications d'IBIS}\label{ch:analyse-de-donnees-sur-les-premieres-applications-d'ibis}
+    \section{Point de départ sur un modèle simple et des données synthétiques : besoins énergétiques du quartier Cambridge dans le cadre du projet DISTRISIM}\label{sec:point-de-depart-sur-un-modele-simple-et-des-donnees-synthetiques-:-besoins-energetiques-du-quartier-cambridge-dans-le-cadre-du-projet-distrisim}
+        \begin{bluebox}
+            Les travaux rapportés ici font suite à un stage de fin d'études de cycle ingénieur en énergétique
+            réalisé en 2023 et visent à le compléter.
+            De nombreuses explications et figures sont donc adaptées du rapport associé\cite{TST}.
+            Certains des résultats de ce stage tiennent lieu de point de départ pour le projet \gls{IBIS}.
+            La reproductibilité de ces résultats constitue alors un enjeu important et une preuve de concept du bon fonctionnement des modèles développés.
+        \end{bluebox}
 
-    \begin{bluebox}
-        (26/01) : À date d'écriture du rapport intermédiaire, ce chapitre n'a pas encore été
-        traité, les prochaines tâches du projet portant davantage sur l'architecture logicielle
-        que les aspects de modélisation.
-    
-        On peut tout de même supposer que celui-ci rapportera des expériences sur plusieurs
-        datasets publics, comme ceux cités en \ref{subsec:reseaux-de-neurones} ou encore ceux
-        décrits dans~\cite{subhourlysixdatasets}.
-    \end{bluebox}
-    + de proche en proche selon l'avancée du modèle
-    + méthodes auto-régressives
-    + capitalisation sur le modèle existant puisque les NN utilisent beaucoup les
-    méta-heuristiques comme la PSO actuellement implémentée
-    
-    
-    \section{Couple modèle-dataset1}
-    \section{Couple modèle-dataset2}
-    \section{Couple modèle-datasetN}
+        Le projet DISTRISIM est mené par le \gls{CEA} et vise à évaluer la consommation énergétique des bâtiments du quartier Cambridge, à Grenoble.
+        L'étude de ces bâtiments est facilitée par le caractère récent
+        \it{(moins de douze ans)} de leur construction, garantissant leur conformité aux
+        réglementations thermiques de la RT2012\cite{RT2012, TST}.
+        En outre ces bâtiments sont pour la plupart connectés à un réseau énergétique de quartier avec par exemple des panneaux solaires installés sur les toitures\cite{TST}.
+
+        Les propriétés géométriques des bâtiments n'ayant pas été utilisées dans le cadre de la modélisation, elles ne sont pas rappelées formellement ici.
+        On peut toutefois mentionner que ces derniers diffèrent notamment par leur nombre d'étages, leur surface vitrée et leur surface habitable.
+        L'étude se limite aux onze bâtiments suivants :
+
+        \begin{table}[H]
+            \caption{Bâtiments étudiés dans le cadre du stage \cite{TST} et du projet DISTRISIM}
+            \centering
+            \begin{tabular}{lcccccccccc}
+                \toprule
+                Alasia &
+                CastelO &
+                CastelR &
+                Ceva &
+                Novae &
+                Panache &
+                Python &
+                Soleil &
+                Thales &
+                Up &
+                Zenae \\
+                \bottomrule
+            \end{tabular}
+            \label{tab:building_list}
+        \end{table}
+
+        Pour chacun de ces bâtiments, des données de consommation énergétique synthétiques sont générées à l'aide d'EnergyPlus sous forme de séries temporelles sur une année entière.
+        Celles-ci comprennent la température intérieure, la puissance de chauffage, la puissance d'ensoleillement et la température extérieure \textit{(ces deux dernières grandeurs étant communes aux onze bâtiments)}.
+
+        L'objectif est alors de développer un Modèle de Contrôle Prédictif, utilisant un segment de ces séries temporelles constituant une période de l'année, pour prédire le plus justement possible la fenêtre temporelle suivante.
+        \newpage
+        \subsection{Quelques commentaires sur les données d'entrée}\label{subsec:quelques-commentaires-sur-les-donnees-d'entree}
+
+            Une brève analyse des données d'entrée est menée en amont de la modélisation pour prévenir d'éventuelles différences de comportement d'un bâtiment à l'autre.
+            Bien qu'il soit fastidieux et contre-productif de chercher les particularités de chaque bâtiment, il est possible de relever les courbes de températures moyennes \ref{fig:analysedonneesdistrisim} et remarquer que le bâtiment Ceva se distingue par une plus grande dispersion de ses valeurs.
+
+            \begin{figure}[H] \centering
+                \subfloat[Tendance annuelle de $\TAir{t}$, moyenne journalière]{\fbox{\includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/distrisim/moyenne_t_air_annuelle}}}\qquad
+                \subfloat[Moyenne journalière de $\TAir{t}$ sur une année]{\fbox{\includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/distrisim/moyenne_t_air}}}\qquad
+                \caption{Allure de $\TAir{t}$ sur l'année 2023 pour les bâtiments du quartier Cambridge}\label{fig:analysedonneesdistrisim}
+            \end{figure}
+
+        \subsection{Modélisation et résultats}\label{subsec:promesses-et-limites-de-la-methode-actuellement-implementees}
+
+            Les hyperparamètres de la modélisation sont identiques à ceux proposés par \cite{TST} et sont rappelés dans le tableau \ref{tab:hp_distrisim}.
+
+            \begin{table}[H]
+                \centering
+                \caption{Hyperparamètres des prédictions sur les données DISTRISIM}
+                \label{tab:hp_distrisim}
+                \begin{tabular}{ll}
+                    \toprule
+                    \textbf{Périodes $n$ d'optimisation des modèles $RC$} & Un mois sur l'année 2023\\
+                    \textbf{Périodes $n+1$ d'application des modèles $RC$} & Un mois sur l'année 2023\\
+                    \textbf{Pas de temps des données initiales} & $10\textbf{min}$\\
+                    \textbf{Pas de temps fixé} & $10\textbf{min}$\\
+                    \textbf{Modèle $RC$} & $3R2C2k$\\
+                    \textbf{Températures initiales du solveur} & $\left\{ T_{\text{air}_0}; T_{\text{env}_0} \right\} = \left\{ 19^\circ\mathbf{C}; 19^\circ\mathbf{C} \right\}$ \\
+                    \textbf{Température de consigne} & $19^\circ C$\\
+                    \textbf{Précision du solveur de l'équation thermique} & $0.1\mathbf C^\circ$ \\
+                    \textbf{Algorithme d'optimisation} & PSO avec précision à $0.1\mathbf C^\circ$ \\
+                    \bottomrule
+                \end{tabular}
+            \end{table}
+
+            Une série de figures représentant $\left\{\TAir{t};\ThatAir{t}\right\}$ et $\left\{ \PhiEm{t};\PhihatEm{t} \right\}$ ont été précédemment décrites dans~\cite{TST}.
+            L'une d'entre elles est rappelée ici \ref{fig:predictioncambridgetst}.
+            On remarque que la température prédite adopte une forme similaire à la température réelle, sans pour autant atteindre l'amplitude des pics des données d'entraînement.
+
+            Le même constat peut être rendu pour le besoin de chauffage.
+
+            Quelques courbes analogues produites par IBIS sont présentées dans la figure \ref{fig:predictionibiscambridge}.
+
+            \begin{figure}[H] \centering
+                \subfloat[Température intérieure, $RMSE = 0.55^ \circ \bf C$]{\fbox{
+                    \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/TST_air_predit_VS_energyplus}}}\qquad
+                \subfloat[Besoins de chauffage, $RMSE = 16.31 \bf kW$]{\fbox{
+                    \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/TST_besoin_chauffage_VS_energyplus}}}\qquad
+                \caption{Exemple de comparaison entre les modélisations d'EnergyPlus et les prévisions de \cite{TST} \textit{(Bâtiment Thales sur le mois de janvier)}}\label{fig:predictioncambridgetst}
+            \end{figure}
+
+            \begin{figure}[H] \centering
+                \subfloat[Température intérieure, Bâtiment CastelO, Mois d'août]{\fbox{
+                    \includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/distrisim/1119882_T_Air}}}\qquad
+                \subfloat[Besoins de chauffage, Bâtiment CastelO, Mois d'août]{\fbox{
+                    \includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/distrisim/1119882_Phi_Em}}}\qquad
+                \subfloat[Température intérieure, Bâtiment Python, Mois de mars]{\fbox{
+                    \includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/distrisim/1121620_T_Air}}}\qquad
+                \subfloat[Besoins de chauffage, Bâtiment Python, Mois de mars]{\fbox{
+                    \includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/distrisim/1121620_Phi_Em}}}\qquad
+                \caption{Exemple de comparaison entre les modélisations d'EnergyPlus et les prévisions d'IBIS}\label{fig:predictionibiscambridge}
+            \end{figure}
+
+            Les données concluant le rapport~\cite{TST} sont celles reportées dans le tableau~\ref{tab:tstfinal}.
+            Celles-ci montrent les erreurs de température obtenues par le modèle calibré sur un mois \textit{(sur chaque ligne)} lorsque ses paramètres thermiques sont déterminés avec les données d'entraînement d'un autre mois \textit{(sur chaque colonne)}, pour un bâtiment.
+            L'expérience est reconduite et synthétisée en~\ref{tab:tstfinal_tsa}.
+            Les erreurs calculées décrivent la même tendance intuitivement prévisible : l'application des paramètres calculés sur les mois d'une saison ne parviennent pas à prédire le comportement thermique du bâtiment sur une autre.
+
+            Les résultats précédents confirmés, il devient possible de passer à l'échelle du quartier complet.
+            La figure~\ref{fig:heatmap} étend le tableau précédemment présenté à l'ensemble des bâtiments selon le logigramme \ref{fig:logigrammemebm}.
+            Trois commentaires peuvent en découler :
+            \begin{enumerate}
+                \item Le bâtiment Ceva, bien que présentant une étendue nettement plus grande de ses données d'entraînement, n'est pas sujet à un profil différent de celui de ses homologues.
+                Ceci montre une certaine résilience d'IBIS face à différentes données.
+                \item En revanche, le bâtiment CastelR obtient des erreurs plus élevées, notamment en été.
+                Cette différence est imputable à sa surface d'habitation, nettent moins élevée que dans les autres bâtiments\footnote{environ $1000\mathbf m^2$ alors que les autres bâtiments ont une surface allant de $3000$ à $8000\mathbf m^2$}, illustrant alors la nécessité de redéfinir plus précisément les bornes d'optimisation, ce qui n'a pas été vu ici.
+                \item Dans l'ensemble, l'expérience montre de bonnes performances par le modèle $RC$ optimisé, puisque les diagonales des matrices de confusion, c'est-à-dire la zone où l'on s'attend à ce que le modèle soit performant, présentent toutes de faibles niveaux d'erreurs.
+            \end{enumerate}
+
+            \begin{figure}[H]
+                \centering
+                \fbox{\input{figures/diagrammes/logigrammes/DISTRISIM_memb.tikz}}
+                \caption{Logigramme des étapes de calcul de la figure \ref{fig:heatmap}}\label{fig:logigrammemebm}
+            \end{figure}
+
+
+            \setdivergentmin{0}
+            \setdivergentmid{3}
+            \setdivergentmax{12}
+            \begin{table}[H]
+                \caption{$\mathrm{RMSE}\left(\ThatAir{t}\right)_{\text{CastelO}}$ avec des valeurs de $\mathbf {P}_{\text{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois \textit{(résultats du précédent stage)}}
+                \centering
+                \begin{tabular}{lcccccccccccc}
+                    \toprule
+                    & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
+                    \midrule
+                    Jan & \divergentcell{0.53} & \divergentcell{0.83} & \divergentcell{1.44} & \divergentcell{0.88} & \divergentcell{2.27} & \divergentcell{2.8} & \divergentcell{6.96} & \divergentcell{7.93} & \divergentcell{2.68} & \divergentcell{2.3} & \divergentcell{0.95} & \divergentcell{0.69} \\
+                    Fév & \divergentcell{0.66} & \divergentcell{0.96} & \divergentcell{1.15} & \divergentcell{0.8} & \divergentcell{3.4} & \divergentcell{3.47} & \divergentcell{5.84} & \divergentcell{7.72} & \divergentcell{3.4} & \divergentcell{1.9} & \divergentcell{0.8} & \divergentcell{0.82} \\
+                    Mar & \divergentcell{1.55} & \divergentcell{1.74} & \divergentcell{1.05} & \divergentcell{1.19} & \divergentcell{5.81} & \divergentcell{5.6} & \divergentcell{4.69} & \divergentcell{7.79} & \divergentcell{5.72} & \divergentcell{1.45} & \divergentcell{1.04} & \divergentcell{1.55} \\
+                    Avr & \divergentcell{2.61} & \divergentcell{2.47} & \divergentcell{1.78} & \divergentcell{1.78} & \divergentcell{7.97} & \divergentcell{7.56} & \divergentcell{6.37} & \divergentcell{8.24} & \divergentcell{7.7} & \divergentcell{1.79} & \divergentcell{1.69} & \divergentcell{2.28} \\
+                    Mai & \divergentcell{3.41} & \divergentcell{8.5} & \divergentcell{7.6} & \divergentcell{8.19} & \divergentcell{0.68} & \divergentcell{0.72} & \divergentcell{2.04} & \divergentcell{1.47} & \divergentcell{0.79} & \divergentcell{8.8} & \divergentcell{7.54} & \divergentcell{7.07} \\
+                    Jui & \divergentcell{3.2} & \divergentcell{10.1} & \divergentcell{8.47} & \divergentcell{9.3} & \divergentcell{0.8} & \divergentcell{0.75} & \divergentcell{1.02} & \divergentcell{0.97} & \divergentcell{0.89} & \divergentcell{9.9} & \divergentcell{8.3} & \divergentcell{8.12} \\
+                    Juil & \divergentcell{3} & \divergentcell{11.1} & \divergentcell{9.22} & \divergentcell{10.1} & \divergentcell{0.95} & \divergentcell{0.84} & \divergentcell{0.79} & \divergentcell{1.12} & \divergentcell{1.15} & \divergentcell{10} & \divergentcell{9.09} & \divergentcell{8.86} \\
+                    Aoû & \divergentcell{2.86} & \divergentcell{8.12} & \divergentcell{6.94} & \divergentcell{7.5} & \divergentcell{1.03} & \divergentcell{0.95} & \divergentcell{1.01} & \divergentcell{0.92} & \divergentcell{0.96} & \divergentcell{8.1} & \divergentcell{6.86} & \divergentcell{6.48} \\
+                    Sep & \divergentcell{2.94} & \divergentcell{6.4} & \divergentcell{5.95} & \divergentcell{6.3} & \divergentcell{0.81} & \divergentcell{0.79} & \divergentcell{1.7} & \divergentcell{1.34} & \divergentcell{0.76} & \divergentcell{6.9} & \divergentcell{5.8} & \divergentcell{5.36} \\
+                    Oct & \divergentcell{2.28} & \divergentcell{1.98} & \divergentcell{1.47} & \divergentcell{1.4} & \divergentcell{5.76} & \divergentcell{5.52} & \divergentcell{4.79} & \divergentcell{6.44} & \divergentcell{5.67} & \divergentcell{1.33} & \divergentcell{5.88} & \divergentcell{2.05} \\
+                    Nov & \divergentcell{0.75} & \divergentcell{1} & \divergentcell{0.84} & \divergentcell{0.75} & \divergentcell{3.36} & \divergentcell{3.38} & \divergentcell{4.28} & \divergentcell{6.59} & \divergentcell{3.3} & \divergentcell{1.28} & \divergentcell{0.71} & \divergentcell{5.31} \\
+                    Dec & \divergentcell{0.41} & \divergentcell{0.73} & \divergentcell{1.34} & \divergentcell{0.67} & \divergentcell{2.08} & \divergentcell{2.2} & \divergentcell{7.11} & \divergentcell{7.3} & \divergentcell{2} & \divergentcell{1.9} & \divergentcell{0.78} & \divergentcell{0.52} \\
+                    \bottomrule
+                \end{tabular}
+                \label{tab:tstfinal}
+            \end{table}
+
+            \begin{table}[H]
+                \caption{$\mathrm{RMSE}\left(\ThatAir{t}\right)_{\text{CastelO}}$ avec des valeurs de $\mathbf {P_{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois \textit{(résultats de l'alternance)}}
+                \centering
+                \label{tab:tstfinal_tsa}
+                \begin{tabular}{lcccccccccccc}
+                    \toprule
+                    & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
+                    \midrule
+                    Jan & \divergentcell{0.67} & \divergentcell{0.73} & \divergentcell{1.51} & \divergentcell{5.64} & \divergentcell{2.64} & \divergentcell{2.77} & \divergentcell{5.74} & \divergentcell{4.59} & \divergentcell{4.59} & \divergentcell{2.23} & \divergentcell{2.23} & \divergentcell{1.07} \\
+                    Fév & \divergentcell{0.81} & \divergentcell{0.7} & \divergentcell{1.19} & \divergentcell{4.75} & \divergentcell{3.28} & \divergentcell{3.43} & \divergentcell{5.91} & \divergentcell{4.89} & \divergentcell{4.89} & \divergentcell{1.86} & \divergentcell{1.86} & \divergentcell{1.38} \\
+                    Mar & \divergentcell{1.46} & \divergentcell{1.15} & \divergentcell{1.06} & \divergentcell{2.6} & \divergentcell{5.49} & \divergentcell{5.64} & \divergentcell{6.97} & \divergentcell{6.22} & \divergentcell{6.22} & \divergentcell{1.38} & \divergentcell{1.38} & \divergentcell{2.71} \\
+                    Avr & \divergentcell{2.17} & \divergentcell{1.87} & \divergentcell{1.81} & \divergentcell{1.52} & \divergentcell{7.5} & \divergentcell{7.56} & \divergentcell{8.17} & \divergentcell{7.58} & \divergentcell{7.58} & \divergentcell{1.66} & \divergentcell{1.66} & \divergentcell{4.45} \\
+                    Mai & \divergentcell{7.18} & \divergentcell{7.23} & \divergentcell{7.59} & \divergentcell{7.86} & \divergentcell{0.66} & \divergentcell{0.7} & \divergentcell{1.1} & \divergentcell{0.94} & \divergentcell{0.94} & \divergentcell{8.34} & \divergentcell{8.34} & \divergentcell{8.83} \\
+                    Jui & \divergentcell{8.29} & \divergentcell{8.09} & \divergentcell{8.46} & \divergentcell{8.24} & \divergentcell{0.86} & \divergentcell{0.71} & \divergentcell{0.82} & \divergentcell{0.86} & \divergentcell{0.86} & \divergentcell{9.18} & \divergentcell{9.18} & \divergentcell{10.95} \\
+                    Juil & \divergentcell{9.1} & \divergentcell{8.79} & \divergentcell{9.21} & \divergentcell{8.82} & \divergentcell{0.96} & \divergentcell{0.78} & \divergentcell{0.88} & \divergentcell{0.96} & \divergentcell{0.96} & \divergentcell{9.92} & \divergentcell{9.92} & \divergentcell{12.1} \\
+                    Aoû & \divergentcell{6.66} & \divergentcell{6.6} & \divergentcell{6.92} & \divergentcell{6.76} & \divergentcell{1.13} & \divergentcell{0.93} & \divergentcell{0.98} & \divergentcell{0.9} & \divergentcell{0.9} & \divergentcell{7.53} & \divergentcell{7.53} & \divergentcell{8.72} \\
+                    Sep & \divergentcell{5.45} & \divergentcell{5.61} & \divergentcell{5.93} & \divergentcell{6.34} & \divergentcell{0.81} & \divergentcell{0.82} & \divergentcell{1.14} & \divergentcell{0.9} & \divergentcell{0.9} & \divergentcell{6.58} & \divergentcell{6.58} & \divergentcell{7.18} \\
+                    Oct & \divergentcell{1.93} & \divergentcell{1.59} & \divergentcell{1.5} & \divergentcell{1.71} & \divergentcell{5.5} & \divergentcell{5.51} & \divergentcell{6.15} & \divergentcell{5.69} & \divergentcell{5.69} & \divergentcell{1.23} & \divergentcell{1.23} & \divergentcell{3.5} \\
+                    Nov & \divergentcell{0.96} & \divergentcell{0.8} & \divergentcell{0.87} & \divergentcell{3.39} & \divergentcell{3.21} & \divergentcell{3.32} & \divergentcell{5.26} & \divergentcell{4.46} & \divergentcell{4.46} & \divergentcell{1.26} & \divergentcell{1.26} & \divergentcell{1.45} \\
+                    Dec & \divergentcell{0.57} & \divergentcell{0.61} & \divergentcell{1.41} & \divergentcell{5.5} & \divergentcell{2.02} & \divergentcell{2.18} & \divergentcell{5.08} & \divergentcell{3.98} & \divergentcell{3.98} & \divergentcell{2.04} & \divergentcell{2.04} & \divergentcell{0.68} \\
+                    \bottomrule
+                \end{tabular}
+            \end{table}
+
+            \settwotonemin{0}
+            \settwotonemax{5}
+
+            \newpage\vspace*{\fill}
+            \begin{figure}[H]
+                \centering
+                \fbox{\includegraphics[width=\textwidth]{figures/diagrammes/courbes/heatmap_series}}
+                \caption{Matrice de confusion représentant $\mathrm{SRMSE}\left(\TAir{t}, \ThatAir{t}\right)_{\text{Bâtiment}}$ pour mois et chaque bâtiment}\label{fig:heatmap}
+            \end{figure}\vspace*{\fill}
+
+    \newpage\section{Reproduction de conditions réelles avec le projet INXS}\label{sec:donnees-reelles-dans-le-cadre-du-projet-inxs}
+        %TODO : Expliquer qu'IBIS a plus de difficultés sur les pas de temps plus faibles (mauvaise calibration des modèles RC)
+        \ref{fig:incas}
+
+        \begin{table}[H]
+            \centering
+            \caption{Hyperparamètres des prédictions sur les données INXS}
+            \label{tab:hp_inxs}
+            \begin{tabular}{ll}
+                \toprule
+                \textbf{Périodes $n$ d'optimisation des modèles $RC$} & Deux semaines de début janvier 2026 à début avril 2026\\
+                \textbf{Périodes $n+1$ d'application des modèles $RC$} & Une semaine sur la même période\\
+                \textbf{Pas de temps des données initiales} & $60\mathbf s$\\
+                \textbf{Pas de temps fixé} & $1\mathbf h$\\
+                \textbf{Modèle $RC$} & $5R2C2A$\\
+                \textbf{Températures initiales du solveur} & $\left\{ T_{\text{air}_0}; T_{\text{mass}_0} \right\} = \left\{ 19^\circ\mathbf{C}; 19^\circ\mathbf{C} \right\}$ \\
+                \textbf{Température de consigne} & $19^\circ C$\\
+                \textbf{Précision du solveur de l'équation thermique} & $0.001\mathbf C^\circ$ \\
+                \textbf{Algorithme d'optimisation} & PSO avec précision à $0.01\mathbf C^\circ$ \\
+                \bottomrule
+            \end{tabular}
+        \end{table}
+
+        Lorem
+
+        \newpage
+        \begin{figure}[H] \centering
+            \subfloat[Optimisation, 260101-260115]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260101 - Train/522363_T_Air}}}\qquad
+            \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Test/523955_T_Air}}}\qquad
+            \subfloat[Optimisation, 260115-260129]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Train/522815_T_Air}}}\qquad
+            \subfloat[Application, 260129-260205]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Test/523961_T_Air}}}\qquad
+            \subfloat[Optimisation, 260129-260212]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Train/523298_T_Air}}}\qquad
+            \subfloat[Application, 260212-260219]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Test/523968_T_Air}}}\qquad
+            \caption{Séries de $\TAir{t}$ calculées par IBIS sur les données INXS \textit{(Première série)}}\label{fig:resultats_inxs}
+        \end{figure}
+        \newpage
+        \begin{figure}[H] \centering
+            \subfloat[Optimisation, 260212-26026]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Train/523612_T_Air}}}\qquad
+            \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Test/523973_T_Air}}}\qquad
+            \subfloat[Optimisation, 260226-260305]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Train/523666_T_Air}}}\qquad
+            \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260305 - Test/523980_T_Air}}}\qquad
+            \subfloat[Optimisation, 260312-260326]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260312 - Train/523944_T_Air}}}\qquad
+            \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260326 - Test/523986_T_Air}}}\qquad
+            \caption{Séries de $\TAir{t}$ calculées par IBIS sur les données INXS \textit{(Seconde série)}}\label{fig:resultats_inxs2}
+        \end{figure}
+        \newpage
+        \begin{figure}[H] \centering
+            \subfloat[Optimisation, 260101-260115]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260101 - Train/522364_Phi_Em}}}\qquad
+            \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Test/523955_Phi_Em}}}\qquad
+            \subfloat[Optimisation, 260115-260129]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Train/522816_Phi_Em}}}\qquad
+            \subfloat[Application, 260129-260205]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Test/523961_Phi_Em}}}\qquad
+            \subfloat[Optimisation, 260129-260212]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Train/523298_Phi_Em}}}\qquad
+            \subfloat[Application, 260212-260219]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Test/523968_Phi_Em}}}\qquad
+            \caption{Séries de $\PhiEm{t}$ calculées par IBIS sur les données INXS \textit{(Première série)}}\label{fig:resultats_inxs_phi_em}
+        \end{figure}
+        \newpage
+        \begin{figure}[H] \centering
+            \subfloat[Optimisation, 260212-26026]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Train/523613_Phi_Em}}}\qquad
+            \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Test/523974_Phi_Em}}}\qquad
+            \subfloat[Optimisation, 260226-260305]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Train/523666_Phi_Em}}}\qquad
+            \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260305 - Test/523981_Phi_Em}}}\qquad
+            \subfloat[Optimisation, 260312-260326]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260312 - Train/523945_Phi_Em}}}\qquad
+            \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260326 - Test/523986_Phi_Em}}}\qquad
+            \caption{Séries de $\PhiEm{t}$ calculées par IBIS sur les données INXS \textit{(Seconde série)}}\label{fig:resultats_inxs2_phi_em}
+        \end{figure}
+
+    \newpage\section{Intégration de données réelles sur des bâtiments présentant différentes propriétés}\label{sec:integration-de-donnees-reelles-sur-des-batiments-presentant-differentes-proprietes}
+        \cite{subhourlysixdatasets}

@@ -15,13 +15,14 @@
 \input{parametres/compilPar}
 \input{parametres/parametres1}
 \input{parametres/traductions}
+\input{parametres/tikzparam}
 
 \input{biblio/bibConfig}
 \input{additional_content/glossaries_entries}
 
 \begin{document}
     \input{pageDeGarde}
-%    % Remerciements without page number
+%    % Remerciements without page numberK
 %    \pagenumbering{gobble} % Removes page numbers
     \input{resume_intro_conclu/remerciements}
 %
@@ -33,8 +34,8 @@
     \listoffigures
     \newpage\listoftables
     \listofmyequations
-    \listofalgorithms
     \lstlistoflistings
+    \listofalgorithms
 %
 %
 %
@@ -49,9 +50,9 @@
     \input{part1/part1}
     \input{part2/part2}
     \input{part3/part3}
-%    \input{resume_intro_conclu/conclusion}
+    \input{resume_intro_conclu/conclusion}
 %    % Inclusion des annexes
-%%    \input{annexes/annexes}
+    \input{annexes/annexes}
 %
 % Imprimer uniquement les entrées du glossaire principal
 %    \printunsrtglossary[type=main, title=Glossaire]

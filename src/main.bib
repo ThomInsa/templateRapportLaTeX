@@ -1,3 +1,32 @@
+@thesis{scanu,
+    author = {Lisa Scanu},
+    title = {Towards archetypes of self-tuned models for connected buildings},
+    institution = {CEA-Liten},
+    year = {2018},
+    month = {03},
+    day = {18},
+}
+
+@misc{noauthor_performance_nodate,
+    title = {Performance énergétique des bâtiments — {Besoins} d'énergie pour le chauffage et le refroidissement, les températures intérieures et les chaleurs sensible et latente},
+    url = {https://www.iso.org/fr/standard/65696.html},
+    year = {2019},
+}
+
+@techreport{rapport_rc_antoine,
+    author = {Antoine Leconte and David Chèze and Xavier Jobard},
+    title = {Fiche signalétique - Type 5893 - Bâtiment simplifié},
+    institution = {CEA-Liten},
+    year = {2013},
+}
+
+@book{sysidentpy,
+    author = {Lacerda Junior, W.R.},
+    title = {Nonlinear System Identification and Forecasting - Theory and Practice with SysIdentPy},
+    year = {2024},
+    url = {https://sysidentpy.org},
+}
+
 @book{manuel_energie_batiment,
     author       = {Simon Rouchier},
     title        = {Manuel de performance énergétique des bâtiments},
@@ -15,7 +44,12 @@
 
 }
 
-
+@article{radau,
+    author = {Ernst Hairer and Gerhard Wanner},
+    title = {Radau methods},
+    journal = {Encyclopedia of Applied and Computational Mathematics},
+    year = {2011},
+}
 
 @book{audit_energy_engineering,
     author       = {Moncef Krarti},
@@ -98,7 +132,6 @@
     addendum = {George Mason University},
     edition      = {2nd},
 %    note         = {Manuel à destination des étudiants de Polytech Annecy-Chambéry}
-    isbn         = {978-0-321-78367-7}
 %    url          = {https://energiebatiment.com/index.html}
 }
 
@@ -115,7 +148,6 @@
     addendum = {Masachussetts Institute of Technology},
     edition      = {2nd},
 %    note         = {Manuel à destination des étudiants de Polytech Annecy-Chambéry}
-    isbn         = {978-0-321-78367-7}
 %    url          = {https://energiebatiment.com/index.html}
 }
 
@@ -497,18 +529,6 @@ keywords = {Building energy prediction, Artificial neural networks, Deep learnin
   note         = {Additional Notes}
 }
 
-@phdthesis{citation_key_phd,
-  author       = {Author Name},
-  title        = {Title of the Thesis},
-  school       = {University Name},
-  year         = {2000},
-  type         = {Type of Thesis (e.g., PhD)},
-  address      = {School Address},
-  month        = {01},
-  note         = {Additional Notes},
-  url          = {URL}
-}
-
 @mastersthesis{citation_key_thesis,
   author       = {Author Name},
   title        = {Title of the Thesis},
@@ -668,14 +688,6 @@ keywords = {Building energy prediction, Artificial neural networks, Deep learnin
   url          = {URL}
 }
 
-@unpublished{citation_key_unpublished,
-  author       = {Author Name},
-  title        = {Title of the Work},
-  note         = {Note (e.g., forthcoming, in preparation)},
-  month        = {01},
-  year         = {2000}
-}
-
 @online{citation_key_online,
     author        = {Dupont, Marie and Martin, Jean and Depollier, Sylvie},
     title         = {Introduction aux modèles de langage},
@@ -736,7 +748,7 @@ keywords = {Building energy prediction, Artificial neural networks, Deep learnin
     author        = {SDES},
     title         = {Chiffres clés de l'énergie},
     subtitle      = {Vers un secteur des bâtiments et de la construction à émission zéro, efficace et résilient},
-    year          = {Édition 2025},
+    year          = {2025},
     url           = {https://www.statistiques.developpement-durable.gouv.fr/edition-numerique/chiffres-cles-energie/fr/11-international},
     note          = {Statistique publique de l'énergie, des transports, du logement et de l'environnement},
     language      = {french},
@@ -745,9 +757,8 @@ keywords = {Building energy prediction, Artificial neural networks, Deep learnin
 
 @online{mixbatfrance,
     author        = {SDES},
-    title         = {Chiffres clés de l'énergie},
-    subtitle      = {Vers un secteur des bâtiments et de la construction à émission zéro, efficace et résilient},
-    year          = {Édition 2025},
+    title         = {Les énergies de chauffage des ménages en France métropolitaine},
+    year          = {2024},
     url           = {https://www.statistiques.developpement-durable.gouv.fr/les-energies-de-chauffage-des-menages-en-france-metropolitaine},
     note          = {Statistique publique de l'énergie, des transports, du logement et de l'environnement},
     language      = {french},
@@ -942,6 +953,17 @@ keywords = {Building energy prediction, Artificial neural networks, Deep learnin
    url = "http://fr.wikipedia.org/w/index.php?title=R%C3%A9seaux_antagonistes_g%C3%A9n%C3%A9ratifs&oldid=228291689",
    note = "[En ligne; Page disponible le 20-août-2025]"
  }
+
+@online{spline,
+    title = {Documentation de la librairie SciPy},
+    date = {2026-06-19},
+    url = {https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.make_interp_spline.html},
+}
+@online{statsmodels,
+    title = {Documentation de la librairie statsmodels et du modèle SARIMAX},
+    date = {2026-07-23},
+    url = {https://www.statsmodels.org/devel/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.html},
+}
 
 @article{bdg2,
 	abstract = {This paper describes an open data set of 3,053 energy meters from 1,636 non-residential buildings with a range of two full years (2016 and 2017) at an hourly frequency (17,544 measurements per meter resulting in approximately 53.6 million measurements). These meters were collected from 19 sites across North America and Europe, with one or more meters per building measuring whole building electrical, heating and cooling water, steam, and solar energy as well as water and irrigation meters. Part of these data was used in the Great Energy Predictor III (GEPIII) competition hosted by the American Society of Heating, Refrigeration, and Air-Conditioning Engineers (ASHRAE) in October-December 2019. GEPIII was a machine learning competition for long-term prediction with an application to measurement and verification. This paper describes the process of data collection, cleaning, and convergence of time-series meter data, the meta-data about the buildings, and complementary weather data. This data set can be used for further prediction benchmarking and prototyping as well as anomaly detection, energy analysis, and building type classification.},

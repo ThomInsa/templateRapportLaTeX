@@ -1,6 +1,6 @@
 \begin{tikzpicture}[
-    main/.style={text centered, text width=8cm, fill=green!50, draw, rectangle, rounded corners, font=\bfseries\Large},
-    service/.style={text centered, text width=3cm, fill=gray!20, draw, rectangle, rounded corners},
+    main/.style={text centered, text width=8cm, fill=ibisGreen!50, draw, rectangle, rounded corners, font=\bfseries\Large},
+    service/.style={text centered, text width=3cm, fill=ibisGray!20, draw, rectangle, rounded corners},
     labo/.style={grow=down, xshift=4cm, text centered, text width=5cm, draw, rectangle, rounded corners, edge from parent path={(\tikzparentnode.225) |- (\tikzchildnode.west)}},
     first/.style    ={level distance=15ex},
     second/.style   ={level distance=30ex},

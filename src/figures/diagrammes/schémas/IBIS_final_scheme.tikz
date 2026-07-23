@@ -1,0 +1,113 @@
+
+\begin{tikzpicture}[
+    node distance=1.2cm and 2.5cm,
+    every node/.style={draw, rectangle, rounded corners, align=center, minimum width=2.8cm, minimum height=0.9cm},
+    arrow/.style={->, thick},
+    dataset/.style={
+        rectangle, rounded corners,
+        draw, fill=ibisSky!20,
+        minimum width=3.5cm, minimum height=1cm,
+        text width=3.5cm, align=center
+    },
+    paradigm/.style={
+        rectangle, rounded corners,
+        draw, fill=ibisBlue!20,
+        minimum width=3cm, minimum height=1cm,
+        text width=3cm, align=center
+    },
+    model/.style={
+        rectangle, rounded corners,
+        draw, fill=ibisGreen!20,
+        minimum width=1cm, minimum height=1cm,
+        text width=3cm, align=center
+    },
+    modelarx/.style={
+        rectangle, rounded corners,
+        draw, fill=ibisTeal!20,
+        minimum width=1cm, minimum height=1cm,
+        text width=3cm, align=center
+    },
+    solvmethod/.style={
+        rectangle, rounded corners,
+        draw, fill=ibisOlive!20,
+        minimum width=1cm, minimum height=1cm,
+        text width=3cm, align=center
+    },
+    results/.style={
+        rectangle, rounded corners,
+        draw, fill=ibisViolet!20,
+        minimum width=1cm, minimum height=1cm,
+        text width=3cm, align=center
+    },
+]
+
+    \node (d1) [dataset] {Profils du bâtiment \\ $\TAir{t}, \PhiEm{t}$};
+    \node (d2) [dataset, below = of d1] {Profils extérieurs \\ $\TExt{t}, \PhiSol{t}, \PhiInt{t}$};
+    \node (T1) [above = of d1, draw=none] {\textbf{Séries temporelles d'entrée}};
+
+    \node (p1) [paradigm, right = of d1] {Modèle boîte grise paramétrique $RC$};
+    \node (p2) [paradigm, below = of p1] {Modèle boîte noire autorégressif};
+    \node (T2) at (T1.east -| p1) [draw=none] {\textbf{Paradigme de modélisation}};
+
+    \node (mr1)  [model, right = of p1] {$1R1C$};
+    \node (mr2)  [model, below = of mr1] {$2R2C2k$};
+    \node (mr3)  [model, below = of mr2] {$3R2C2k$};
+    \node (mr4)  [model, below = of mr3] {$5R1C2A$};
+    \node (mr5)  [model, below = of mr4] {$5R2C2A$};
+    \node (ml1) [modelarx, below = of mr5] {MISO linéaire ou non-linéaire (N)ARIMA(X)};
+    \node (ml2) [modelarx, below = of ml1] {Modèles avec paramètre de saisonnalité SARIMA(X)};
+    \node (ml3) [modelarx, below = of ml2] {Modèles MIMO VARIMA(X)};
+    \node (T3) at (T2.east -| mr1) [draw=none] {\textbf{Modèle}};
+
+    \node (s1) [solvmethod, right = of mr1] {Méta-heuristiques};
+    \node (s2) [solvmethod, below = of s1] {Valeurs arbitraires};
+    \node (s3) [solvmethod, below = of s2] {Recherche gloutonne};
+    \node (T4) at (T3.east -| s1) [draw=none] {\textbf{Méthode de détermination des paramètres}};
+
+    \node (r1) [results, right = of s1] {Paramètres physiques \\ interprétables};
+    \node (r2) [results, below = of r1, yshift=-5cm] {Profils de \\ températures et de flux de chauffage};
+    \node (T5) at (T4.east -| r1) [draw=none] {\textbf{Données de sortie}};
+
+
+    \draw[-] (d1.east) -- (p1.west);
+    \draw[-] (d1.east) -- (p2.west);
+    \draw[-] (d2.east) -- (p1.west);
+    \draw[-] (d2.east) -- (p2.west);
+
+    \draw[-] (p1.east) -- (mr1.west);
+    \draw[-] (p1.east) -- (mr2.west);
+    \draw[-] (p1.east) -- (mr3.west);
+    \draw[-] (p1.east) -- (mr4.west);
+    \draw[-] (p1.east) -- (mr5.west);
+    \draw[-] (p2.east) -- (ml1.west);
+    \draw[-] (p2.east) -- (ml2.west);
+    \draw[-] (p2.east) -- (ml3.west);
+
+    \draw[-] (mr1.east) -- (s1.west);
+    \draw[-] (mr2.east) -- (s1.west);
+    \draw[-] (mr3.east) -- (s1.west);
+    \draw[-] (mr4.east) -- (s1.west);
+    \draw[-] (mr5.east) -- (s1.west);
+    \draw[-] (mr1.east) -- (s2.west);
+    \draw[-] (mr2.east) -- (s2.west);
+    \draw[-] (mr3.east) -- (s2.west);
+    \draw[-] (mr4.east) -- (s2.west);
+    \draw[-] (mr5.east) -- (s2.west);
+    \draw[-] (ml1.east) -- (s3.west);
+    \draw[-] (ml2.east) -- (s3.west);
+    \draw[-] (ml3.east) -- (s3.west);
+
+    \draw[-] (s1.east) -- (r1.west);
+    \draw[-] (s2.east) -- (r1.west);
+    \draw[-] (s1.east) -- (r2.west);
+    \draw[-] (s2.east) -- (r2.west);
+    \draw[-] (s3.east) -- (r2.west);
+
+    \draw[-] (ml1.east) -- (r2.west);
+    \draw[-] (ml1.east) -- (r2.west);
+    \draw[-] (ml2.east) -- (r2.west);
+    \draw[-] (ml2.east) -- (r2.west);
+    \draw[-] (ml3.east) -- (r2.west);
+    \draw[-] (ml3.east) -- (r2.west);
+
+\end{tikzpicture}

@@ -1,2 +1,187 @@
-\chapter*{Annexe 2 :}
-\addcontentsline{toc}{chapter}{Annexe 2 :}
+\chapter*{Annexe 2 : Intégration dans l'entreprise et
+développement des compétences}
+\setcounter{chapter}{2}
+\addcontentsline{toc}{chapter}{Annexe 2 : Intégration dans l'entreprise et développement des compétences}
+
+\begin{bluebox}
+    Ce chapitre est tiré du rapport intermédiaire "Aspects Humanités" rédigé pour l'INSA CVL à la fin de la première période d'alternance et constituait à l'origine un seul document avec la partie \ref{part:de-l'energetique-du-batiment-au-cea-:-rappels-historiques-et-contextualisation}.
+\end{bluebox}
+
+\section{Parcours d'intégration au sein de l'entreprise}\label{ch:parcours-d'integration-au-sein-de-l'entreprise}
+
+
+\subsection{Entretien réglementaire avec les différents interlocuteurs}\label{subsec:entretien-reglementaire-avec-les-differents-interlocuteurs}
+
+La première partie de l'alternance a été marquée par un certain nombre d'entretiens réglementaires et d'évènements de différentes natures.
+
+\begin{itemize}
+    \item À l'échelle du \gls{CEA} de Grenoble :
+    \begin{itemize}
+        \item Une journée d'accueil des alternants organisée par le service du personnel, permettant de découvrir les activités du Centre ainsi que ses nombreux équipements
+        \item Une visite médicale
+        \item Une journée d'accueil dédiée à la sécurité \textit{(à venir car incompatible avec le calendrier d'alternance jusqu'alors)}
+    \end{itemize}
+    \item À l'échelle de l'\gls{INES}, avec une série de présentations par différents interlocuteurs :
+    \begin{itemize}
+        \item Assistante de laboratoire
+        \item Responsable sécurité
+        \item Responsable qualité
+        \item Responsable de sécurité des systèmes d'information
+        \item Correspondant scientifique
+        \item Chef d'installation
+    \end{itemize}
+\end{itemize}
+\subsection{Accueil par l'équipe et immersion progressive}\label{subsec:accueil-par-l'equipe-et-immersion-progressive}
+
+L'ensemble des procédures administratives a été complété par un accueil chaleureux de l'ensemble du \gls{LELA}, notamment par une visite
+de l'\gls{INES} et une présentation à l'équipe par l'encadrant de l'alternance en amont de celle-ci.
+La découverte du \gls{CEA} par l'alternant s'est faite aussi et surtout par de nombreuses discussions informelles autour des différents projets menés par le laboratoire, des travaux de recherche des collègues et de leur quotidien.
+En outre, plusieurs réunions techniques avec quelques membres du laboratoire ont permis la compréhension des enjeux de l'alternance et leurs liens avec d'autres activités, tout en favorisant la cohésion d'équipe.
+
+Enfin, le travail de cohésion entre les membres de l'\gls{INES} est appuyé par son association Act'\gls{INES} proposant à ses adhérents de nombreuses activités extraprofessionnelles de natures sportive et culturelle.
+
+\section{Cadre de l'alternance et missions confiées}\label{ch:cadre-de-l'alternance-et-missions-confiees}
+
+A date d'écriture du rapport, on peut structurer le travail fourni autour de quatre thématiques :
+\begin{enumerate}
+    \item Une étude bibliographique des différents articles, ouvrages et ressources nécessaires à l'appropriation du sujet par l'alternant
+    \item Un développement en \texttt{Python} d'un modèle simplifié, reprenant de précédents travaux de stage, visant d'une part à identifier les paramètres thermiques des bâtiments du quartier, et d'autre part à résoudre l'équation différentielle posée par ce modèle pour prédire la température intérieure du bâtiment au cours de l'année
+    \item Une participation à la montée en compétences du laboratoire dans différents domaines en capitalisant sur la formation \gls{STI} de l'INSA CVL \textit{(développement logiciel, gestion de projet logiciel, sécurité informatique)}
+    \item Une restitution orale et écrite de ces travaux par la rédaction des livrables demandés par l'alternance et une préparation de soutenance à la fin du semestre
+\end{enumerate}
+
+Nous revenons sommairement sur les trois premiers points ci-après.
+
+\subsection{Montée en compétences en énergétique du bâtiment}\label{sec:montee-en-competences-en-energetique-du-batiment}
+
+L'énergétique du bâtiment est un domaine de recherche et d'ingénierie très documenté et très actif, notamment avec de nouvelles approches ces vingt dernières années.
+A cet égard, tout travail de développement doit être mené en aval d'une certaine appropriation de connaissances, en particulier de celles absentes de la formation INSA CVL n'apportant pas d'applications au bâtiment de sa formation.
+
+L'alternance a donc commencé par l'étude de la bibliographie du stage effectué sur le projet DISTRISIM \textit{(voir section suivante)} ainsi que d'ouvrages plus globaux en thermique du bâtiment, particulièrement sur l'analogie entre les transferts de chaleur dans les bâtiments et les circuits électriques, une méthodologie éprouvée constituant la base du sujet de l'alternance et d'un certain nombre de projets du laboratoire.
+
+\subsection{Reprise du projet DISTRISIM}\label{sec:reprise-du-projet-distrisim}
+
+La majeure partie des activités de l'alternance gravite autour d'un stage de fin d'études effectué en 2023 pendant lequel avait été modélisé un parc de bâtiments de Grenoble selon le modèle proposé par~\cite{aoun}.
+Les conclusions du stage et le code fourni montrent que le comportement énergétique des bâtiments peut être prédit de façon satisfaisante avec un petit volume de données d'entrée et des méthodes d'optimisation peu complexes.
+
+Ce code a servi en premier lieu de prétexte pour la montée en compétences de l'alternant et l'application des connaissances théoriques.
+Dans un second temps, un jalon important de la mission confiée fut la reprise du projet comme nouveau point de départ des travaux d'identification des paramètres de bâtiment.
+A ce titre, des considérations sur l'architecture du projet ont été émises dans l'optique de le rendre d'une part utilisable par l'ensemble du laboratoire, et d'autre part pour qu'il puisse servir de socle stable à des modélisations plus larges et détaillées \textit{(en particulier, avec de nouvelles données et de nouvelles méthodes de calcul)}.
+
+Par ailleurs, une attention particulière ainsi qu'un volume horaire important ont été accordées à la documentation du code pour réutilisation de celui-ci par un novice, absente jusqu'ici et apportant une réelle valeur ajoutée au projet.
+
+Le livrable attendu pour la fin de la période est la comparaison directe entre les figures présentées dans le rapport de stage repris et celles obtenues par le nouveau programme.
+Cette synthèse sera intégrée au rapport technique de l'alternance.
+
+\subsection{Travaux transverses sur les bonnes pratiques applicables au LELA}\label{sec:travaux-transverses-sur-les-bonnes-pratiques-applicables-au-lela}
+\subsubsection{Gestion de projet et développement versionné}\label{subsec:gestion-de-projet-et-developpement-versionne}
+En travaillant de concert avec l'encadrant, une uniformisation des pratiques de développement a été commencée sur cette période.
+Celle-ci a pour visée principale la capitalisation d'une part sur les modélisations pouvant être réutilisées au sein du laboratoire, et l'évitement d'autre part que des programmes similaires soient développés en parallèle par les différents membres de l'équipe à des fins de cohérence et d'efficacité.
+
+Cette uniformisation a été rendue possible par l'intégration récente de la plateforme \texttt{GitLab} en interne au \gls{CEA}.
+Celle-ci permet d'héberger les projets selon le framework \texttt{Git}, améliorant le développement de projets de façon significative sur deux plans au moins :
+\begin{enumerate}
+    \item La collaboration avec de nombreux acteurs pouvant adopter différents rôles, allant du simple relecteur à l'utilisateur soucieux de remonter les problèmes rencontrés et au collaborateur actif.
+    Pour ce dernier, le travail est facilité par le suivi détaillé de chaque modification de code aidant à comprendre leur impact global sur le projet.
+    Une autre fonctionnalité majeure de \texttt{Git} est le développement par branches, permettant aux collaborateurs de créer des copies indépendantes du projet initial pour concevoir de nouvelles implémentations et éventuellement les fusionner avec la branche principale quand elles atteignent un stade de maturité avancée.
+    \item Le suivi du projet par des méthodes traditionnellement rapprochées de l'agilité, comme la création et la résolution d'issues, auxquelles on peut attribuer un ou plusieurs responsables, une durée de travail, un domaine du projet \ldots
+\end{enumerate}
+
+\subsubsection{Cybersécurité et Machine Learning}\label{subsec:cybersecurite-et-machine-learning}
+
+En accord avec les enseignants du département \gls{STI} de l'INSA CVL, un travail de bibliographie sur les enjeux de sécurité soulevés par le sujet, en particulier sur les travaux de l'agence européenne pour la cybersécurité \textit{(cités en \ref{sec:marges-de-progression-identifiees-et-continuite-de-la-formation})} autour des problèmes posés par le traitement statistique massif de données parfois sensibles.
+Dans un second temps, une analyse de risques poussée sur les programmes développés pendant l'alternance sera menée pour évaluer leur niveau de sécurité et identifier les solutions mises en place pour faire face aux menaces et vulnérabilités relevées par l'étude bibliographique.
+
+Les livrables techniques à l'attention de l'INSA comporteront également une partie strictement dédiée aux aspects de développement illustrant la montée en compétences de l'alternant dans ce domaine.
+
+\section{Compétences apportées et développées par l'alternant}\label{ch:competences-apportees-et-developpees-par-l'alternant}
+
+
+\subsection{Capitalisation sur la double formation apportée par l'INSA CVL}\label{sec:capitalisation-sur-la-double-formation-apportee-par-l'insa-cvl}
+
+Les premières semaines d'alternance ont permis d'exploiter de nombreux modules enseignés à l'INSA CVL, en particulier dans le cadre du double diplôme \gls{MRI}-\gls{STI}.
+Les connaissances mobilisées sont synthétisées dans le tableau ci-dessous.
+
+Ces connaissances ont été abondées par les deux stages suivies avant l'alternance, dans chacun des deux départements.
+
+\begin{itemize}
+    \item Par le stage de 4A \gls{MRI}, portant sur le développement d'un outil de liquéfaction des barrages en remblai :
+    \begin{itemize}
+        \item Modélisation physique
+        \item Optimisation non linéaire
+        \item Travail de R\&D et exploitation de la littérature scientifique
+    \end{itemize}
+    \item Par le stage de 4A \gls{STI}, portant sur l'étude de l'architecture logicielle d'un code de calcul en \gls{acoustique} environnementale pour les installations industrielles du parc EDF :
+    \begin{itemize}
+        \item Calcul géométrique
+        \item Développement Python
+        \item Utilisation de \texttt{Git} et \texttt{GitLab} sur un projet d'envergure
+        \item Introduction à l'agilité et au développement logiciel
+    \end{itemize}
+\end{itemize}
+
+\begin{table}[H]
+    \centering \renewcommand{\arraystretch}{1.3}
+    \begin{tabularx}{\textwidth}{lccX}
+             \toprule \textbf{Matière} & \textbf{Spécialité} & \textbf{Semestre} & \textbf{Compétences apportées par le module}\\
+             \midrule
+             Électrocinétique & STPI & S1 & Panel exhaustif des composants utilisés par l'analogie électrique\\
+             Projet Mathématiques & \gls{MRI} & S5 & Introduction à l'automatique et au contrôle prédictif \\
+             Thermique & \gls{MRI} & S5 & Comportement des flux de chaleur avec une approche nodale et l'introduction aux trois modes de transport \textit{(conduction, convection, rayonnement)}\\
+             Composants Électroniques & \gls{MRI} & S5 & Approfondissement des connaissances en électronique mobilisées par les modèles $RC$ de bâtiment\\
+             Optimisation Linéaire & \gls{MRI} & S6 & Méthodologie de base de l'optimisation sous contraintes et de la minimisation de fonctions objectifs \\
+             Analyse Numérique & \gls{MRI} & S6 & Résolution numérique itérative d'équations différentielles \\
+             Automatique & \gls{MRI} & S6 & Fondamentaux du contrôle prédictif \\
+             Modélisation et commande dans l'espace d'état & \gls{MRI} & S7 & Approfondissement du contrôle prédictif \\
+             Projet Informatique et Sécurité & \gls{STI} & S7 & Machine Learning, développement Python, visualisation de données, approche par projet, restitution écrite et orale \\
+             Introduction au Machine Learning & \gls{STI} & S8 & Machine Learning, développement Python \\
+             Deep Learning et applications & \gls{STI} & S8 & Machine Learning, Statistiques, approche par projet, développement Python \\
+             Traitement de données NoSQL & \gls{STI} & S8 & Introduction au traitement de données \\
+             Data Mining & \gls{STI} & S9 & Approfondissent des méthodes de traitement de données \\
+             IA Avancée & \gls{STI} & S9 & Approfondissement des techniques modernes de Machine Learning \\
+             \bottomrule
+    \end{tabularx}
+    \caption{Apports de la formation INSA pour l'alternance}
+    \label{tab:modules}
+\end{table}
+
+
+\newpage
+\subsection{Marges de progression identifiées et continuité de la formation…}\label{sec:marges-de-progression-identifiees-et-continuite-de-la-formation}
+
+S'il est aisé de faire un certain nombre de liens avec les compétences développées en amont de l'alternance, plusieurs lacunes subsistent à la fin de la première période, illustrant une montée en compétences encore en cours pour plusieurs domaines.
+Celles-ci sont progressivement comblées par de nombreuses discussions avec les experts du sujet dans le laboratoire, ainsi que par la formation autodidacte imposée au fil de l'eau par la reprise du projet \texttt{DISTRISIM}.
+
+Ces travaux sont complétés par l'examen approfondi de plusieurs articles, ressources et ouvrages de référence dans les sciences sollicitées par le sujet d'alternance.
+Nous les citons ci-après.
+\begin{itemize}
+    \item En Thermique du Bâtiment :~\cite{manuel_energie_batiment, audit_energy_engineering}
+    \item En Analyse Numérique et en Optimisation :~\cite{numerical_analysis, NIA}
+    \item En Modèle de Contrôle Prédictif :~\cite{MPC_needs}
+    \item En Machine Learning :~\cite{WML, Goodfellow-et-al-2016, UDL}
+    \item En développement logiciel :~\cite{clean_code}
+    \item En Sécurité des \gls{algorithme}s de Machine Learning :~\cite{ENISA_securing_ML, ENISA_AI_standardization, ENISA_AI_cyber_research, ENISA_AI_forecasting_demand_electricity}
+\end{itemize}
+
+\subsection{Premier retour d'expérience et suite immédiate de l'alternance}\label{sec:premier-retour-d'experience-et-suite-immediate-de-l'alternance}
+
+Les premiers résultats concrets sont très récents\footnote{les simulations tournent en parallèle de l'écriture du rapport !} et nécessitent un examen approfondi, mais tendent vraisemblablement à montrer que les écueils de l'\gls{algorithme} existant viennent de deux problèmes au moins :
+
+\begin{enumerate}
+    \item Une implémentation encore trop fragile pour porter le code sur d'autres études
+    \item Une approche mathématique challengeable par la considération d'autres procédés similaires à celle-ci (autres méthodes méta-heuristiques) ou non \textit{(modèles de Machine Learning, dits "boîtes noires")}
+\end{enumerate}
+
+Ces résultats sont conformes aux hypothèses émises au début de l'alternance et confirment le besoin de continuer le développement du projet, désormais renommé \texttt{IBIS} pour \textbf Identification of \textbf Buildings \textbf Insights and \textbf Simulation.
+
+D'un point de vue du projet de l'alternant et de la montée en compétences, l'ensemble des compétences nécessaires à une activité d'ingénieur-chercheur \textit{(étude bibliographique, comparaison de modèles, développement scientifique ...)} a été mobilisé et ont permis sa formation active et intensive.
+
+%\begin{figure}[H]
+%    \centering
+%    \subfloat[Par semaine]{\fbox{
+%        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/volume_horaire/hours_distribution}}}\\
+%    \subfloat[Au total]{\fbox{
+%        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/volume_horaire/total_hours_pie}}}
+%    \caption{Répartition horaire des cinq premières semaines d'alternance}\label{fig:volume_horaire}
+%\end{figure}
+

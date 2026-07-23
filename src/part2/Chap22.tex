@@ -1,219 +1,414 @@
 %! suppress = MissingImport
-\chapter{Modélisation des besoins énergétiques du quartier Cambridge dans le cadre du projet DISTRISIM}\label{chap:distrisim}
+\chapter{IBIS : Un projet modulaire destiné à différents modèles, bâtiments et données}\label{ch:ibis}
+    Le chapitre précédent montre de façon non exhaustive l'étendue des possibilités en matière de modélisation énergétique des bâtiments.
+    Il est proposé dans celui-ci d'en explorer quelques-unes à travers les fonctionnalités du projet IBIS, développé en parallèle de la rédaction de ce livrable.
+
+    Ainsi, les éléments mathématiques et physiques d'une part et algorithmes et numériques d'autre part sont joints dans les prochaines sections, et sont complétées notamment par les chapitres suivants :
+    \begin{itemize}
+        \item Le chapitre \ref{ch:analyse-de-donnees-sur-les-premieres-applications-d'ibis} explorant les résultats obtenus
+        \item Le chapitre \ref{ch:resultats-et-failles-d'ibis-:-une-synthese-apres-un-an-de-developpement} synthétisant les forces et points d'améliorations du projet à date de livraison du présent rapport
+        \item L'annexe \ref{ch:ibisdoc} reprenant la documentation technique du projet comme guide pratique à destination des utilisateurs comme des développeurs
+    \end{itemize}
+
+    Ce chapitre couvre quant à lui, dans cet ordre :
+    \begin{enumerate}
+        \item Les objectifs poursuivis par le projet
+        \item La cadre d'étude général et les principales hypothèses ayant piloté la modélisation
+        \item Deux approches prédictives différentes, appelées "Boîte noire" et "Boîte grise", chacun de ces termes pouvant respectivement être interchangé avec les notions de "méthode ARX" et de "modèle $RC$"
+    \end{enumerate}
+
+\section{Genèse et raison d'être du projet}\label{sec:genese-et-raison-d'etre-du-projet}
+
+    Comme précisé en introduction de ce rapport, le lancement du projet IBIS est motivé par le besoin d'un outil protéiforme pour la modélisation et l'analyse de données de bâtiments, en particulier au regard de l'impossibilité
+    à proposer un modèle de bâtiment facilement généralisable.
+    En effet, la complexité inhérente à la formulation d'un problème d'énergétique du bâtiment impose souvent de définir un ensemble d'hypothèses intrinsèque au bâtiment ou au parc étudié, parmi lesquelles figurent :
+    \begin{itemize}
+        \item la surface des bâtiments étudiés \textit{(immeubles ou résidences individuelles)}
+        \item l'année de construction, ayant une influence importante sur l'inertie thermique des parois notamment
+        \item le rôle du bâtiment et par conséquent la prise en compte de l'occupation de celui-ci \textit{(c'est-à-dire l'opposition entre les bâtiments tertiaires et le parc résidentiel)}
+    \end{itemize}
+
+    Par ailleurs, les trois sources de données étudiées dans le cadre du développement d'IBIS illustrent cette hétéréogénéité des cadres d'étude \textit{(voir \ref{ch:analyse-de-donnees-sur-les-premieres-applications-d'ibis})}.
+
+    Ces contraintes prises en compte, il devient possible d'atteindre les visées finales du projet, définies comme suit :
+    \begin{itemize}
+        \item Analyser des données de bâtiment sous différents prismes et notamment différents modèles, en interfaçant les modèles précédemment développés avec les travaux conduits lors du développement d'IBIS pour permettre leur compatibilité.
+        \item Prédire le comportement énergétique des bâtiments à différents horizons temporels de courte échelle
+        \item Au-delà des capacités de prédiction des modèles, participer à la description rigoureuse des bâtiments pour expliquer les liens entre leurs caractéristiques et leurs profils physiques\footnote{Des travaux de recherche sont par ailleurs actuellement conduits au LELA pour déterminer des classes de bâtiments à l'échelle du parc résidentiel français, particulièrement par des algorithmes de clustering.}
+    \end{itemize}
+
     \begin{bluebox}
-        Les travaux rapportés ici font suite à un stage de fin d'études de cycle ingénieur en énergétique
-        réalisé en 2023 et visent à le compléter.
-        De nombreuses explications et figures sont donc adaptées du rapport associé\cite{TST}.
-        Les résultats de ce stage tiennent lieu de point de départ pour le projet IBIS.
-        Aussi, les deux enjeux majeurs de ce chapitre sont la compréhension théorique des
-        différents composants du modèle, et la reproductibilité des résultats obtenus pendant ce
-        stage avec des données similaires et un code refactorisé permettant une extension du
-        modèle dans le cadre du projet \gls{IBIS}.
+        Ainsi, IBIS se donne comme principal objectif et pilote de développement la détermination d'un Modèle de Contrôle Prédictif obtenant le meilleur compromis entre précision des résultats, temps de calcul, généralisation et interprétabilité physique des paramètres quand ces deux dernières sont possibles.
+        À date de livraison du présent rapport, les fonctionnalités et modèles proposés sont synthétisés par la figure \ref{fig:IBIS_final_scheme}.
+        Cette figure montre qu'il est possible de résumer ces fonctionnalités à une prédiction de séries temporelles, soit par résolution numérique d'équations différentielles induites par des modèles $RC$, soit par des méthodes plus proches du Machine Learning traditionnel dites "méthodes auto-régressives", les deux approches reposant sur les mêmes données d'entrée et de sortie.
+        Les sections suivantes décrivent donc respectivement le format de ces données, puis chacune de ces deux méthodes.
     \end{bluebox}
 
+    \begin{figure}[H]
+        \centering
+        \begin{adjustbox}{width=\textwidth}
+        \fbox{\input{figures/diagrammes/schémas/IBIS_final_scheme.tikz}}
+        \end{adjustbox}
+        \caption{Résumé des fonctionnalités du projet IBIS}\label{fig:IBIS_final_scheme}
+    \end{figure}
 
-    \section{Position du problème}\label{sec:position-du-probleme}
+\section{Entrées, sorties et hypothèses générales}\label{sec:entrees-sorties-et-fonctionnement-general}
 
+    \subsection{Circonscription de l'étude à quelques flux physiques}\label{subsec:circonscription-de-l'etude-a-quelques-flux-physiques}
 
-        \subsection{Bâtiments étudiés et datasets d'entraînement}\label{subsec:batiments-etudies-et-datasets-d'entrainement}
+        Dans un but de simplicité d'une part et pour rechercher les performances intrinsèques à un modèle en l'absence de données complètes d'autre part, de nombreuses hypothèses simplificatrices fortes sont
+        appliquées aux modèles d'IBIS et excluent à dessein une description fine des bâtiments étudiés.
+        Ces hypothèses sont les suivantes :
+        \begin{itemize}
+            \item Modélisation monozone, c'est-à-dire que l'on considère uniforme la température de l'air $\TAir{t}$ au sein du bâtiment\footnote{Cette précision sur la température de l'air est importante. En effet, celle-ci n'empêche pas le modèle de calculer des températures d'autres parties du bâtiment (de l'enveloppe par exemple) pendant la résolution des équations, mais on ne considère pas de différence de température entre les pièces ou les étages du bâtiment.}
+            \item Non-considération des données géométriques intérieures, comme le nombre d'étages ou de pièces différentes, ou le ratio $\frac{\text{surface de parois vitrées}}{\text{surfaces de parois non vitrées}}$\footnote{Cette hypothèse est donc liée à la précédente.}
+            \item Non-considération des flux de froid \textit{(climatisation, brasseurs d'air)} pour se limiter à un flux de chauffage unique $\PhiEm{t}$
+            \item Prise en compte du flux de chaleur intérieur lié à l'occupation du bâtiment $\PhiInt{t}$\footnote{En pratique le projet manque de données représentatives de ce flux, alors considéré nul bien qu'implémenté et utilisable par les modèles.}
+            \item Prise en compte des conditions extérieures avec un flux solaire surfacique $\PhiSol{t}$ et une température extérieure $\TExt{t}$
+            \item Non-considération des détails propres au système \gls{HVAC} \textit{(pompe à chaleur, radiateur électrique etc)}
+            \item Pour la majeure partie des études menées et notamment l'ensemble de la section \ref{sec:approche-predictive-principale-:-du-modele-$rc$-au-profil-de-chauffage}, constance de la température de consigne sur l'ensemble de la période étudiée
+        \end{itemize}
 
-Le projet DISTRISIM est mené par le \gls{CEA} et vise à évaluer la consommation énergétique des bâtiments du quartier Cambridge, à Grenoble.
-L'étude de ces bâtiments est facilitée par le caractère récent
-            \it{(moins de douze ans)} de leur construction, garantissant leur conformité aux
-            réglementations thermiques de la RT2012\cite{RT2012, TST}.
-            En outre ces bâtiments sont pour la plupart connectés à un réseau énergétique de quartier avec par exemple des panneaux solaires installés sur les toitures\cite{TST}.
+        \begin{bluebox}
+            Ces hypothèses permettent de définir les séries temporelles d'entrée d'IBIS synthétisées par l'équation \ref{eq:IBISinput}.
 
-            Les propriétés géométriques des bâtiments n'ayant pas été utilisées dans le cadre de ce rapport, elles ne sont pas rappelées formellement ici.
-            On peut toutefois mentionner que ces derniers diffèrent notamment par leur nombre d'étages, leur surface vitrée et leur surface habitable.
-            L'étude se limite aux onze bâtiments suivants :
+            Bien qu'elles ne soient pas appelées comme tel par la suite, elles constituent les données d'entraînement $\underline{\underline{\mathbf X}}(t)$ et prédites $\overrightarrow{\mathbf y} (t)$ au sens de la nomenclature classique du Machine Learning.
+            Comme vu dans les sections suivantes, la répartition de ces séries entre les données d'entraînement et les données prédites dépend du modèle utilisé.
+            En effet, dans la plupart des cas, il est prévu par le modèle d'utiliser une connaissance \textit{a priori} de $\PhiEm{t}$ pour prédire $\TAir{t}$ ou inversement.
+            Cependant, dans le cas des modèles MIMO proposés en \ref{sec:methodesautoregressives}, il est possible de prédire les deux séries simultanément à partir des autres entrées.
+        \end{bluebox}
+
+        \begin{equation}
+            \overrightarrow{\underline{\underline{\textbf{IBIS}}}}_{\text{input}} = \begin{bmatrix}
+                        \TAir{t}\\
+                        \TExt{t}\\
+                        \PhiEm{t}\\
+                        \PhiSol{t}\\
+                        \PhiInt{t}
+            \end{bmatrix}\label{eq:IBISinput}
+        \end{equation}\myequations{Séries temporelles d'entrée d'IBIS}
+
+        \subsubsection{Précisions sur la fenêtre temporelle et le pas de temps}
+            Les modèles $RC$ simples ne sont généralement pas adaptés à l'étude de dynamiques très courtes, c'est-à-dire une fréquence d'oscillation de $\TAir{t}$ et $\PhiEm{t}$ élevée \textit{(voir \ref{sec:donnees-reelles-dans-le-cadre-du-projet-inxs})}.
+            En dépit de cette limitation, les données relevées lors de campagnes d'essais ou présentées dans la littérature ont un pas de temps relativement faible, de l'ordre de quelques minutes.
+            Ce choix est souvent imposé par les techniques d'instrumentation insuffisantes pour mesurer avec précision les flux physiques d'une zone habitable \textit{(en particulier la présence des occupants et les gains solaires)}, nécessitant alors des mesures régulières pour s'assurer de la fiabilité des données.
+
+            Pour ces raisons, il est choisi de restreindre les périodes pendant lesquelles le modèle est calibré puis appliqué à une période allant de quelques jours à quelques semaines, quand cela est possible\footnote{Les résultats présentés en \ref{sec:point-de-depart-sur-un-modele-simple-et-des-donnees-synthetiques-:-besoins-energetiques-du-quartier-cambridge-dans-le-cadre-du-projet-distrisim} faisant exception car issues d'une étude précédente basée sur des périodes d'un mois.}
+
+            En outre, et pour pallier le défaut des données réelles parfois incomplètes, les données manquantes sont recomposées par interpolation de type "B-Spline" de degré 1\footnote{Détails décrits dans \cite{spline}}.
+            Cette technique introduit cependant un biais dans les données et peut produire des résultats manquant de fiabilité.
+
+    \subsection{Données de sortie et évaluation des modèles}\label{subsec:donnees-de-sortie-et-evaluation-des-modeles}
+        \subsubsection{Sur le choix des métriques d'évaluation}\label{subsubsec:choix-des-metriques}
+            \textbf{La définition d'une métrique d'évaluation de performance d'un modèle prédictif pour des ensembles de séries temporelles est un problème non trivial.}
+
+            En effet, le caractère temporel des données d'entrée et de sortie impose de manipuler les métriques classiques plus précautioneusement qu'avec des données non temporelles.
+            Par exemple, dans le cas de l'évaluation par $\mathrm{RMSE}$\eqref{eq:RMSE}, un score haut comme bas est plus difficilement interprétable, pour deux raisons au moins :
+            \begin{itemize}
+                \item Une erreur élevée peut être mesurée sur un modèle bien que celui-ci puisse par ailleurs être considéré comme satisfaisant, notamment si l'on s'intéresse à la dynamique des oscillations mais que les amplitudes prédites sont trop fortes
+                \item À l'inverse, une erreur faible peut êre obtenue par le modèle s'il fait une prédiction relativement naïve, en prenant une moyenne lissée des oscillations d'entrée, sans pour autant modéliser la dynamique réelle du système
+            \end{itemize}
+
+            Ce problème est en fait celui de la rupture de la structure temporelle provoquée par l'utilisation d'une métrique "point à point" : deux scores, qu'ils soient faibles ou élevés, peuvent refléter des réalités physiques très différentes d'un point de vue dynamique.
+            Cette contrainte se traduit par la nécessité d'ajouter plusieurs métriques au cadre de l'étude, et de comparer visuellement les prédictions lorsque l'on obtient des erreurs très faibles pour s'assurer de la validité du modèle.
+
+            Par ailleurs, les modèles développés ont pour ambition d'être applicables à une année entière, plage temporelle pendant laquelle il est observé une nette variation des amplitudes de température.
+            Il est alors nécessaire d'apprécier la performance du modèle en comparant des métriques absolues, en $^\circ\mathbf{C}$, à des métriques relatives standardisées sur la distribution statistique des données d'entrée.
+
+            \begin{bluebox}
+                Ainsi, les six métriques suivantes sont retenues pour l'évaluation des performances d'IBIS\@.
+                Le tableau \ref{tab:metriquescompare} montre comment sont réparties ces métriques entre les deux approches proposées\footnote{L'astérisque * indique que la métrique annotée est utilisée pour l'évaluation des données de sortie mais également pour l'optimisation des paramètres du modèle.}
+                L'évaluation des deux paradigmes n'est donc pas uniformisée : ceci est dû d'une part à une non-priorisation de cette tâche dans le développement du projet, et d'autre part au fait que ces deux approches ne suivent pas exactement
+                la même méthodologie.
+                En particulier, pour le modèle $RC$, la phase de test est conçue différemment de la phase d'entraînement, et les données d'entrée ne permettent pas non plus une utilisation uniforme d'une seule métrique d'évaluation.
+
+                Pour la suite, selon la variable prédite, on définit $y$ tel que $y \in \left\{\TAir{t},\PhiEm{t}\right\}$.
+            \end{bluebox}
 
             \begin{table}[H]
+                \caption{Attribution des métriques d'évaluation à chacun des paradigmes de modélisation}
                 \centering
-                \begin{tabular}{lcccccccccc}
+                \begin{tabular}{ll}
                     \toprule
-                    Alasia &
-                    CastelO &
-                    CastelR &
-                    Ceva &
-                    Novae &
-                    Panache &
-                    Python &
-                    Soleil &
-                    Thales &
-                    Up &
-                    Zenae \\
+                    \textbf{Boîte noire} & \textbf{Boîte Grise} \\
+                    \midrule
+                    $\mathrm{RMSE}$* \textit{(Root Mean Square Error)} \eqref{eq:RMSE} & $\mathrm{RMSE}$\\
+                    $\mathrm{RRSE}$ \textit{(Root Relative Squared Error)} \eqref{eq:RRSE} & $\mathrm{SRMSE}$* \textit{(Standardized RMSE)} \eqref{eq:SRMSE}\\
+                    $\mathrm{MASE}$ \textit{(Mean Averaged Scaled Error)}\eqref{eq:MASE} & $\mathrm{MAE}$ \eqref{eq:mae}\\
+                    $\mathrm{\rho}$ \textit{(Coefficient de Pearson)}\eqref{eq:Pearson} & \\
                     \bottomrule
                 \end{tabular}
-                \caption{Bâtiments étudiés dans le cadre du stage \cite{TST} et du projet DISTRISIM}
-                \label{tab:building_list}
+                \label{tab:metriquescompare}
             \end{table}
 
-            Pour chacun de ces bâtiments, des données de consommation énergétique synthétiques sont générées à l'aide d'EnergyPlus sous forme de séries temporelles sur une année entière.
-            Celles-ci comprennent la température intérieure du bâtiment \textit{(unique)}, la température extérieure, le flux de chauffage dans le bâtiment \textit{(unique également)} et le flux solaire.
-            On peut ainsi regrouper ces séries dans un vecteur constituant le forçage externe du modèle :
+            \paragraph{Formulation et justification du choix de chaque métrique}
+
+            La façon la plus rapide d'évaluer une erreur entre deux séries statistiques de même taille est de calculer la différence moyenne entre les valeurs prédites et réelles : c'est la fonction de la métrique MAE\@.
+            Il est choisi de croiser l'étude de cette valeur avec la RMSE, cette dernière présentant la particularité de fortement pénaliser les données extrêmes, cette propriété pouvant se révéler utile ou dommageable pour l'évaluation du modèle
+            selon la grandeur étudiée\footnote{En effet, il a été préféré au cours du développement de se baser sur le couple de valeurs $\left\{ \mathrm{RMSE}\left(\TAir{t}, \ThatAir{t}\right), \mathrm{MAE}\left(\PhiEm{t}, \PhihatEm{t}\right)\right\}$, du fait de la forme d'onde particulière du flux de chaleur, nul sur de grandes plages temporelles, en particulier en été, provoquant une RMSE systématiquement élevée sur cette période.}.
+            \begin{equation}
+                \mathrm{MAE}\left(\overrightarrow {\mathbf y(t)}, \widehat{\overrightarrow{\mathbf y(t)}}\right) = \frac{1}{N_{\text{test}}}\sum_t\left|y-\hat y\right|\label{eq:mae}
+            \end{equation}\myequations{Formulation de la métrique $\mathrm{MAE}$}
+            \begin{equation}
+                \mathrm{RMSE}\left(\overrightarrow {\mathbf y(t)}, \widehat{\overrightarrow{\mathbf y(t)}}\right) = \sqrt{\sum_t \left(y -\hat y\right)^2}\label{eq:RMSE}
+            \end{equation}\myequations{Formulation de la métrique $\mathrm{RMSE}$}
+
+            Cependant, la valeur d'une erreur absolue en température a par définition une signification différente selon la période de l'année, empêchant sa comparaison directe d'une saison à l'autre.
+            C'est la raison pour laquelle la version "standardisée", \textit{(c'est-à-dire divisée par l'étendue)} est également ajoutée et étudiée.
+
+            \begin{bluebox}
+                L'implémentation de cette métrique est principalement motivée par les résultats satisfaisants qu'elle permet d'obtenir pour les travaux de thèse de \cite{scanu}, portant sur de nombreux modèles$RC$.
+                Cependant, son utilisation dans IBIS est sujette aux problèmes expliqués en introduction de cette section, ce qui explique le choix de la métrique RRSE pour les méthodes autorégressives.
+            \end{bluebox}
 
             \begin{equation}
-                \FExt = \begin{bmatrix}
-                    \TAir{t}\\
-                    \TExt{t}\\
-                    \PhiHeat{t}\\
-                    \PhiSol{t}
-                \end{bmatrix}\label{eq:FExt}
-            \end{equation}\myequations{Vecteur forçage externe pour le projet DISTRISIM}
+                \mathrm{SRMSE}\left(\overrightarrow {\mathbf y(t)}, \widehat{\overrightarrow{\mathbf y(t)}}\right) = \frac{\sum_t \left(y -\hat y\right)^2}{\max_t{\left(\overrightarrow {\mathbf y\left(t \right)}\right)}-\min_t\left( \overrightarrow {\mathbf y(t) }\right)}\label{eq:SRMSE}
+            \end{equation}\myequations{Formulation de la métrique $\mathrm{SRMSE}$}
 
-            L'objectif est alors de développer un Modèle de Contrôle Prédictif, utilisant un segment de ces séries temporelles constituant une période de l'année, pour prédire le plus justement possible la fenêtre temporelle suivante.
+            La métrique RRSE permet de standardiser l'erreur non pas par son étendue, mais par son écart-type, ce qui la rend théoriquement plus fiable que la SRMSE\@, bien qu'elle non plus ne permette pas de décrire complètement le système.
 
-        \subsubsection{Quelques commentaires sur les données d'entrée}
-            \label{subsec:quelques-commentaires-sur-les-donnees-d'entree}
-                \begin{bluebox}
-                        (27/01) : La détermination rigoureuse d'un modèle d'entraînement statistique
-                    doit en toute logique être précédée d'une analyse de fond des données
-                    impliquées.
-                    Cette partie souffre pour l'instant d'un manque de profondeur, mais les
-                    futurs travaux impliquant de gros volumes de données corrigeront cet écueuil.
-                \end{bluebox}
+            \begin{equation}
+                \mathrm{RRSE}\left(\overrightarrow {\mathbf y(t)}, \widehat{\overrightarrow{\mathbf y(t)}}\right) = \sqrt{\frac{\sum_t \left(y -\hat y\right)^2}{\sum_t \left(y -\overline y\right)^2}} = \frac{\mathrm{RMSE}}{\sigma\left(y\right)}\label{eq:RRSE}
+            \end{equation}\myequations{Formulation de la métrique $\mathrm{RRSE}$}
 
-                \begin{figure}[H] \centering
-                    \subfloat[Température intérieure]{\fbox{
-                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_TAir}}
-                    }\\
-                    \subfloat[Besoin de chauffage]{\fbox{
-                        \includegraphics[width = 0.9\textwidth]{figures/diagrammes/courbes/TST/DISTRISIM_PhiEm}}
-                    }
-                    \caption{Visualisation de la distribution des données d'entrée}\label{fig:DISTRISIMinputData}
-                \end{figure}
+            La métrique MASE compare quant à elle le score MAE à celui du prédicteur dit "naïf", c'est-à-dire, pour le cas des séries temporelles, la série $\widehat{\overrightarrow{\mathbf y(t)}}$ tel que $\hat y_t = y_{t-1} \forall t$.
+            Elle évalue donc le modèle de façon beaucoup plus sévère.
 
-\newpage\subsection{Modèle $RC$ sélectionné}\label{subsec:modele-$rc$-selectionne}
+            \begin{equation}
+                \mathrm{MASE}\left(\overrightarrow {\mathbf y(t)}, \widehat{\overrightarrow{\mathbf y(t)}}\right) = \frac{\frac{1}{N_{\text{test}}}\sum_t\left|y-\hat y\right|}{\frac{1}{N_{\text{train} - 1}}\sum_t\left| y_t - y_{t-1} \right|}\label{eq:MASE}
+            \end{equation}\myequations{Formulation de la métrique $\mathrm{MASE}$}
 
-            On s'inspire de l'architecture proposée par~\cite{aoun} en 2019, celle-ci offrant un
-            compromis intéressant entre complétude des paramètres et simplicité de résolution.
-    
+            Enfin, le coefficient de Pearson permet d'évaluer la corrélation statistique entre les valeurs réelles et prédites.
+            Cet indicateur est utile lorsque la RRSE, utilisée comme métrique principale, indique un score faible.
+            En effet, deux cas de figures sont alors possibles :
+            \begin{itemize}
+                \item $\rho$ est élevé et le modèle est mal calibré, c'est-à-dire que la série prédite est décalée verticalement d'une constante seulement de la série réelle
+                \item $\rho$ est faible et le modèle complet est à revoir
+            \end{itemize}
+
+            \begin{equation}
+                \rho\left(\overrightarrow {\mathbf y(t)}, \widehat{\overrightarrow{y}(t)}\right) = \frac{\text{cov}\left(\mathbf y(t),\widehat{\overrightarrow{\mathbf y(t)}}\right)}{\sigma_{\overrightarrow {\mathbf y(t)}}\times\sigma_{\widehat{\overrightarrow{\mathbf y(t)}}}} \label{eq:Pearson}
+            \end{equation}\myequations{Formulation de la corrélation de Pearson $\rho$}
+        \subsubsection{Données de sortie}
+            Les données produites par IBIS sont donc analogues aux données d'entrée et sont constituées des deux séries temporelles prédites $\ThatAir{t}$ et $\PhihatEm{t}$.
+            Il est possible d'analyser ces données séparément en inspectant la dynamique de leurs profils, ou bien de façon plus macroscopique en comparant les métriques d'évaluation d'une série à l'autre.
+            Ces deux approches sont complémentaires et doivent être menées en parallèle, en raison de la difficulté précédemment décrite à interpréter chaque métrique.
+
+\section{Approche prédictive principale : du modèle $RC$ au profil de chauffage}\label{sec:approche-predictive-principale-:-du-modele-$rc$-au-profil-de-chauffage}
+    L'approche Boîte Grise développée dans IBIS suit les étapes du logigramme~\ref{fig:logigramme1}, et peut être structurée en deux parties :
+    \begin{enumerate}
+        \item L'optimisation à une période $T_i$ des paramètres d'un modèle $RC$ par résolutions successives des équations différentielles avec des paramètres $RC$ déterminés selon la minimisation d'une fonction objectif
+        \item L'application du modèle $RC$ optimisé à la période suivante $T_j$ pour reconstruire d'une part le profil de température $\ThatAir{t}_{T_j}$ et d'autre part le besoin de chauffage associé $\PhihatEm{t}_{T_j}$
+    \end{enumerate}
+
+    Chacun de ces parties est développée dans les sections suivantes.
+    \begin{center}
+        \begin{figure}[H]
+            \centering
+            \begin{adjustbox}{max width=\linewidth}
+                \fbox{\input{figures/diagrammes/logigrammes/DISTRISIM_behavior.tikz}}
+            \end{adjustbox}
+            \caption{Logigramme reprenant les étapes du modèle prédictif d'IBIS basé sur un modèle $RC$}\label{fig:logigramme1}
+        \end{figure}
+    \end{center}
+
+    \subsection{Modèles $RC$ implémentés}\label{subsec:modeles-rc-implementes}
+        Comme vu en \ref{subsec:AE_rc}, il existe une grande variété d'architectures de modèles $RC$ et seuls quelques-uns sont implémentés dans IBIS\@.
+        Le choix des modèles vus ici donne la priorité à la continuité des travaux du LELA et repose donc sur les architectures déjà largement utilisées, bien que plusieurs autres modèles pourraient être considérés\footnote{On peut à nouveau citer \cite{scanu} notamment avec un modèle $9R4C$ reconnu comme plus performant que tous les autres abordés dans le cadre de ces travaux, dont certains sont communs avec IBIS.}.
+        Pour chacun de ces modèles, les paramètres thermiques ainsi que le système d'équations différentielles associé sont rappelés.
+        \subsubsection{Modèle $1R1C$}
+            Il est possible de concevoir un bâtiment comme une unité macroscopique avec un seul paramètre de résistance thermique et un paramètre d'inertie.
+            Ce modèle présente des performances relativement faibles dans les applications d'IBIS mais peut constituer un point de départ de modélisation intéressant.
+            \begin{equation}
+                {\PTh}_{(\text{1R1C})} = \begin{bmatrix}
+               \UBuild \\
+               \CBuild
+            \end{bmatrix}
+                \label{eq:Pth1R1C}
+            \end{equation}\myequations{Vecteur des paramètres thermiques pour le modèle $1R1C$}
+
+            \begin{equation}
+                \CBuild\frac{\mathrm{d}\TAir{t}}{\mathrm dt} = \PhiEm{t} + \PhiSol{t} + \PhiInt{t} - \UBuild\left(\TAir{t} - \TExt{t}\right)\label{eq:oneronec}
+            \end{equation}\myequations{Équation thermique du modèle $1R1C$}
+        \subsubsection{Modèle $3R2C2k$}
+            On s'inspire de l'architecture proposée par~\cite{aoun} en 2019 et on applique les mêmes hypothèses que \cite{TST}, celle-ci offrant un compromis intéressant entre complétude des paramètres et facilité de résolution.
+
             Le modèle d'origine introduit 16 paramètres à identifier :
             \begin{itemize}
-                \item 5 noeuds de température $\TAir{t}$, $\TEnv{t}$, $\TMass{t}$, $\TEm{t}$ et $\TCirc{t}$, représentant respectivement les températures intérieure, de l'enveloppe, de la masse thermique, de la source de chaleur et du circuit de chauffage ;
+                \item 5 noeuds de température $\TAir{t}$, $\TEnv{t}$, $\TMass{t}$, $\TEm{t}$ et $\TCirc{t}$, représentant respectivement les températures intérieure, de l'\gls{enveloppe}, de la masse thermique, de la source de chaleur et du circuit de chauffage ;
                 \item 5 capacités thermiques représentant l'inertie de ces mêmes zones $\CAir$, $\CEnv$, $\CMass$, $\CEm$ et $\CCirc$
                 \item 5 conductances pour les transferts de chaleur entre les noeuds $\UAirExt$, $\UAirEnv$, $\UAirMass$, $\UAirEm$ et $\UEnvExt$
-                \item 3 ouvertures surfaciques pour l'impact du flux solaire sur l'air intérieur, l'enveloppe et la masse $\kAir$, $\kEnv$, $\kMass$
+                \item 3 ouvertures surfaciques pour l'impact du flux solaire sur l'air intérieur, l'\gls{enveloppe} et la masse $\kAir$, $\kEnv$, $\kMass$
             \end{itemize}
-            
-            Cependant, l'objectif de l'étude se limite aux besoins de chauffage et utilise à ce titre des datasets moins riches ne donnant pas d'information sur le système de chauffage.
-            C'est la raison pour laquelle on néglige la présence de la masse thermique et du circuit.
-            Par ailleurs, les gains solaires sont simplifiés en deux ouvertures dépendantes l'une de l'autre, l'une sur l'enveloppe et l'autre sur l'air intérieur.
+
+            Cependant, l'objectif de l'étude se limite aux besoins de chauffage et considère à ce titre le système de chauffage comme une boîte noire.
+            Par ailleurs les datasets récupérés dans le cadre du projet sont moins riches que ceux utilisés par le modèle initial.
+            C'est la raison pour laquelle on néglige l'influence de la masse thermique et du circuit de chauffage.
+            Enfin, pour linéariser le modèle, les facteurs de gains solaires sont simplifiés en deux ouvertures dépendantes l'une de l'autre, l'une sur l'\gls{enveloppe} et l'autre sur l'air intérieur.
             On définit alors les paramètres thermiques suivants :
 
             \begin{equation}
-                {\PTh}_{(\text{DISTRISIM})} = \begin{bmatrix}
-                \UAirExt \\
-                \UAirEnv\\
-                \UEnvExt \\
-                \CAir \\
-                \CEnv \\
-                k_1 \\
-                k_2
+              {\PTh}_{(\text{3R2C2k})} = \begin{bmatrix}
+              \UAirExt \\
+              \UAirEnv\\
+              \UEnvExt \\
+              \CAir \\
+              \CEnv \\
+              k_1 \\
+              k_2
             \end{bmatrix}
-                \label{eq:Pth}
-            \end{equation}\myequations{Vecteur des paramètres thermiques pour le projet DISTRISIM}
+                \label{eq:Pth3R2C2k}
+            \end{equation}\myequations{Vecteur des paramètres thermiques pour le modèle $3R2C2k$}
 
-            Enfin, et pour correspondre aux paramètres d'entrée définis en \ref{subsec:batiments-etudies-et-datasets-d'entrainement} on définit deux sources de chaleur $\PhiSol{t}$ et $\PhiHeat{t}$, dépendant évidemment du temps\footnote{En théorie, il existe également un flux de chaleur interne \textit{produit par les occupants et leurs activités}, mais comme cette information n'est généralement pas mesurable, on fait le choix de négliger cette donnée dans le modèle à identifier. Cette décision engendre nécessairement une erreur d'estimation, que les paramètres identifiés visent à limiter.}.
+            On peut donc visualiser le modèle comme suit \ref{fig:modelerctst} :
 
-            On peut donc visualiser le modèle comme suit :
-        
             \begin{figure}[H]
                 \centering
-                {\fbox{\includegraphics[width = 0.7\textwidth]{figures/diagrammes/schémas/DISTRISIM AE.drawio}}}
-                \caption{Modèle RC utilisé pour modéliser un bâtiment DISTRISIM \textit(tiré de \cite{TST} et inspiré de \cite{aoun})}\label{fig:figure}
+                {\fbox{\includegraphics[width = 0.7\textwidth]{figures/diagrammes/schémas/DISTRISIM AE}}}
+                \caption{Modèle $3R2C2k$ utilisé pour modéliser un bâtiment DISTRISIM \textit(tiré de \cite{TST} et inspiré de \cite{aoun})}\label{fig:modelerctst}
             \end{figure}
-            
-            On peut montrer que ce modèle obéit aux deux équations différentielles suivantes,
-            qu'il est alors nécessaire de résoudre.
 
+            Ce modèle est régi par le système d'équations différentielles \ref{eq:diffTST} :
             \begin{equation}
                 \begin{split}
-                    C_{air}\frac{\mathrm d\TAir{t}}{\mathrm dt}&=\UAirEnv\left(\TAir{t}\right) +\UAirExt\left(\TEnv{t}-T_{ext}\right) + k_2\PhiSol{t}+\PhiHeat{t} \\
-                    C_{env}\frac{\mathrm d\TEnv{t}}{\mathrm dt}&=\UEnvExt\left(\TEnv{t}\right) +
+                    \CAir\frac{\mathrm d\TAir{t}}{\mathrm dt}&=\UAirEnv\left(\TEnv{t} - \TAir{t}\right) +\UAirExt\left(\TEnv{t}-\TExt{t}\right) + k_2\PhiSol{t}+\PhiEm{t} \\
+                    \CEnv\frac{\mathrm d\TEnv{t}}{\mathrm dt}&=\UEnvExt\left(\TExt{t}-\TEnv{t}\right) +
                     \UAirEnv\left(\TAir{t}-\TEnv{t}\right) + \left( k_1-k_2 \right)\PhiSol{t} \\
                 \end{split}\label{eq:diffTST}
-            \end{equation}\myequations{Équations différentielles régissant la température d'un modèle thermique à 7 paramètres}
+            \end{equation}\myequations{Équations différentielles régissant la température du modèle $3R2C2k$}
 
-            La résolution des équations suit les étapes du logigramme~\ref{fig:logigramme}, mais peut être synthétisée en deux parties : d'une part l'idéntification des paramètres de modèle de bâtiment et d'autre part la recherche numérique d'une solution approchée.
-            La première utilise un algorithme méta-heuristique détaillé en~\ref{subsec:optimisation-par-essaims-particulaires-(pso)} et la seconde un solveur numérique simple présenté en\ref{sec:resolution-des-equations-differentielles}.
-            Les résultats obtenus sont décrits en \ref{sec:promesses-et-limites-de-la-methode-actuellement-implementees}.
+            \textit{Nb : en retirant $\UAirExt$ (le paramètre le moins influent de l'équation) du modèle, on revient à un modèle $2R2C$ largement utilisé par le LELA. Celui-ci est également disponible dans IBIS.}
 
-            \newpage
-                \vspace*{\fill}
-                \begin{center}
-                    \begin{figure}[H]
-                        \centering
-                        \fbox{\input{figures/diagrammes/logigrammes/DISTRISIM_behavior.tikz}}
-                        \caption{Logigramme des étapes de calcul pour le projet \texttt{DISTRISIM}}\label{fig:logigramme}
-                    \end{figure}
-                \end{center}
-                \vspace*{\fill}
-            \newpage
-
-
-    \section{Identification des paramètres}\label{sec:optimisation-des-parametres-du-modele}
-        La première étape de résolution du problème est la recherche de valeurs cohérente des paramètres $RC$.
-        Il est à cet égard possible de les fixer par différents critères, notamment la méthode 3CL utilisée dans les normes de calcul du DPE.
-
-        Il est également possible de les optimiser par rapport aux données d'entrée.
-        On choisit alors une fonction objectif d'une part et un algorithme de résolution d'autre part, lesquels sont présentés plus bas.
-
-        \subsection{Définition de la fonction objectif}\label{subsec:definition-de-la-fonction-objectif}
-
+        \subsubsection{Modèle $5R1C2A$}
+            Ce modèle est plébiscité car expliqué dans la norme ISO\cite{noauthor_performance_nodate}, synthétisée par le LELA dans \cite{rapport_rc_antoine}.
+            Il est vu ici une version simplifiée du modèle avec 4 noeuds de température et non 5, en raison du format des données d'entraînement d'IBIS\@.
+            \begin{equation}\label{eq:fiveronec}
+                \resizebox{0.9\linewidth}{!}{$\begin{split}
+                     \TAir{t} &= \frac{\left(\frac{1}{2}\PhiInt{t}+\PhiEm{t}+\UAirExt\TExt{t}+\UAirEnv\TEnv{t}\right)}{\UAirExt + \UAirEnv}\\
+                     \TEnv{t} &= \frac{\frac{1}{2}\left(1-\frac{\Am}{\Atot}-\frac{\UEnvExt}{9,1\Atot}\right)\left(\PhiInt{t}+\PhiSol{t}\right) + \UEnvMass\TMass{t} + \UEnvExt\TExt{t} + \UAirEnv\TAir{t}}{\UEnvMass + \UEnvExt + \UAirEnv}\\
+                     \CMass\frac{\mathrm{d}\TMass{t}}{\mathrm dt} &= \UExtMass\left(\TExt{t}-\TMass{t}\right) + \UEnvMass\left(\TEnv{t} - \TMass{t}\right) + \frac{\Am}{\Atot}\left(\frac{1}{2}\PhiInt{t}+\PhiSol{t}\right)
+                \end{split}$}
+            \end{equation}\myequations{Équation thermique du modèle $5R1C2A$ \textit{(simplifiée sur 4 noeuds de température)}}
             \begin{bluebox}
-                (28/01) : Cette sous-section mérite d'être étoffée.
-                Par souci de simplicité on utilise la RMSE par défaut, mais il peut être
-                intéressant de justifier le choix ou le rejet d'autres fonctions.
+                Ce modèle présente une particularité dans sa définition actuelle car son équation fait partie des équations différentielles algébriques (DAE) et non des équations différentielles ordinaires vues précédemment.
+                Pour cette raison, le solveur d'IBIS est à ce stade de développement incapable de la résoudre.
+                C'est pourquoi les applications du projet lui préfèrent l'équation $5R2C2A$, similaire dans sa formulation mais différente dans sa résolution.
             \end{bluebox}
-            
-            \begin{equation}
-                \mathrm{RMSE}\left(\ThatAir{t}\right) =
-                \sqrt{\sum_{i=1}^{n}
-                    \displaystyle{
-                    \frac{\left(\widehat {T_{\text{air}}}_{t_i} - {\Tconsint}_{t_i}\right)^2}{n}}}
-                    \label{eq:RMSE}
-            \end{equation}\myequations{Racine de l'erreur quadratique moyenne entre la température prédite et la température consigne intérieure}
+        \subsubsection{Modèle $5R2C2A$}
+            Une capacité est ajoutée sur le noeud d'air intérieur, ayant pour effet notable de simplifier la résolution du modèle.
+            Afin d'achever cette simplification, notamment sa linéarisation, le coefficient $\Atot$ est fixé à 405 en amont de la recherche des autres paramètres.
+            \ref{fig:modelercfivertwoc}
 
-        \subsection{Optimisation par essaim particulaires (PSO)}\label{subsec:optimisation-par-essaims-particulaires-(pso)}
-
-La \gls{PSO} est une des méta-heuristiques les plus populaires en raison de son faible coût computationnel et sa capacité à modéliser de nombreuses situations.
-
-Sommairement, l'algorithme consiste en l'initialisation de $N$ particules placées aléatoirement dans l'espace de recherche borné, auxquelles à chaque instant $t$ on attribue une position et une vitesse, c'est-à-dire l'incrément de leur position à l'instant $t+1$, dépendant de la solution trouvée, mise à jour si la fonction objectif est réduite.
-            Ainsi, les particules sont chargées de rechercher un minimum local dans l'espace qu'elles explorent, puis de les comparer pour définir un minimum global.
-
-            Une représentation de l'algorithme en deux dimensions est donnée plus bas :
-            \begin{figure}[H] \centering
-                    \subfloat[À un état quelconque]{\fbox{
-                        \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/PSO/PSOi}}}\qquad
-                    \subfloat[À l'état final]{\fbox{
-                        \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/PSO/PSOf}}}\qquad
-                \caption{Représentation visuelle d'une optimisation de fonction à deux
-                paramètres par PSO \it{(\cite{yt_pso})}}\label{fig:figure4}
+            \begin{figure}[H]
+                \centering
+                {\fbox{\includegraphics[width = 0.7\textwidth]{figures/diagrammes/schémas/rc_model_5R2C2A}}}
+                \caption{Schéma du modèle $5R2C2A$}\label{fig:modelercfivertwoc}
             \end{figure}
 
-\newpage\paragraph{Précisions sur les intervalles de recherche} Ceux-ci dépendent du bâtiment considéré car ils sont obtenus à partir de caractéristiques intrinsèques à ceux-ci \textit{(conductivité thermique, épaisseur des parois, ratio des surfaces vitrées par rapport aux parois etc)}.
-            Pour la majorité des bâtiments, les bornes sont similaires à :
             \begin{equation}
-                \left\{\mathbf{p}_{\min} ;  \mathbf{p}_{\max} \right\} = \left\{
-                    \begin{bmatrix}
-                        10^3 \\ 10^3 \\ 10^3 \\ 10^6 \\ 10^9 \\ 0 \\ 0 \end{bmatrix}\;;\;
-                    \begin{bmatrix}
-                        10^5 \\ 10^5 \\ 10^5 \\ 10^{10} \\ 10^{12} \\ 4,3.10^2 \\ 4.3.10^2
-                    \end{bmatrix}
-                \right\}\label{eq:bornes}
-            \end{equation}\myequations{Intervalle de recherche typique pour le projet DISTRISIM}
+                {\PTh}_{(\text{5R2C2A})} = \begin{bmatrix}
+                   \UAirExt \\
+                   \UAirEnv\\
+                   \UEnvExt \\
+                   \UAirMass\\
+                   \UEnvMass\\
+                   \CAir \\
+                   \CMass \\
+                   \Am \\
+                   \Atot
+                \end{bmatrix}
+                \label{eq:Pth5R2C2A}
+            \end{equation}\myequations{Vecteur des paramètres thermiques pour le modèle $5R2C2A$}
+            \begin{equation}\label{eq:fivertwoc}
+                \resizebox{0.9\linewidth}{!}{$\begin{split}
+                  \CAir\frac{\mathrm{d}\TAir{t}}{\mathrm dt} &= \frac 12 \PhiInt{t} + \PhiEm{t} + \UAirExt\left(\TExt{t} - \TAir{t}\right) + \UAirEnv  \left(\TEnv{t} - \TAir{t}\right)\\
+                  \TEnv{t} &= \frac{\frac{1}{2}\left(1-\frac{\Am}{\Atot}-\frac{\UEnvExt}{9,1\Atot}\right)\left(\frac 12 \PhiInt{t}+\PhiSol{t}\right) + \UEnvMass\TMass{t} + \UEnvExt\TExt{t} + \UAirEnv\TAir{t}}{\UEnvMass + \UEnvExt + \UAirEnv}\\
+                  \CMass\frac{\mathrm{d}\TMass{t}}{\mathrm dt} &= \UExtMass\left(\TExt{t}-\TMass{t}\right) + \UEnvMass\left(\TEnv{t} - \TMass{t}\right) + \frac{\Am}{\Atot}\left(\frac{1}{2}\PhiInt{t}+\PhiSol{t}\right) \\
+                \end{split}$}
+            \end{equation}\myequations{Équation thermique du modèle $5R2C$ \textit{(simplifiée sur 4 noeuds de température)}}
+    \subsection{Résolution des équations différentielles induites par les modèles}\label{subsec:resolution-des-equations-differentielles-induites-par-les-modeles}
+        En fixant les paramètres $RC$, il est possible de calculer une solution numérique à l'équation~\ref{eq:diffTST} pour obtenir les profils de température sur un
+        horizon temporel donné.
 
+        On admet qu'il est difficile de trouver une solution explicite aux systèmes d'équations \ref{eq:oneronec}, \ref{eq:diffTST}, \ref{eq:fiveronec} et \ref{eq:fiveronec}, pour lesquelles il est alors nécessaire d'utiliser un solveur numérique.
 
+        \begin{bluebox}
+            Il est cherché ici à challenger l'implémentation décrite dans \cite{TST} où il est proposé d'utiliser la méthode d'Euler explicite \ref{alg:euler}.
+            Le principe de celle-ci est de partir d'une condition initiale et de se déplacer d'une distance très faible sur la pente de la fonction dans
+            l'espace des solutions, puis de recalculer cette pente itérativement jusqu'à convergence des valeurs calculées.
 
-            L'algorithme complet est donné ci-dessous.
-            Le lecteur peut consulter\cite{gad_particle_2022}, \cite{PSO_overview} et \cite{NIA} pour une description
-            plus détaillée\footnote{En particulier, on peut montrer que le nombre de paramètres du modèle peut être réduit sous l'hypothèse forte de l'indépendance des paramètres à optimiser.}.
+            Cette méthode est appréciée pour sa simplicité d'implémentation et sa rapidité d'exécution, son écueil principal étant la non-garantie de convergence de l'algorithme.
+            C'est pourquoi il a été choisi d'utiliser des approches implicites avec un pas de temps adaptatif, au prix d'un temps de calcul plus long et d'une calibration plus complexe
+            La méthode d'Euler est tout de même rappelée ici pour son utilité historique.
+        \end{bluebox}
 
+        \begin{algorithm}[H]
+            \caption{Méthode d'Euler explicite}
+            \label{alg:euler}
+            \begin{algorithmic}[1]
+            \Require
+            Fonction $f(t,y)$, condition initiale $y_0$, temps initial $t_0$, pas $h$,
+            nombre d'itérations $N$
+            \Ensure
+            Approximation numérique $(t_n, y_n)$ de la solution de $\displaystyle y'(t)=f(t,y(t))$
+
+            \State Initialiser $t_0 \gets t_0$
+            \State Initialiser $y_0 \gets y_0$
+
+            \For{$n = 0$ \textbf{à} $N-1$}
+                \State $t_{n+1} \gets t_n + h$
+                \State $y_{n+1} \gets y_n + h f(t_n, y_n)$
+            \EndFor
+
+            \State \Return $\{(t_n, y_n)\}_{n=0}^{N}$
+        \end{algorithmic}
+        \end{algorithm}
+
+        Pour obtenir les résultats présentés dans le chapitre \ref{ch:analyse-de-donnees-sur-les-premieres-applications-d'ibis}, plusieurs méthodes de résolution numérique classiques sont testées, sans que l'une d'entre elles obtienne des résultats significativement plus satisfaisants\footnote{Celles-ci sont toutes des arguments de la fonction \texttt{solve\_ivp} de SciPy et sont interchangeables facilement. Le véritable défi de calibration du solveur est la définition de la borne maximale du pas de temps interne, pouvant provoquer de mauvais résultats ou un temps de calcul anormalement long selon qu'il soit fixé trop haut ou trop bas.} :
+        La méthode Radau IIA, appartenant à la classe des méthodes de Runge-Kutta complètement implicites\cite{radau} est celle retenue pour la suite de l'étude.
+
+        \begin{algorithm}[H]
+            \caption{Méthode Radau, adaptée de \cite{radau}}
+            \label{alg:radau}
+            \begin{algorithmic}[1]
+                \Require équation différentielle $\dot y = f(t,y)$, nombre d'étages $s$, condition initiale $\left\{t_0, y_0\right\}$, fenêtre temporelle $T$
+                \Ensure Une solution approximée $\hat y$ de $y$
+                \State $\left\{c_1, \dots, c_s\right\} \gets x \text{ tel que }\frac{\mathrm d^{s-1}}{\mathrm dx^{s-1}}\left(x^{s-1} \left(x-1\right)^s\right)$
+                \State Construction du polynôme $u(t)$ de degré $s$ tel que $u\left(t_n\right)=y_n$ et $\dot u\left(t_n + c_i h\right)=f\left(t_n + c_i h, u\left(t_n + c_i h\right)\right) \forall i$
+                \For{$t=1 \textbf{à} T$}
+                    \State $y_{t+1} \gets u\left(t + h\right)$
+                \EndFor
+                \Return
+            \end{algorithmic}
+        \end{algorithm}
+    \subsection{Optimisation semi-physique des paramètres $RC$}\label{subsec:optimisation-semi-physique-des-parametres-rc}
+        Pour les raisons citées en section \ref{subsubsec:choix-des-metriques}, la fonction objectif définie est une version standardisée de la RMSE sur la température prédite : $\theta \coloneqq \mathrm{SRMSE}\left( \TAir{t}, \ThatAir{t} \right)$
+
+        \subsubsection{Choix d'un algorithme d'optimisation méta-heuristique}
+            L'étape suivant la définition de la fonction objectif est le choix de la méthode permettant de la minimiser, en cherchant un compromis pertinent entre précision et temps de calcul.
+            En reprenant les résultats de \cite{TST}, il est choisi d'utiliser la \gls{PSO}, une des méta-heuristiques les plus populaires en raison de son faible coût computationnel et sa capacité à modéliser de nombreuses situations.
+
+            Sommairement, l'\gls{algorithme} consiste en l'initialisation de $N$ particules placées aléatoirement dans l'espace de recherche borné, auxquelles à chaque instant $t$ on attribue une position et une vitesse, c'est-à-dire l'incrément de leur position à l'instant $t+1$, dépendant de la solution trouvée, mise à jour si la fonction objectif est réduite.
+            Ainsi, les particules sont chargées de rechercher un minimum local dans l'espace qu'elles explorent, puis de les comparer pour définir un minimum global.
+
+            Une représentation en deux étapes de l'\gls{algorithme} pour le cas à deux dimensions est donnée par la figure~\ref{fig:pso} :
+            \begin{figure}[H] \centering
+                \subfloat[À un état quelconque]{\fbox{\includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/PSO/PSOi}}}\qquad
+                \subfloat[À l'état final]{\fbox{\includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/PSO/PSOf}}}\qquad
+                \caption{Représentation visuelle d'une optimisation de fonction à deux paramètres par PSO \it{(\cite{yt_pso})}}\label{fig:pso}
+            \end{figure}
+
+            \begin{bluebox}
+                Ainsi, l'algorithme est appliqué dans un espace dont le nombre de dimensions varie selon le modèle $RC$.
+                L'évaluation des paramètres étant obtenue par l'erreur entre l'ensemble des valeurs des séries prédite et réelle, il est nécessaire de discrétiser l'équation \ref{eq:diffTST} avant l'optimisation, puis de la calculer itérativement à chaque pas de temps.
+                Cette étape est assurée par les méthodes numériques décrites en \ref{subsec:resolution-des-equations-differentielles-induites-par-les-modeles}.
+            \end{bluebox}
+
+            L'\gls{algorithme} complet est donné ci-dessous (\ref{alg:pso}). Le lecteur peut consulter\cite{gad_particle_2022,PSO_overview}~, et~\cite{NIA} pour une description plus détaillée\footnote{En particulier, on peut montrer que le nombre de paramètres du modèle peut être réduit sous l'hypothèse forte de l'indépendance des paramètres à optimiser.}.
 
             \begin{algorithm}
                 \caption{Optimisation par essaim de particules (PSO)}\label{alg:pso}
-                \begin{algorithmic}
+                \begin{algorithmic}[1]
                     \Require
                     Taille de l'essaim $S\in\mathbb N$,
                     Dimensionnalité de l'espace de recherche $D\in\mathbb N$,
@@ -249,282 +444,171 @@ Sommairement, l'algorithme consiste en l'initialisation de $N$ particules placé
                 \end{algorithmic}
             \end{algorithm}
 
-\newpage\section{Résolution des équations différentielles}\label{sec:resolution-des-equations-differentielles}
-
-        Une fois les paramètres $RC$ déterminés, il devient possible de calculer une solution
-        numérique à l'équation \ref{eq:diffTST} pour obtenir les profils de température sur un
-        horizon temporel donné.
-        Deux méthodes différentes sont employées pour déterminer d'une part un profil de température cohérent avec les données d'entraînement et d'autre part un besoin de chauffage pour le bâtiment.
-
-        \subsection{Températures dans la paroi et à l'intérieur du bâtiment}\label{subsec:temperatures-dans-la-paroi-et-a-l'interieur-du-batiment}
-
-            On admet qu'il est difficile de trouver une solution explicite à l'équation
-            présentée.
-            Pour ce type de problème, il est courant d'utiliser un solveur numérique comme celui proposé par la méthode d'Euler.
-            Le principe de celle-ci est de partir d'une condition initiale et de se
-            déplacer d'une distance très faible sur la pente de la fonction dans l'espace des
-            solutions, puis de recalculer cette pente itérativement jusqu'à convergence des
-            valeurs calculées.
-        
-            \begin{algorithm}[H]
-                \caption{Méthode d'Euler explicite}
-                \label{alg:euler}
-                \begin{algorithmic}[1]
-                    \Require
-                    Fonction $f(t,y)$, condition initiale $y_0$, temps initial $t_0$, pas $h$,
-                    nombre d'itérations $N$
-                    \Ensure
-                    Approximation numérique $(t_n, y_n)$ de la solution de $\displaystyle y'(t)=f(t,y(t))$
-                    
-                    \State Initialiser $t_0 \gets t_0$
-                    \State Initialiser $y_0 \gets y_0$
-                    
-                    \For{$n = 0$ \textbf{à} $N-1$}
-                        \State $t_{n+1} \gets t_n + h$
-                        \State $y_{n+1} \gets y_n + h\, f(t_n, y_n)$
-                    \EndFor
-                    
-                    \State \Return $\{(t_n, y_n)\}_{n=0}^{N}$
-                \end{algorithmic}
-            \end{algorithm}
-
-        \subsection{Besoin de chauffage}\label{subsec:flux-de-chaleur-solaire-et-besoin-de-chauffage}
-
-            La méthode de la sécante est un algorithme utilisé pour trouver les racines d'une fonction, présentant l'avantage de ne pas utiliser sa dérivée \cite{numerical_analysis}.
-            Comme les algorithmes précédents, cette méthode consiste à itérer sur un intervalle de recherche, mais il est cette fois-ci redéfini à chaque itération et la valeur finale est l'une de ces bornes.
-
-            Appliqué au présent modèle, on cherche le flux de chauffage pour lequel la température intérieure est égale à la température de consigne.
-            La fonction d'entrée est donc :
-            \begin{equation}
-                \ThatAir {\PhihatHeat{t}}  - \Tconsint\label{eq:fminphiheatdistrisim}
-            \end{equation}\myequations{Fonction à minimiser pour déterminer le besoin de chauffage du projet DISTRISIM}
-
-            \begin{algorithm}
-                \caption{Méthode de la sécante \it{(Tiré de \cite{numerical_analysis_2})}}
-                \label{alg:sec}\begin{algorithmic}
-                    \Require Approximations initiales $p_0, p_1$, tolérance $\varepsilon$,
-                    nombre d'itérations $N$
-                    \Ensure Solution approximative $p$ ou message d'erreur
-                    \State i $\gets 2$
-                    \State $q_0\gets f\left( p_0 \right)$
-                    \State $q_1\gets f\left( p_1 \right)$
-                    \While{$i\leq N$}
-                        \State $p\gets p=p_1-q_1\left( \frac{p_1 - p_0}{q_1-q_0} \right)$
-                        \If{$|p - p_1| < \varepsilon$}
-                            \State \Return $p$
-                        \EndIf
-                        \State $i\gets i+1$
-                        \State $p_0\gets p_1$
-                        \State $q_0\gets q_1$
-                        \State $p_1\gets p$
-                        \State $q_1\gets f\left( p \right)$
-                    \EndWhile
-                    \State \Return \texttt{Erreur : pas de convergence}
-                \end{algorithmic}
-            \end{algorithm}
-
-\newpage\section{Promesses et limites de la méthode actuellement implémentée}\label{sec:promesses-et-limites-de-la-methode-actuellement-implementees}
-
-        Cette section vise à synthétiser les différents résultats obtenus par le modèle, en répondant principalement à deux problématiques :
-        \begin{enumerate}
-            \item La cohérence des résultats avec les conclusions du précédent stage
-            \item Un retour d'expérience identifiant les composantes du modèle, ses failles, et proposant des pistes pour améliorer ses performances
-        \end{enumerate}
-
-        \subsection{Reproductibilité et continuité des précédents résultats}\label{subsec:reproductibilite-des-precedents-resultats}
-
-            Une série de figures représentant $\left\{\TAir{t};\ThatAir{t}\right\}$ et $\left\{ \PhiHeat{t};\PhihatHeat{t} \right\}$ ont été précédemment décrites dans \cite{TST}.
-            L'une d'entre elles est rappelée ici.
-            On remarque que la température prédite adopte une forme similaire à la température réelle, sans pour autant atteindre l'amplitude des pics des données d'entraînement.
-            Le même constat peut être émis pour le besoin de chauffage.
-
-            \begin{figure}[H] \centering
-                \subfloat[Température intérieure, $RMSE = 0.55^ \circ \bf C$]{\fbox{
-                    \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/TST_air_predit_VS_energyplus}}}\qquad
-                \subfloat[Besoins de chauffage, $RMSE = 16.31 \bf kW$]{\fbox{
-                    \includegraphics[width = 0.4\textwidth]{figures/diagrammes/courbes/TST/TST_besoin_chauffage_VS_energyplus}}}\qquad
-                \caption{Exemple de comparaison entre les modélisations d'EnergyPlus et les prévisions du précédent stage \textit{(Bâtiment Thales sur le mois de janvier)}}\label{fig:figure6}
-            \end{figure}
-
-            Les données concluant le rapport \cite{TST} sont celles reportées dans le tableau \ref{tab:tstfinal}.
-            Celles-ci montrent les erreurs de température obtenues par le modèle sur un mois lorsque ses paramètres thermiques sont déterminés avec les données d'entraînement d'un autre, pour un bâtiment.
-            L'expérience est reconduite et synthétisée en \ref{tab:tstfinal_tsa}.
-            Les erreurs calculées décrivent la même tendance intuitivement prévisible : l'application des paramètres calculés sur les mois d'une saison ne parviennent pas à prédire le comportement thermique du bâtiment sur une autre.
-            Quelques différences sont mises en évidence en \ref{tab:abserrtst} et concernent uniquement le premier cas de figure, n'invalidant pas la fiabilité du modèle.
-
-
-            Les résultats précédents confirmés, l'échelle des expérimentations est augmentée pour s'intéresser à l'ensemble des bâtiments.
-            La figure \ref{fig:heatmap} généralise le tableau précédemment présenté et une moyenne de toutes les erreurs de température est reportée dans le tableau \ref{tab:mean_std_by_building_by_month}
-            \newpage\vspace*{\fill}
-            \setdivergentmin{0}
-            \setdivergentmid{3}
-            \setdivergentmax{12}
-            \begin{table}[H]
-                \centering
-                \begin{tabular}{lcccccccccccc}
-                    \toprule
-                     & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
-                    \midrule
-                    Jan & \divergentcell{0.53} & \divergentcell{0.83} & \divergentcell{1.44} & \divergentcell{0.88} & \divergentcell{2.27} & \divergentcell{2.8} & \divergentcell{6.96} & \divergentcell{7.93} & \divergentcell{2.68} & \divergentcell{2.3} & \divergentcell{0.95} & \divergentcell{0.69} \\
-                    Fév & \divergentcell{0.66} & \divergentcell{0.96} & \divergentcell{1.15} & \divergentcell{0.8} & \divergentcell{3.4} & \divergentcell{3.47} & \divergentcell{5.84} & \divergentcell{7.72} & \divergentcell{3.4} & \divergentcell{1.9} & \divergentcell{0.8} & \divergentcell{0.82} \\
-                    Mar & \divergentcell{1.55} & \divergentcell{1.74} & \divergentcell{1.05} & \divergentcell{1.19} & \divergentcell{5.81} & \divergentcell{5.6} & \divergentcell{4.69} & \divergentcell{7.79} & \divergentcell{5.72} & \divergentcell{1.45} & \divergentcell{1.04} & \divergentcell{1.55} \\
-                    Avr & \divergentcell{2.61} & \divergentcell{2.47} & \divergentcell{1.78} & \divergentcell{1.78} & \divergentcell{7.97} & \divergentcell{7.56} & \divergentcell{6.37} & \divergentcell{8.24} & \divergentcell{7.7} & \divergentcell{1.79} & \divergentcell{1.69} & \divergentcell{2.28} \\
-                    Mai & \divergentcell{3.41} & \divergentcell{8.5} & \divergentcell{7.6} & \divergentcell{8.19} & \divergentcell{0.68} & \divergentcell{0.72} & \divergentcell{2.04} & \divergentcell{1.47} & \divergentcell{0.79} & \divergentcell{8.8} & \divergentcell{7.54} & \divergentcell{7.07} \\
-                    Jui & \divergentcell{3.2} & \divergentcell{10.1} & \divergentcell{8.47} & \divergentcell{9.3} & \divergentcell{0.8} & \divergentcell{0.75} & \divergentcell{1.02} & \divergentcell{0.97} & \divergentcell{0.89} & \divergentcell{9.9} & \divergentcell{8.3} & \divergentcell{8.12} \\
-                    Juil & \divergentcell{3} & \divergentcell{11.1} & \divergentcell{9.22} & \divergentcell{10.1} & \divergentcell{0.95} & \divergentcell{0.84} & \divergentcell{0.79} & \divergentcell{1.12} & \divergentcell{1.15} & \divergentcell{10} & \divergentcell{9.09} & \divergentcell{8.86} \\
-                    Aoû & \divergentcell{2.86} & \divergentcell{8.12} & \divergentcell{6.94} & \divergentcell{7.5} & \divergentcell{1.03} & \divergentcell{0.95} & \divergentcell{1.01} & \divergentcell{0.92} & \divergentcell{0.96} & \divergentcell{8.1} & \divergentcell{6.86} & \divergentcell{6.48} \\
-                    Sep & \divergentcell{2.94} & \divergentcell{6.4} & \divergentcell{5.95} & \divergentcell{6.3} & \divergentcell{0.81} & \divergentcell{0.79} & \divergentcell{1.7} & \divergentcell{1.34} & \divergentcell{0.76} & \divergentcell{6.9} & \divergentcell{5.8} & \divergentcell{5.36} \\
-                    Oct & \divergentcell{2.28} & \divergentcell{1.98} & \divergentcell{1.47} & \divergentcell{1.4} & \divergentcell{5.76} & \divergentcell{5.52} & \divergentcell{4.79} & \divergentcell{6.44} & \divergentcell{5.67} & \divergentcell{1.33} & \divergentcell{5.88} & \divergentcell{2.05} \\
-                    Nov & \divergentcell{0.75} & \divergentcell{1} & \divergentcell{0.84} & \divergentcell{0.75} & \divergentcell{3.36} & \divergentcell{3.38} & \divergentcell{4.28} & \divergentcell{6.59} & \divergentcell{3.3} & \divergentcell{1.28} & \divergentcell{0.71} & \divergentcell{5.31} \\
-                    Dec & \divergentcell{0.41} & \divergentcell{0.73} & \divergentcell{1.34} & \divergentcell{0.67} & \divergentcell{2.08} & \divergentcell{2.2} & \divergentcell{7.11} & \divergentcell{7.3} & \divergentcell{2} & \divergentcell{1.9} & \divergentcell{0.78} & \divergentcell{0.52} \\
-                    \bottomrule
-                \end{tabular}
-                \caption{$\mathrm{RMSE}\left(\ThatAir{t}\right)_{\text{CastelO}}$ avec des valeurs de $\mathbf {P}_{\text{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois \textit{(résultats du précédent stage)}}
-                \label{tab:tstfinal}
-            \end{table}
-
-            \begin{table}[H]
-                \centering
-                \begin{tabular}{lcccccccccccc}
-                    \toprule
-                    & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
-                    \midrule
-                    Jan & \divergentcell{0.67} & \divergentcell{0.73} & \divergentcell{1.51} & \divergentcell{5.64} & \divergentcell{2.64} & \divergentcell{2.77} & \divergentcell{5.74} & \divergentcell{4.59} & \divergentcell{4.59} & \divergentcell{2.23} & \divergentcell{2.23} & \divergentcell{1.07} \\
-                    Fév & \divergentcell{0.81} & \divergentcell{0.7} & \divergentcell{1.19} & \divergentcell{4.75} & \divergentcell{3.28} & \divergentcell{3.43} & \divergentcell{5.91} & \divergentcell{4.89} & \divergentcell{4.89} & \divergentcell{1.86} & \divergentcell{1.86} & \divergentcell{1.38} \\
-                    Mar & \divergentcell{1.46} & \divergentcell{1.15} & \divergentcell{1.06} & \divergentcell{2.6} & \divergentcell{5.49} & \divergentcell{5.64} & \divergentcell{6.97} & \divergentcell{6.22} & \divergentcell{6.22} & \divergentcell{1.38} & \divergentcell{1.38} & \divergentcell{2.71} \\
-                    Avr & \divergentcell{2.17} & \divergentcell{1.87} & \divergentcell{1.81} & \divergentcell{1.52} & \divergentcell{7.5} & \divergentcell{7.56} & \divergentcell{8.17} & \divergentcell{7.58} & \divergentcell{7.58} & \divergentcell{1.66} & \divergentcell{1.66} & \divergentcell{4.45} \\
-                    Mai & \divergentcell{7.18} & \divergentcell{7.23} & \divergentcell{7.59} & \divergentcell{7.86} & \divergentcell{0.66} & \divergentcell{0.7} & \divergentcell{1.1} & \divergentcell{0.94} & \divergentcell{0.94} & \divergentcell{8.34} & \divergentcell{8.34} & \divergentcell{8.83} \\
-                    Jui & \divergentcell{8.29} & \divergentcell{8.09} & \divergentcell{8.46} & \divergentcell{8.24} & \divergentcell{0.86} & \divergentcell{0.71} & \divergentcell{0.82} & \divergentcell{0.86} & \divergentcell{0.86} & \divergentcell{9.18} & \divergentcell{9.18} & \divergentcell{10.95} \\
-                    Juil & \divergentcell{9.1} & \divergentcell{8.79} & \divergentcell{9.21} & \divergentcell{8.82} & \divergentcell{0.96} & \divergentcell{0.78} & \divergentcell{0.88} & \divergentcell{0.96} & \divergentcell{0.96} & \divergentcell{9.92} & \divergentcell{9.92} & \divergentcell{12.1} \\
-                    Aoû & \divergentcell{6.66} & \divergentcell{6.6} & \divergentcell{6.92} & \divergentcell{6.76} & \divergentcell{1.13} & \divergentcell{0.93} & \divergentcell{0.98} & \divergentcell{0.9} & \divergentcell{0.9} & \divergentcell{7.53} & \divergentcell{7.53} & \divergentcell{8.72} \\
-                    Sep & \divergentcell{5.45} & \divergentcell{5.61} & \divergentcell{5.93} & \divergentcell{6.34} & \divergentcell{0.81} & \divergentcell{0.82} & \divergentcell{1.14} & \divergentcell{0.9} & \divergentcell{0.9} & \divergentcell{6.58} & \divergentcell{6.58} & \divergentcell{7.18} \\
-                    Oct & \divergentcell{1.93} & \divergentcell{1.59} & \divergentcell{1.5} & \divergentcell{1.71} & \divergentcell{5.5} & \divergentcell{5.51} & \divergentcell{6.15} & \divergentcell{5.69} & \divergentcell{5.69} & \divergentcell{1.23} & \divergentcell{1.23} & \divergentcell{3.5} \\
-                    Nov & \divergentcell{0.96} & \divergentcell{0.8} & \divergentcell{0.87} & \divergentcell{3.39} & \divergentcell{3.21} & \divergentcell{3.32} & \divergentcell{5.26} & \divergentcell{4.46} & \divergentcell{4.46} & \divergentcell{1.26} & \divergentcell{1.26} & \divergentcell{1.45} \\
-                    Dec & \divergentcell{0.57} & \divergentcell{0.61} & \divergentcell{1.41} & \divergentcell{5.5} & \divergentcell{2.02} & \divergentcell{2.18} & \divergentcell{5.08} & \divergentcell{3.98} & \divergentcell{3.98} & \divergentcell{2.04} & \divergentcell{2.04} & \divergentcell{0.68} \\
-                    \bottomrule
-                \end{tabular}
-                \caption{$\mathrm{RMSE}\left(\ThatAir{t}\right)_{\text{CastelO}}$ avec des valeurs de $\mathbf {P_{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois \textit{(résultats de l'alternance)}}
-                \label{tab:tstfinal_tsa}
-            \end{table}
-
-            \settwotonemin{0}
-            \settwotonemax{5}
-            \begin{table}[H]
-                \centering
-                \begin{tabular}{lcccccccccccc}
-                    \toprule
-                    & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
-                    \midrule
-                    Jan & \twotonecell{0.14} & \twotonecell{0.1} & \twotonecell{0.07} & \twotonecell{4.76} & \twotonecell{0.37} & \twotonecell{0.03} & \twotonecell{1.22} & \twotonecell{3.34} & \twotonecell{1.91} & \twotonecell{0.07} & \twotonecell{1.28} & \twotonecell{0.38} \\
-                    Fév & \twotonecell{0.15} & \twotonecell{0.26} & \twotonecell{0.04} & \twotonecell{3.95} & \twotonecell{0.12} & \twotonecell{0.04} & \twotonecell{0.07} & \twotonecell{2.83} & \twotonecell{1.49} & \twotonecell{0.04} & \twotonecell{1.06} & \twotonecell{0.56} \\
-                    Mar & \twotonecell{0.09} & \twotonecell{0.59} & \twotonecell{0.01} & \twotonecell{1.41} & \twotonecell{0.32} & \twotonecell{0.04} & \twotonecell{2.28} & \twotonecell{1.57} & \twotonecell{0.5} & \twotonecell{0.07} & \twotonecell{0.34} & \twotonecell{1.16} \\
-                    Avr & \twotonecell{0.44} & \twotonecell{0.6} & \twotonecell{0.03} & \twotonecell{0.26} & \twotonecell{0.47} & \twotonecell{0.0} & \twotonecell{1.8} & \twotonecell{0.66} & \twotonecell{0.12} & \twotonecell{0.13} & \twotonecell{0.03} & \twotonecell{2.17} \\
-                    Mai & \twotonecell{3.77} & \twotonecell{1.27} & \twotonecell{0.01} & \twotonecell{0.33} & \twotonecell{0.02} & \twotonecell{0.02} & \twotonecell{0.94} & \twotonecell{0.53} & \twotonecell{0.15} & \twotonecell{0.46} & \twotonecell{0.8} & \twotonecell{1.76} \\
-                    Jui & \twotonecell{5.09} & \twotonecell{2.01} & \twotonecell{0.01} & \twotonecell{1.06} & \twotonecell{0.06} & \twotonecell{0.04} & \twotonecell{0.2} & \twotonecell{0.11} & \twotonecell{0.03} & \twotonecell{0.72} & \twotonecell{0.88} & \twotonecell{2.83} \\
-                    Juil & \twotonecell{6.1} & \twotonecell{2.31} & \twotonecell{0.01} & \twotonecell{1.28} & \twotonecell{0.01} & \twotonecell{0.06} & \twotonecell{0.09} & \twotonecell{0.16} & \twotonecell{0.19} & \twotonecell{0.08} & \twotonecell{0.83} & \twotonecell{3.24} \\
-                    Aoû & \twotonecell{3.8} & \twotonecell{1.52} & \twotonecell{0.02} & \twotonecell{0.74} & \twotonecell{0.1} & \twotonecell{0.02} & \twotonecell{0.03} & \twotonecell{0.02} & \twotonecell{0.06} & \twotonecell{0.57} & \twotonecell{0.67} & \twotonecell{2.24} \\
-                    Sep & \twotonecell{2.51} & \twotonecell{0.79} & \twotonecell{0.02} & \twotonecell{0.04} & \twotonecell{0.0} & \twotonecell{0.03} & \twotonecell{0.56} & \twotonecell{0.44} & \twotonecell{0.14} & \twotonecell{0.32} & \twotonecell{0.78} & \twotonecell{1.82} \\
-                    Oct & \twotonecell{0.35} & \twotonecell{0.39} & \twotonecell{0.03} & \twotonecell{0.31} & \twotonecell{0.26} & \twotonecell{0.01} & \twotonecell{1.36} & \twotonecell{0.75} & \twotonecell{0.02} & \twotonecell{0.1} & \twotonecell{4.65} & \twotonecell{1.45} \\
-                    Nov & \twotonecell{0.21} & \twotonecell{0.2} & \twotonecell{0.03} & \twotonecell{2.64} & \twotonecell{0.15} & \twotonecell{0.06} & \twotonecell{0.98} & \twotonecell{2.13} & \twotonecell{1.16} & \twotonecell{0.02} & \twotonecell{0.55} & \twotonecell{3.86} \\
-                    Dec & \twotonecell{0.16} & \twotonecell{0.12} & \twotonecell{0.07} & \twotonecell{4.83} & \twotonecell{0.06} & \twotonecell{0.02} & \twotonecell{2.03} & \twotonecell{3.32} & \twotonecell{1.98} & \twotonecell{0.14} & \twotonecell{1.26} & \twotonecell{0.16} \\
-                    \bottomrule
-                \end{tabular}
-                \caption{Erreur absolue entre les deux précédents tableaux}
-                \label{tab:abserrtst}
-            \end{table}
-\vspace*{\fill}\newpage
-            \begin{figure}[H]
-                \centering
-                \fbox{\includegraphics[width=0.8\textwidth]{figures/diagrammes/courbes/heatmap_series}}
-                \caption{Heatmap de $\mathrm{RMSE}\left(T_{air}\right)_{\text{Bâtiment}}$ pour chaque bâtiment}\label{fig:heatmap}
-            \end{figure}
-
-            \begin{table}[H]
-                        \centering
-                        \begin{tabular}{lcccccccccccc}
-                            \toprule
-                            & \textbf{Jan} & \textbf{Fév} & \textbf{Mar} & \textbf{Avr} & \textbf{Mai} & \textbf{Jui} & \textbf{Juil} & \textbf{Aoû} & \textbf{Sep} & \textbf{Oct} & \textbf{Nov} & \textbf{Déc} \\
-                            \midrule
-                            Jan & \divergentcell{0.83} & \divergentcell{0.86} & \divergentcell{1.26} & \divergentcell{2.15} & \divergentcell{1.87} & \divergentcell{7.36} & \divergentcell{14.97} & \divergentcell{8.84} & \divergentcell{2.76} & \divergentcell{1.87} & \divergentcell{1.11} & \divergentcell{0.94} \\
-                            Fév & \divergentcell{0.8} & \divergentcell{0.8} & \divergentcell{1.05} & \divergentcell{1.87} & \divergentcell{1.63} & \divergentcell{6.48} & \divergentcell{13.2} & \divergentcell{7.94} & \divergentcell{2.47} & \divergentcell{1.67} & \divergentcell{0.97} & \divergentcell{0.91} \\
-                            Mar & \divergentcell{1.12} & \divergentcell{1.05} & \divergentcell{0.91} & \divergentcell{1.24} & \divergentcell{1.78} & \divergentcell{4.59} & \divergentcell{8.87} & \divergentcell{5.8} & \divergentcell{2.29} & \divergentcell{1.36} & \divergentcell{1.06} & \divergentcell{1.2} \\
-                            Avr & \divergentcell{1.42} & \divergentcell{1.35} & \divergentcell{1.19} & \divergentcell{1.01} & \divergentcell{2.27} & \divergentcell{3.13} & \divergentcell{4.45} & \divergentcell{3.72} & \divergentcell{2.29} & \divergentcell{1.23} & \divergentcell{1.45} & \divergentcell{1.77} \\
-                            Mai & \divergentcell{1.59} & \divergentcell{1.92} & \divergentcell{1.83} & \divergentcell{1.88} & \divergentcell{0.81} & \divergentcell{1.52} & \divergentcell{3.04} & \divergentcell{1.88} & \divergentcell{1.17} & \divergentcell{2.65} & \divergentcell{1.71} & \divergentcell{2.51} \\
-                            Jui & \divergentcell{2.37} & \divergentcell{2.5} & \divergentcell{2.57} & \divergentcell{2.43} & \divergentcell{1.53} & \divergentcell{1.07} & \divergentcell{1.46} & \divergentcell{1.32} & \divergentcell{1.5} & \divergentcell{3.16} & \divergentcell{2.43} & \divergentcell{3.2} \\
-                            Juil & \divergentcell{2.86} & \divergentcell{2.93} & \divergentcell{2.84} & \divergentcell{2.59} & \divergentcell{1.78} & \divergentcell{1.29} & \divergentcell{1.07} & \divergentcell{1.53} & \divergentcell{1.74} & \divergentcell{3.27} & \divergentcell{2.83} & \divergentcell{3.7} \\
-                            Aoû & \divergentcell{2.41} & \divergentcell{2.41} & \divergentcell{2.37} & \divergentcell{2.27} & \divergentcell{1.82} & \divergentcell{1.29} & \divergentcell{1.32} & \divergentcell{1.14} & \divergentcell{1.43} & \divergentcell{2.7} & \divergentcell{2.4} & \divergentcell{2.96} \\
-                            Sep & \divergentcell{1.62} & \divergentcell{1.82} & \divergentcell{1.65} & \divergentcell{1.64} & \divergentcell{1.16} & \divergentcell{1.35} & \divergentcell{2.46} & \divergentcell{1.47} & \divergentcell{0.94} & \divergentcell{2.1} & \divergentcell{1.66} & \divergentcell{2.3} \\
-                            Oct & \divergentcell{1.52} & \divergentcell{1.37} & \divergentcell{1.23} & \divergentcell{1.11} & \divergentcell{2.05} & \divergentcell{3.13} & \divergentcell{5.0} & \divergentcell{3.86} & \divergentcell{2.25} & \divergentcell{0.99} & \divergentcell{1.49} & \divergentcell{1.42} \\
-                            Nov & \divergentcell{0.79} & \divergentcell{0.78} & \divergentcell{0.8} & \divergentcell{1.23} & \divergentcell{1.37} & \divergentcell{4.7} & \divergentcell{9.86} & \divergentcell{6.27} & \divergentcell{2.16} & \divergentcell{1.13} & \divergentcell{0.7} & \divergentcell{0.74} \\
-                            Dec & \divergentcell{0.86} & \divergentcell{0.88} & \divergentcell{1.18} & \divergentcell{2.02} & \divergentcell{1.8} & \divergentcell{6.99} & \divergentcell{14.43} & \divergentcell{8.51} & \divergentcell{2.64} & \divergentcell{1.65} & \divergentcell{1.03} & \divergentcell{0.83} \\
-                            \bottomrule
-                        \end{tabular}
-                        \caption{Moyenne des $\mathrm{RMSE}\left(T_{air}\right)_{\text{Bâtiment}}$ avec des valeurs de $\mathbf {P_{Th}}$ calculées par PSO sur un mois et appliquées à un autre mois pour l'ensemble des bâtiments}
-                        \label{tab:mean_std_by_building_by_month}
-                    \end{table}
-
-
-        \subsection{Pistes d'amélioration du modèle}\label{subsec:limites-de-la-pso-et-continuite-des-travaux}
-
-            \subsubsection{Évaluation des performances}
-                Au cours de l'étude, une priorité plus grande a été donnée à l'appréciation de $\textrm{RMSE}\left(\ThatAir{t}\right)$.
-                Cependant, la figure \ref{fig:TAir_PhiHeat} basée sur les données de sortie du tableau \ref{tab:mean_std_by_building_by_month} montre que l'erreur
-                sur le besoin de chauffage est décorrélée de celle sur la température intérieure.
-                Les prochaines évaluations devront donc tenir compte de cette décorrélation et définir un critère pour pénaliser les erreurs sur $\PhihatHeat{t}$ également.
-
-                \begin{figure}[H]
-                    \centering
-                    \fbox{\includegraphics[width=0.5\textwidth]{figures/diagrammes/courbes/TST/TAir_PhiHeat}}
-                    \caption{$\textrm{RMSE}\left( \PhihatHeat{t} \right)$ en fonction de $\textrm{RMSE}\left( \ThatAir{t} \right)$}\label{fig:TAir_PhiHeat}
-                \end{figure}
-
-            \subsubsection{Limites de la PSO}
-Les ressources citées précédemment mettent en garde sur le risque lié à l'initialisation aléatoire des particules pendant la \gls{PSO}.
-En effet, la convergence vers un minimum global peut fortement dépendre des positions de départ, ce que vérifie le tableau suivant reportant les résultats de dix optimisations
-parallèles pour lesquelles varient seulement ce paramètre.
-                \setdivergentmin{-100}
-                \setdivergentmid{0}
-                \setdivergentmax{100}
-                \begin{table}[H]
-                    \centering
-                    \begin{adjustbox}{width=\textwidth}
-                    \begin{tabular}{lccccccccc}
-                        \toprule
-                        \textbf{Bâtiment} & $\UAirEnv$ &  $\UAirExt$ &  $\UEnvExt$ & $\CAir$ & $\CEnv$ & $k_1$ & $k_2$ & $\mathrm{RMSE}\left(\ThatAir{t}\right)$ & $\mathrm{RMSE}\left(\PhiHeat{t}\right)$ \\
-                        \midrule
-                        CastelO & \divergentcell{42} & \divergentcell{0} & \divergentcell{84} & \divergentcell{1} & \divergentcell{42} & \divergentcell{3.0} & \divergentcell{44} & \divergentcell{1} & \divergentcell{3} \\
-                        CastelR & \divergentcell{0} & \divergentcell{0} & \divergentcell{31} & \divergentcell{0} & \divergentcell{313} & X & \divergentcell{316} & \divergentcell{1} & \divergentcell{0} \\
-                        Ceva & \divergentcell{36} & \divergentcell{1} & \divergentcell{95} & \divergentcell{32} & \divergentcell{45} & \divergentcell{32.0} & \divergentcell{25} & \divergentcell{4} & \divergentcell{60} \\
-                        Novae & \divergentcell{16} & \divergentcell{1} & \divergentcell{134} & \divergentcell{7} & \divergentcell{37} & \divergentcell{7.0} & \divergentcell{56} & \divergentcell{5} & \divergentcell{3} \\
-                        Panache & \divergentcell{23} & \divergentcell{0} & \divergentcell{51} & \divergentcell{1} & \divergentcell{33} & \divergentcell{2.0} & \divergentcell{30} & \divergentcell{1} & \divergentcell{2} \\
-                        Python & \divergentcell{14} & \divergentcell{1} & \divergentcell{149} & \divergentcell{6} & \divergentcell{45} & \divergentcell{8.0} & \divergentcell{52} & \divergentcell{6} & \divergentcell{3} \\
-                        Soleil & \divergentcell{15} & \divergentcell{1} & \divergentcell{138} & \divergentcell{5} & \divergentcell{29} & \divergentcell{8.0} & \divergentcell{34} & \divergentcell{4} & \divergentcell{4} \\
-                        Thales & \divergentcell{2} & \divergentcell{0} & \divergentcell{213} & \divergentcell{3} & \divergentcell{38} & \divergentcell{4.0} & \divergentcell{49} & \divergentcell{2} & \divergentcell{3} \\
-                        Up & \divergentcell{21} & \divergentcell{2} & \divergentcell{69} & \divergentcell{10} & \divergentcell{46} & \divergentcell{6.0} & \divergentcell{35} & \divergentcell{5} & \divergentcell{5} \\
-                        Zenae & \divergentcell{7} & \divergentcell{1} & \divergentcell{66} & \divergentcell{2} & \divergentcell{28} & \divergentcell{5.0} & \divergentcell{28} & \divergentcell{3} & \divergentcell{2} \\
-                        \bottomrule
-                    \end{tabular}
-                    \end{adjustbox}
-                    \caption{Écart-type normalisé en \% des données de sorties de la PSO sur dix calculs, par bâtiment, pour le mois de janvier}
-                    \label{tab:my_label4}
-                \end{table}
-
-Ces données ne montrent pas un impact significatif sur les métriques d'évaluation et confirment l'existence de minima locaux présentant des performances similaires.
-Cependant, les limites de la \gls{PSO} sont mises en évidence et une question pertinente peut être celle de la portabilité de cet algorithme sur d'autres données.
-
-\newpage\subsubsection{Limites des solveurs}
-                Il a été montré que $\textrm{RMSE}\left( \PhihatHeat{t} \right)$ est décorrélée de $\textrm{RMSE}\left( \ThatAir{t} \right)$ avec le modèle actuel.
-                Cependant, la fonction optimisée pour le besoin de chauffage \ref{eq:fminphiheatdistrisim} dépend directement de la température intérieure prédite.
-                On peut alors émettre l'hypothèse que le modèle n'est pas fiable, en raison de la non-proportionnalité entre les deux erreurs précédemment décrites.
-                Une piste de travail est donc le remplacement de la méthode de la sécante par une méthode minimisant l'erreur additionnelle s'ajoutant à celle calculée par le solveur d'Euler.
-                À ce titre, la méthode de Brent est généralement un bon concurrent à la sécante et mérite d'être examinée.
-
             \begin{bluebox}
-                (04/02) : À ce jour, les modifications de modélisation envisagées sont très fortement corrélées à l'architecture logicielle du projet, encore mal définie.
-                Par exemple, il est fastidieux de chercher à challenger la méthode de la sécante ou le solveur Euler car ceux-ci sont implémentés \it{from scratch}.
-                C'est pourquoi la priorité est désormais de continuer le refactoring et l'amélioration de cette architecture, notamment en généralisant l'utilisation de librairies standards comme SciPy,
-                en adoptant une approche orientée objet, et en proposant un modèle relationnel dans une base de données dédiée à l'importation des données actuelles et futures.
+                IBIS propose également une optimisation par évolution différentielle et une autre par algorithme génétique,
+                deux méthodes populaires dans la littérature mais présentant des résultats similaires à la PSO pour un temps de calcul considérablement plus élevé
+                sur les exemples présentés en \ref{ch:analyse-de-donnees-sur-les-premieres-applications-d'ibis}, c'est pourquoi ils ne sont pas repris par la suite.
             \end{bluebox}
-        
-        
 
+            \paragraph{Précisions sur les intervalles de recherche}
+                La définition de l'espace de recherche est un problème non trivial mobilisant une bonne connaissance des propriétés statistiques des données, de la physique des bâtiments étudiés et du comportement de l'algorithme d'optimisation, avec deux problèmes notoires et complémentaires :
+                \begin{itemize}
+                    \item Si les bornes sont trop restreintes, l'optimisation peut converger aux valeurs limites de façon quasi-systématique
+                    \item Si elles sont trop larges, il devient impossible d'affirmer que l'espace de recherche\footnote{dont la dimension se situe entre 6 et 8 pour les cas d'application rapportés} soit suffisamment exploré et le risque de converger vers des minimums locaux augmente de façon importante
+                \end{itemize}
+                Ainsi chacun des cas d'application décrits dans le chapitre \ref{ch:analyse-de-donnees-sur-les-premieres-applications-d'ibis} se voit attribuer des bornes propres à lui-même et résultant de précédentes études, dans le but de s'appuyer sur un sens physique des valeurs limites pour l'exploration, apportant de fait une cohérence à la démarche.
+                Il est possible de généraliser cette approche avec la méthode 3CL prescrivant des valeurs de référence des paramètres $RC$ en fonction de l'architecture des bâtiments\footnote{Voir \ref{sec:vers-une-integration-dans-un-groupe-de-projets-coherent-:-best} pour une liste non exhaustive de projets connexes à IBIS visant à être rassemblés dans une suite d'outils pour les activités futures du LELA.}
+            \newpage
+    \subsection{Prédiction du besoin de chauffage par un modèle $RC$ connu}\label{subsec:prediction-du-besoin-de-chauffage-par-un-modele-$rc$-connu}
+        Une fois le modèle calibré sur une période d'entraînement, il devient possible de prédire le besoin de chauffage sur la période suivante comme sur la période suivante, comme illustré dans le logigramme \ref{fig:logigramme1}.
+
+        Le principe est de définir une température de consigne, puis de calculer en parallèle $\PhihatEm{t}$ et $\ThatAir{t+1}$.
+        Le flux de chauffage à l'instant $t$ est nul si la température intérieure à l'instant suivant est supérieure à la consigne.
+        Dans le cas contraire, on calcule le flux nécessaire à l'instant $t$ pour amener la température à l'instant $t+1$ à la température de consigne,
+        c'est-à-dire la puissance à laquelle la différence entre ces deux températures est quasi nulle.
+        Il est alors nécessaire de calculer à chaque instant la racine de la fonction suivante :
+
+        \begin{equation}
+            \ThatAir {\PhihatEm{t}}  - \Tcons\label{eq:fminphiemdistrisim}
+        \end{equation}\myequations{Fonction à minimiser pour déterminer le besoin de chauffage du projet DISTRISIM}
+
+        On formalise ce problème selon l'algorithme \ref{alg:phi_em_pred} et on détaille le calcul de la racine en \ref{par:racines}
+
+        \begin{algorithm}[H]
+            \caption{Prédiction du besoin de chauffage par calcul itératif sous contraintes de la température intérieure}\label{alg:phi_em_pred}
+            \begin{algorithmic}[1]
+                \Require 
+                Paramètres $RC$ optimisés $\PTh$, 
+                Période d'application $T_j$,
+                \Ensure 
+                Profil de chauffage prédit $\PhihatEm{t}$
+                \State Initialisation, $\PhihatEm{t} \gets 0\times \PhiEm{t}$
+                \For{$t\in T_j$}
+                    \If{$T_{\text{Air}}(t) > \Tcons$}
+                        \State $\hat\phi_t \gets 0$
+                    \Else
+                        \State $\hat\phi_t \gets \text{ tel que } \phi_{\text{Em}}\left( \Tcons - T_{{\text{Air}_t}} \right) = 0$
+                    \EndIf
+                \EndFor
+                \Return $\PhihatEm{t}$
+            \end{algorithmic}
+        \end{algorithm}
+
+        \begin{bluebox}
+            Il est important de noter que d'un point de vue numérique, cette méthode présente au moins un écueil évident : en comparant strictement la température de consigne et la température prédite, 
+            le système change de comportement pour les variations infinitésimales, négligeant de fait les erreurs de mesure pouvant être faites en situation réelle par un thermostat.
+            Les courbes de température et de puissance de chauffage prédites peuvent alors être éloignées de la réalité même si le modèle a bien été calibré pendant la phase d'entraînement.
+            Une méthode plus précise consisterait alors à définir un seuil inférieur à la température de consigne et une différenciation du couple de températures comparées selon que la période soit ascendante \textit{(avec alors un chauffage jusqu'à la température de consigne)} ou descendante \textit{(où l'algorithme attendrait que le seuil soit franchis avant de recommencer à chauffer)},
+            ceci pour permettre des variations de température et de chauffage plus importantes et donc plus proches de la réalité.
+
+            Cependant, il est considéré que cette comparaison stricte est un moindre mal et une condition nécessaire pour qu'IBIS puisse proposer un modèle simplifié permettant de généraliser sur un grand nombre de bâtiments.
+            En effet, la définition de ce threshold devrait nécessairement impliquer des considérations sur les spécifications internes du bâtiment \textit{(notamment le type de système de chauffage)}, dont IBIS cherche à se défaire.
+        \end{bluebox}
+
+        \paragraph{Choix d'une méthode de recherche des racines}\label{par:racines}
+
+        La méthode de la sécante est un \gls{algorithme} utilisé pour trouver les racines d'une fonction, présentant l'avantage de ne pas utiliser sa dérivée~\cite{numerical_analysis}.
+        Comme les \gls{algorithme}s précédents, cette méthode consiste à itérer sur un intervalle de recherche, mais ce dernier est cette fois-ci redéfini à chaque itération et la valeur finale est l'une de ces bornes.
+
+        \begin{algorithm}[H]
+            \caption{Méthode de la sécante \it{(Tiré de \cite{numerical_analysis_2})}}
+            \label{alg:sec}\begin{algorithmic}[1]
+                \Require Approximations initiales $p_0, p_1$, tolérance $\varepsilon$,
+                nombre d'itérations $N$
+                \Ensure Solution approximative $p$ ou message d'erreur
+                \State i $\gets 2$
+                \State $q_0\gets f\left( p_0 \right)$
+                \State $q_1\gets f\left( p_1 \right)$
+                \While{$i\leq N$}
+                    \State $p\gets p_1-q_1\left( \frac{p_1 - p_0}{q_1-q_0} \right)$
+                    \If{$|p - p_1| < \varepsilon$}
+                        \State \Return $p$
+                    \EndIf
+                    \State $i\gets i+1$
+                    \State $p_0\gets p_1$
+                    \State $q_0\gets q_1$
+                    \State $p_1\gets p$
+                    \State $q_1\gets f\left( p \right)$
+                \EndWhile
+                \State \Return \texttt{Erreur : pas de convergence}
+            \end{algorithmic}
+        \end{algorithm}
+
+        \textit{Nb : Par construction, il est facile de remplacer cet algorithme par un autre paramètre de la fonction \texttt{root\_scalar} de SciPy, mais les résultats obtenus avec celle-ci sont satisfaisants pour cette étape du calcul au moins.}
+
+
+\newpage
+
+\section{Méthodes autorégressives}\label{sec:methodesautoregressives}
+
+    Comme rappelé plus haut, le paradigme "Boîte noire" sur lequel sont basées les méthodes autorégressives, aussi appelées "méthodes ARX", s'affranchit de l'interprétabilité physique des paramètres
+    et se concentre uniquement sur la performance en sortie du modèle.
+    À ce titre, les méthodes ARX ne permettent pas de définir des caractéristiques intrinsèques au bâtiment étudié, mais sont beaucoup plus rapides et précises que les modèles $RC$ pour prédire des séries temporelles à partir d'une période d'entraînement\footnote{Du moins sur les résultats obtenus en \ref{sec:integration-de-donnees-reelles-sur-des-batiments-presentant-differentes-proprietes}}.
+
+    Les principes décrits dans cette section s'appuient largement sur la documentation de la librairie Sysidentpy \cite{sysidentpy}, privilégiée pour l'implémentation des méthodes autorégressives dans IBIS\@.
+    Bien que sa maturité soit encore assez basse et impose de compenser son manque de fonctionnalités par d'autres librairies\footnote{sktime (écosystème Scikit-learn, statsmodels)}, sa documentation présente l'avantage d'être
+    complète et presque auto-suffisante pour comprendre les principes inhérents à ces méthodes.
+
+    Les notations et définitions suivantes sont adoptées par la suite :
+    \begin{itemize}
+        \item $\hat y_t$ est la valeur de la grandeur prédite $\widehat{\overrightarrow {\mathbf y}}(t)$ à l'instant $t$, avec $\widehat{\overrightarrow y}(t) \in \left\{\TAir{t},\PhiEm{t}\right\}$\footnote{L'essentiel des résultats obtenus par méthodes ARX utilise $\overrightarrow{\hat y}(t) = \TAir{t}$, bien qu'il soit facilement possible de le changer pour prédire $\PhiEm{t}$.}
+        \item $x_{t_{c}}$ est la valeur de l'entrée exogène à l'instant $t$ pour la grandeur de la colonne $c$, la matrice complète des entrées exogènes $\overrightarrow{\underline{\underline{\mathbf X}}}(t)$ étant alors composées de $c$ colonnes\footnote{
+            Pour les applications réalisées, on a donc $c = 3$ et $\overrightarrow{\underline{\underline{\mathbf X}}}(t) = \begin{bmatrix}
+            \PhiEm{t} \\ \TExt{t} \\ \PhiSol{t}.
+            \end{bmatrix}$, dans le cas où $\overrightarrow{\hat y}(t) = \TAir{t}$ et où il est donc choisi d'inclure $\PhiEm{t}$ comme donnée d'entraînement et non comme donnée cherchée.
+            Il est techniquement possible de restreindre les entrées exogènes à une ou deux séries parmi les trois choisies ici, mais ceci n'a pas été testé dans les applications proposées dans ce rapport.}
+        \item $e_t$ représente la valeur des résidus à l'instant $t$, c'est-à-dire la partie de $\hat y_t$ strictement imprévisible à l'instant $t-1$
+        \item $\left\{n_x, n_e, n_y\right\} \in \mathbb N^3$ sont respectivement les "lags" des entrées, du bruit et de la sortie, c'est-à-dire le nombre de pas de temps précédent l'instant $t$ utilisés pour prédire $y_t$
+        \item Les paramètres $\Theta$ sont des coefficients scalaires modifiant l'influence sur la sortie des régresseurs auxquels ils sont appliqués
+    \end{itemize}
+
+    \subsection{Prédictions simples et influence des entrées exogènes : modèles (N)ARIMA(X)}\label{subsec:modelisations-simples-et-influence-des-entrees-exogenes-:-modeles-arima(x)-et-narima(x)}
+
+        \footnote{Comme on utilise la composante "I" \textit{(pour "intégration")}, la modélisation n'est pas réalisée sur $y_t$ exactement mais sur les différences $\Delta y = y_t-t_{t-1}$. Il en va de même pour les composants $x$ et $e$. Pour la suite les régresseurs sont tout de même notés sans l'opérateur de différenciation pour alléger l'écriture.}
+
+        \begin{equation}
+            \hat y_t=K + \sum_{c}\sum_{j=0}^{n_x}\Theta_x^{j}x_{{t-j}_c} + \sum_{l=1}^{n_e}\Theta_e^{l}e_{t-l} + \sum_{m=1}^{n_y}\Theta_{y}^m y_{t-m} + e_t\label{eq:ARIMAX}
+        \end{equation}\myequations{Formulation d'un modèle ARMAX}
+
+        Pour un modèle non-linéaire NARMAX d'ordre $n > 1$, les entrées du modèle sont multipliées entre elles selon leurs exposants respectifs $b_i, d_i, a_i$ tel que $a_i + b_i + d_i = n$ :
+
+        \begin{equation}
+            \hat y_t=\sum_{i=1}^p\left(\Theta_i \times \prod_c\prod_{j=0}^{n_x}x_{{t-j}_c}^{b_i,j}\prod_{l=1}^{n_e}e_{t-l}^{d_i,l}\prod_{m=1}^{n_y}y_{t-m}^{a_i,m}\right)\label{eq:NARIMAX}
+        \end{equation}\myequations{Formulation d'un modèle NARMAX}
+
+        Si l'on "retire" les termes en $x$ du membre de droite de l'équation \ref{eq:ARIMAX}, on obtient un modèle sans entrée exogène de type ARIMA \ref{eq:arma}.
+        Le raisonnement est analogue pour passer du modèle NARIMAX à NARIMA\@.
+
+        \begin{equation}
+            \hat y_t = K + \sum_{m=1}^{n_y}\Theta_{y}^m y_{t-m} + \sum_{l=1}^{n_e}\Theta_e^{l}e_{t-l} \label{eq:arma}
+        \end{equation}\myequations{Formulation d'un modèle ARMA}
+    \subsection{Ajout d'une composante de saisonnalité : modèles SARIMA(X)}\label{subsec:ajout-d'une-composante-saisonniere-:-sarima-sarimax}
+        La force intrinsèque du modèle SARIMAX est sa capacité à capturer des tendances de long terme sur les séries prédites.
+        On introduit pour cela le paramètre $S$ définissant la saisonnalité : par exemple, si $S=12$ sur une série d'un an, la saisonnalité est égale à un mois.
+        On distingue alors les lags "internes" $p$ et $q$ des lags "externes" saisonniers $P$ et $Q$ tels que $n_y = p + PS$ et $n_e = q + QS$.
+
+        Pour le cas linéaire, un modèle SARIMAX peut être exprimé en reprenant l'équation \ref{eq:ARIMAX} et en adaptant les notations des coefficients et des bornes comme indiqué en \ref{eq:coeffsarimax}.
+
+        \begin{equation}
+            \hat y_t = \sum_c \Theta_x x_{t,c} + K + \sum_{l=1}^{n_e}\Theta_e^{l}e_{t-l} + \sum_{m=1}^{n_y}\Theta_y^{m}\bigl(y_{t-m} - \sum_c \Theta_x x_{t-m,c}\bigr) + e_t\label{eq:sarimax}
+        \end{equation}\myequations{Formulation d'un modèle SARIMAX}
+
+        \begin{equation}
+            \Theta_y^{m} = \left\{\begin{split}
+                   \phi_m & \text{ si } m \in\left\{ {1,\ldots,p} \right\}\\
+                   \Phi_{m/S} & \text{ si } m \in \left\{S, 2S, \ldots, PS\right\} \\
+                   -\phi_i,\Phi_k & \text{ si } m = i + kS, i \leq p, k\leq p \\
+                   0 & \text{ sinon}
+            \end{split}\right. \;
+            \Theta_e^{l} = \left\{\begin{split}
+                  \theta_l & \text{ si } l \in \left\{1,\ldots,q\right\} \\
+                  \Theta_{l/S} & \text{ si } l \left\{\in {S, 2S, \ldots, QS} \right\}\\
+                  \theta_j,\Theta_r & \text{ si } l = j + rS, j\leq q,\ r\leq Q \\
+                  0 & \text{ sinon}
+                \end{split}\right.\label{eq:coeffsarimax}
+        \end{equation}\myequations{Coefficients d'un modèle SARIMAX}
+
+        L'équation \ref{eq:sarimax} diffère de l'équation \ref{eq:ARIMAX} en ce qu'elle appelle un coefficient unique $\Theta_x$ pour l'ensemble des régresseurs sur les entrées exogènes.
+        Cette spécification est propre à l'implémentation de SARIMAX dans la librairie statsmodels utilisée par IBIS. Plus de précisions sont données dans la documentation officielle \cite{statsmodels}.
+
+    \subsection{Prédictions sur plusieurs grandeurs simultanées : modèles VARMA(X)}\label{subsec:predictions-sur-plusieurs-grandeurs-simultanees-:-modeles-varma(x)}

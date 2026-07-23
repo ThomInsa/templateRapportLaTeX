@@ -1,10 +1,11 @@
-\usepackage{pgfplots}
-\usepackage{pgfplotstable}
-%% ==================== DOCUMENT COLORS ====================
-% Define global colors for hyperlinks and URLs
-\definecolor{linkborderColor}{rgb}{0.1329,0.247,0.467}   % Blue for link borders
-\definecolor{urlborderColor}{rgb}{0,1,1}                % Cyan for URL borders
-\definecolor{urlColor}{rgb}{1,0,0}                      % Red for URL text
+% -----------------------------------------------
+% Palette rapport scientifique
+% -----------------------------------------------
+
+% --- Références inline ---
+\definecolor{refSection}{HTML}{3A6FD8}
+\definecolor{refURL}{HTML}{8250C0}
+\definecolor{refCitation}{HTML}{1D8A65}
 
 %% ==================== HYPERREF SETUP ====================
 \hypersetup{
@@ -13,17 +14,121 @@
     pdfsubject = {Mémoire de Projet},                    % PDF document subject
     pdfkeywords = {Tag1, Tag2, Tag3, \dots},             % PDF keywords for indexing
     pdfstartview={FitH},                                 % Default PDF view (fit width)
-    linkbordercolor = {linkborderColor}                 % Color for hyperlink borders
-%urlbordercolor = \color{urlborderColor},           % Uncomment to set URL border color
-%urlcolor = \color{urlColor}                        % Uncomment to set URL text color
+    linkbordercolor = {refSection},                 % Color for hyperlink borders
+    urlbordercolor = {refURL},           % Uncomment to set URL border color
+    citebordercolor={refCitation}
 }
 
+% --- Palette qualitative (12 couleurs) ---
+\definecolor{ibisRed}{HTML}{C84020}
+\definecolor{ibisCoral}{HTML}{D86030} % Orange
+\definecolor{ibisAmber}{HTML}{C07A18}
+\definecolor{ibisOlive}{HTML}{8A9E18}
+\definecolor{ibisGreen}{HTML}{1D8A65}
+\definecolor{ibisTeal}{HTML}{118898}
+\definecolor{ibisSky}{HTML}{4898C8}
+\definecolor{ibisBlue}{HTML}{3A6FD8}
+\definecolor{ibisIndigo}{HTML}{4848C8}
+\definecolor{ibisViolet}{HTML}{8250C0}
+\definecolor{ibisPink}{HTML}{B03880}
+\definecolor{ibisGray}{HTML}{6A6A66}
 
-%% Divergence palette for heatmaps
+% --- Callouts — fonds ---
+\definecolor{calloutNoteBackground}{HTML}{EBF2FF}
+\definecolor{calloutWarnBackground}{HTML}{FDF4E7}
+\definecolor{calloutDefBackground}{HTML}{F2EBF9}
 
-\definecolor{errmax}{RGB}{215,48,39}   % rouge
-\definecolor{neu}{RGB}{255,255,255} % blanc
-\definecolor{errmin}{RGB}{69,117,180}  % bleu
+% --- Callouts — filets ---
+\definecolor{calloutNoteBorder}{HTML}{3A6FD8}
+\definecolor{calloutWarnBorder}{HTML}{C07A18}
+\definecolor{calloutDefBorder}{HTML}{8250C0}
+
+% --- Callouts — textes ---
+\definecolor{calloutNoteText}{HTML}{1E4FAD}
+\definecolor{calloutWarnText}{HTML}{7A4D08}
+\definecolor{calloutDefText}{HTML}{5A2A9A}
+
+% --- Blocs de code — fond & texte général ---
+\definecolor{codeBackground}{HTML}{F5F4F0}
+\definecolor{codeText}{HTML}{2C2C2A}
+
+% --- Blocs de code — coloration syntaxique ---
+\definecolor{codeKeyword}{HTML}{1D8A65}   % mots-clés (import, return…)
+\definecolor{codeStruct}{HTML}{8250C0}    % structures (def, class…)
+\definecolor{codeFunction}{HTML}{3A6FD8}  % noms de fonctions
+\definecolor{codeLiteral}{HTML}{C07A18}   % littéraux (nombres, opérateurs)
+
+% --- Échelle divergente A (erreur signée, bleu → rouge) ---
+\definecolor{divA1}{HTML}{1E4FAD}
+\definecolor{divA2}{HTML}{3A6FD8}
+\definecolor{divA3}{HTML}{7AAAE8}
+\definecolor{divA4}{HTML}{BCCFED}
+\definecolor{divA5}{HTML}{F0EEF8}  % centre
+\definecolor{divA6}{HTML}{F5D0C8}
+\definecolor{divA7}{HTML}{E8967F}
+\definecolor{divA8}{HTML}{C84020}
+\definecolor{divA9}{HTML}{8A1A08}
+
+% --- Échelle divergente B (corrélation, vert → violet) ---
+\definecolor{divB1}{HTML}{0D5C40}
+\definecolor{divB2}{HTML}{1D8A65}
+\definecolor{divB3}{HTML}{5AB898}
+\definecolor{divB4}{HTML}{A8DACA}
+\definecolor{divB5}{HTML}{EDF6F2}  % centre
+\definecolor{divB6}{HTML}{F0E8F8}
+\definecolor{divB7}{HTML}{C898E0}
+\definecolor{divB8}{HTML}{A060C8}
+\definecolor{divB9}{HTML}{6B28A0}
+\definecolor{divB10}{HTML}{3C0D70}
+
+
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+
+% ============================== CODE COLORS ====================================
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{codeBackground},   % Fond ivoire clair
+    frame=single,                             % Single-line frame around code
+    rulecolor=\color{codeLiteral},            % Filet ambre
+    commentstyle=\color{codeStruct},          % Violet — commentaires
+    keywordstyle=\color{codeKeyword},         % Vert — mots-clés
+    keywordstyle=[2]\color{codeFunction},     % Bleu — fonctions built-in
+    keywordstyle=[3]\color{codeStruct},       % Violet — structures (def, class…)
+    numberstyle=\tiny\color{codeText},        % Gris foncé — numéros de ligne
+    stringstyle=\color{codeLiteral},          % Ambre — chaînes & littéraux
+    basicstyle=\ttfamily\footnotesize\color{codeText}, % Monospace, texte principal
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language={Python}
+}
+\lstset{
+    style=mystyle,
+    morekeywords=[2]{print, len, range, enumerate, zip, map, filter},
+    morekeywords=[3]{def, class, lambda, with, as}
+}
+
+\lstdefinelanguage{YAML}{
+    keywords={true,false,null,y,n,yes,no,on,off},
+    keywordstyle=\color{ibisBlue},
+    basicstyle=\ttfamily\small,
+    comment=[l]{\#},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{ibisGray},
+    stringstyle=\color{ibisGreen},
+    morestring=[b]',
+    morestring=[b]",
+    sensitive=false
+}
+% ============================== Others ====================================
 
 \pgfplotsset{compat=1.18}
 
@@ -45,9 +150,9 @@
     }%
     \let\percent=\pgfmathresult
     \ifdim #1pt < \divergentmidval pt
-        \edef\temp{\noexpand\cellcolor{errmin!\percent!neu}}%
+        \edef\temp{\noexpand\cellcolor{divA1!\percent!divA5}}%
     \else
-        \edef\temp{\noexpand\cellcolor{errmax!\percent!neu}}%
+        \edef\temp{\noexpand\cellcolor{divA9!\percent!divA5}}%
     \fi
     \temp
     #1%
@@ -65,8 +170,9 @@
     % Calculer le pourcentage de la valeur dans l'intervalle [min, max]
     \pgfmathparse{min(100, max(0, ((#1 - \twotoneminval) / (\twotonemaxval - \twotoneminval)) * 100))}%
     \let\percent=\pgfmathresult
-    % Appliquer la couleur de neu (blanc) à errmax (rouge)
-    \edef\temp{\noexpand\cellcolor{errmax!\percent!neu}}%
+    % Appliquer la couleur de A5 (blanc) à A1 (rouge)
+    \edef\temp{\noexpand\cellcolor{divA1!\percent!divA5}}%
     \temp
     #1%
 }
+

@@ -5,34 +5,58 @@
     every node/.style={font=\small},
     inputshort/.style={
         rectangle, rounded corners,
-        draw, fill=orange!20,
+        draw, fill=ibisAmber!20,
         minimum width=1.2cm, minimum height=1cm,
         text width=1.2cm, align=center
     },
     inputlong/.style={
         rectangle, rounded corners,
-        draw, fill=orange!20,
-        minimum width=3cm, minimum height=1cm,
-        text width=3cm, align=center
+        draw, fill=ibisCoral!20,
+        minimum width=5cm, minimum height=1.3cm,
+        text width=5cm, align=center
     },
     outputshort/.style={
         rectangle, rounded corners,
-        draw, fill=blue!20,
+        draw, fill=ibisBlue!20,
         minimum width=1cm, minimum height=1cm
+    },
+    outputlong/.style={
+        rectangle, rounded corners,
+        draw, fill=ibisBlue!20,
+        minimum width=3cm, minimum height=1cm,
+        text width=3cm, align=center
     },
     process/.style={
         rectangle,
-        draw, fill=gray!15,
+        draw, fill=ibisGray!15,
         minimum width=3cm, minimum height=1cm,
         align=center
     },
     decision/.style={
         diamond,
-        draw, fill=green!15,
+        draw, fill=ibisGreen!15,
         aspect=2,
         inner sep=2pt,
-        text width=2cm,
+        text width=3cm,
         align=center
+    },
+    nestA/.style={
+        rectangle,fill=ibisSky!30,
+        draw, dashed,
+        rounded corners=1mm,
+        inner sep = 20pt
+    },
+    nestB/.style={rectangle,
+    draw, dashed,
+    fill=ibisIndigo!15,
+    rounded corners=1mm,
+    inner sep = 27pt
+    },
+    nestC/.style={rectangle,
+    draw, dashed,
+    fill=ibisViolet!15,
+    rounded corners=1mm,
+    inner sep = 27pt
     },
     arrow/.style={
         thick, ->, >=Stealth
@@ -40,67 +64,83 @@
 ]
 
 % Nodes
-    \node (start) [process] {Récupération des \\ profils temporels du bâtiment};
+    \node (start) [process] {Récupération des \\ profils temporels du bâtiment \\ et de l'extérieur};
 
-    \node (Text) [inputshort, below right=of start] {$\TAir{t}$};
-    \node (Tint) [inputshort, below right=of start, xshift = 2cm] {$\TExt{t}$};
-    \node (phiheat) [inputshort, below right=of start, xshift = 4cm] {$\PhiHeat{t}$};
-    \node (phisol) [inputshort, below right=of start, xshift = 6cm] {$\PhiSol{t}$};
+    \node (phiheat) [inputshort, below=of start, xshift = -4cm] {$\PhiEm{t}$};
+    \node (phisol) [inputshort, below=of start, xshift = -2cm] {$\PhiSol{t}$};
+    \node (phiint) [inputshort, below=of start] {$\PhiInt{t}$};
+    \node (TExt) [inputshort, below=of start, xshift = 2cm] {$\TExt{t}$};
+    \node (TAir) [inputshort, below=of start, xshift = 4cm] {$\TAir{t}$};
 
-    \node (fext) [inputshort, below=of Tint, xshift=1cm] {
-        $\FExt$};
-    \node (PSOparam) [inputlong, below=of fext, yshift=1.5cm] {Fonction objectif \\ Bornes de recherche \\ Taille de l'essaim \\ Nb max d'itérations};
+    \node (Pth) [inputlong, below=of phiint] {Paramètres thermiques $\PTh$ et système d'ODE associé};
+    \node (solvparams) [inputlong, right=of Pth] {Période d'identification $T_i$ \\ Pas de temps $\tau$ \\ Températures initiales};
+    \node (exo) [inputlong, left=of Pth] {Entrées exogènes};
 
-    \node (PSOyn) [decision, below=of start, yshift=-0.5cm] {Paramètres thermiques \\ fixés ?};
+    \node (REME) [process, below=of Pth] {Résolution du système d'ODE \\ par un solveur numérique};
+    \node (obj) [outputlong, right=of REME] {Fonction objectif \\ $\Theta\left(\TAir{t}, \ThatAir{t}\right)$};
 
-    \node (Pth) [inputlong, below=of PSOyn, yshift=-2cm] {Vecteur Paramètres thermiques $\PTh$};
-    \node (REME) [process, below=of Pth] {Résolution de l'équation \ref{eq:diffTST} \\ par la méthode d'Euler};
-    \node (PSO) [process, right=of Pth, xshift=-0.5cm] {PSO \\ pour déterminer \\ les paramètres thermiques};
-    \node (secante) [process, below=of REME] {Détermination du besoin de chauffage \\ par la méthode de la sécante};
+    \begin{scope}[on layer=bg1]
+        \node (nesta) [nestA, fit=(start) (phiheat) (phisol) (phiint) (TExt) (TAir) (Pth) (solvparams) (exo) (REME) (obj), label={[anchor=north west]north west:Période d'entraînement du modèle $RC$, jusqu'à convergence de $\Theta$}] {};
+    \end{scope}
+
+    \node (PSO) [process, above=of start] {Algorithme \\ d'optimisation \\ des paramètres thermiques};
+    \node (PSOparam) [inputlong, right=of PSO] {Fonction objectif \\ Bornes de recherche \\ Nb max d'itérations \\ Hyperparamètres};
+
+    \node (Pthoptim) [outputlong, below=of REME] {$\PTh$ optimisé};
+    \node (solvparamstest) [inputlong, right=of Pthoptim] {Période de validation $T_j$ \\ Pas de temps $\tau$ \\ Températures initiales};
+
+    \node (calcultair) [process, below=of Pthoptim] {Calcul de $T_{\text{Air}}(t)$ \\ par résolution des ODE avec $\PTh$ optimisé};
+    \node (testtair) [decision, below=of calcultair] {$T_{\text{Air}}(t) < \Tcons$};
+    \node (Tconsint) [inputshort, left=of testtair] {$\Tcons$};
+    \node (phiemzero) [process, right=of testtair] {$\phi_{\text{Em}}(t) \leftarrow 0$};
+    \node (phiemnotzero) [process, below=of testtair] {$\phi_{\text{Em}}(t) \leftarrow \phi_{\text{Em}} \text{ tel que }  \phi_{\text{Em}}\left( \Tcons - T_{\text{Air}}(t) \right) = 0$};
+
+    \node (phiemoutput) [outputlong, below=of phiemnotzero] {Profil de chauffage $\PhihatEm{t}$ prédit sur la période $T_j$};
+
+    \begin{scope}[on layer=bg1]
+        \node (nestc) [nestC, fit=(Tconsint) (calcultair) (testtair) (phiemzero) (phiemnotzero), label={[anchor=north west]north west:Pour $t$ allant de $1$ à $T_j$ par pas de $\tau$}] {};
+    \end{scope}
+
+    \begin{scope}[on layer=bg2]
+        \node (nestb) [nestB, fit=(Pthoptim) (solvparamstest) (Tconsint) (calcultair) (testtair) (phiemzero) (phiemnotzero), label={[anchor=north west]north west:Période d'application du modèle $RC$}] {};
+    \end{scope}
+
+    % Arrows
+    \draw [arrow] (start.south) -- ++(0, -0.5) -| (TAir.north);
+    \draw [arrow] (start.south) -- ++(0, -0.5) -| (TExt.north);
+    \draw [arrow] (start.south) -- ++(0, -0.5) -| (phiheat.north);
+    \draw [arrow] (start.south) -- ++(0, -0.5) -| (phisol.north);
+    \draw [arrow] (start.south) -- ++(0, -0.5) -| (phiint.north);
+
+    \draw [arrow] (TExt.south) -- ++(0,-0.5) -| (exo.north);
+    \draw [arrow] (phiheat.south) -- ++(0,-0.5) -| (exo.north);
+    \draw [arrow] (phisol.south) -- ++(0,-0.5) -| (exo.north);
+    \draw [arrow] (phiint.south) -- ++(0,-0.5) -| (exo.north);
+
+    \draw [arrow] (exo.south) |- ++(0,-0.5) -| (REME.north);
+    \draw [arrow] (Pth.south) |- ++(0,-0.5) -| (REME.north);
+    \draw [arrow] (solvparams.south) |- ++(0,-0.5) -| (REME.north);
+
+    \draw [arrow] (REME.east) -- (obj.west);
+    \draw [arrow] (TAir.east) -- ++(5.75, 0) |- (obj.east);
+    \draw [arrow] (PSOparam.west) -- (PSO.east);
 
 
-    \node (Tairpred) [outputshort, below=of REME, xshift=-4.cm, yshift = 1.5cm] {$\ThatAir{t}$};
-    \node (Tenvpred) [outputshort, below=of REME, xshift=4.cm, yshift = 1.5cm] {$\ThatEnv{t}$};
+    \draw [arrow] (Pthoptim.south) -- (calcultair.north);
+    \draw [arrow] (calcultair.south) -- (testtair.north);
+    \draw [arrow] (testtair.south) -- (phiemnotzero.north);
+    \draw [arrow] (phiemnotzero.south) -- (phiemoutput.north);
 
+    \draw [arrow] (solvparamstest.south) |- ++(0,-0.5) -| (calcultair.north);
+    \draw [arrow] (testtair.east) -- (phiemzero.west);
+    \draw [arrow] (Tconsint.east) -- (testtair.west);
+    \draw [arrow] (Tconsint.south) |- (phiemnotzero.west);
 
-    \node (phiheatpred) [outputshort, below=of secante, xshift=-4cm, yshift = 1.5cm] {$\PhihatHeat{t}$};
-    \node (phisolpred) [outputshort, below=of secante, xshift=4cm, yshift = 1.5cm] {$\PhihatSol{t}$};
+    \draw [arrow, dashed] (PSO.south) -- (nesta.north);
+    \draw [arrow] ([xshift=-8cm]nesta.south) |- (nestb.west);
+%    \draw [arrow] (Tconsint.west) -- ++(-1, 0) |- ([yshift=-0.2cm]secante.east);
+%    \draw [arrow] (REME.west) -| (Tairpred.north);
 
-    \node (Tconsext) [inputshort, right=of secante, xshift=2cm, yshift = 0.75cm] {$\Tconsext$};
-    \node (Tconsint) [inputshort, right=of secante, xshift=2cm, yshift = -0.75cm] {$\Tconsint$};
-
-% Arrows
-    \draw [arrow] (start) -- (PSOyn);
-
-    \draw [arrow] (start.east) -| (Text.north);
-    \draw [arrow] (start.east) -| (Tint.north);
-    \draw [arrow] (start.east) -| (phiheat.north);
-    \draw [arrow] (start.east) -| (phisol.north);
-
-
-    \draw [arrow] (Text.south) -- ++(0,-0.5) -| (fext.north);
-    \draw [arrow] (Tint.south) -- ++(0,-0.5) -| (fext.north);
-    \draw [arrow] (phiheat.south) -- ++(0,-0.5) -| (fext.north);
-    \draw [arrow] (phisol.south) -- ++(0,-0.5) -| (fext.north);
-
-    \draw [arrow] (PSOyn.south) -- node[left, text width=4cm, align=center] {oui \textit{(déterminés par la méthode 3CL ou par une précédente PSO)}} (Pth.north);
-    \draw [arrow] (PSOyn.east) -| node[text width=1cm, align=left, yshift=0.2cm, xshift=-1cm] {non} (PSO.north);
-%    \draw [arrow] (PSOyn.east) -- node[left, text width=4cm, align=center] {Non} (Pth.north);
-    \draw [arrow] (Pth.south) -- (REME.north);
-    \draw [arrow] (REME.south) -- (secante.north);
-
-    \draw [arrow] (fext.west) -| (PSO.north);
-    \draw [arrow] (PSOparam.west) -| (PSO.north);
-    \draw [arrow] (PSO.west) -- (Pth.east);
-
-    \draw [arrow] (Tconsext.west) -- ++(-1, 0) |- ([yshift=0.2cm]secante.east);
-    \draw [arrow] (Tconsint.west) -- ++(-1, 0) |- ([yshift=-0.2cm]secante.east);
-
-    \draw [arrow] (REME.west) -| (Tairpred.north);
-    \draw [arrow] (REME.east) -| (Tenvpred.north);
-
-    \draw [arrow] (secante.west) -| (phiheatpred.north);
-    \draw [arrow] (secante.east) -| (phisolpred.north);
-
+%    \draw [arrow] (secante.west) -| (phiempred.north);
+%    \draw [arrow] (secante.east) -| (phisolpred.north);
 \end{tikzpicture}
-

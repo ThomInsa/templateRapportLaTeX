@@ -1,0 +1,122 @@
+\begin{tikzpicture}[
+    node distance=2cm,
+    every node/.style={font=\small},
+    inputshort/.style={
+        rectangle, rounded corners,
+        draw, fill=ibisAmber!20,
+        minimum width=2cm, minimum height=1cm,
+        text width=2cm, align=center
+    },
+    inputlong/.style={
+        rectangle, rounded corners,
+        draw, fill=ibisCoral!20,
+        minimum width=5cm, minimum height=1.3cm,
+        text width=5cm, align=center
+    },
+    outputshort/.style={
+        rectangle, rounded corners,
+        draw, fill=ibisBlue!20,
+        minimum width=1cm, minimum height=1cm
+    },
+    outputlong/.style={
+        rectangle, rounded corners,
+        draw, fill=ibisBlue!20,
+        minimum width=3cm, minimum height=1cm,
+        text width=3cm, align=center
+    },
+    process/.style={
+        rectangle,
+        draw, fill=ibisGray!15,
+        minimum width=3cm, minimum height=1cm,
+        align=center
+    },
+    decision/.style={
+        diamond,
+        draw, fill=ibisGreen!15,
+        aspect=2,
+        inner sep=2pt,
+        text width=3cm,
+        align=center
+    },
+    nestA/.style={
+        rectangle,fill=ibisSky!30,
+        draw, dashed,
+        rounded corners=1mm,
+        inner sep = 20pt
+    },
+    nestB/.style={rectangle,
+    draw, dashed,
+    fill=ibisIndigo!15,
+    rounded corners=1mm,
+    inner sep = 27pt
+    },
+    arrow/.style={
+        thick, ->, >=Stealth
+    }
+]
+
+    \tikzset{
+        pics/database/.style={
+            code = {
+                \def\rx{0.85}
+                \def\ry{0.30}
+                \def\bh{1.7}
+                \filldraw[draw=ibisTeal!75!black, fill=ibisTeal!15]
+                (-\rx,0) -- (-\rx,-\bh)
+                arc[start angle=180, end angle=360, x radius=\rx, y radius=\ry]
+                -- (\rx,0)
+                arc[start angle=0, end angle=180, x radius=\rx, y radius=\ry] -- cycle;
+                \filldraw[draw=ibisTeal!75!black, fill=ibisTeal!25]
+                (0,0) ellipse[x radius=\rx, y radius=\ry];
+                \draw[draw=ibisTeal!75!black, line width=0.6pt]
+                (-\rx,-0.55) arc[start angle=180, end angle=360, x radius=\rx, y radius=\ry];
+                \draw[draw=ibisTeal!75!black, line width=0.6pt]
+                (-\rx,-1.10) arc[start angle=180, end angle=360, x radius=\rx, y radius=\ry];
+            }
+        },
+        database icon/.style={
+            rectangle,
+            minimum width=1.9cm,
+            minimum height=2.3cm,
+            inner sep=0pt,
+            append after command={
+                \pgfextra{
+                    \pic[shift={(0,0.85)}] at (\tikzlastnode.center) {database};
+                }
+            }
+        }
+    }
+
+    \node (inputsimu) [inputlong] {Données de simulation EnergyPlus};
+    \node (inputaca) [inputlong, above=of inputsimu] {Données de la littérature scientifique};
+    \node (inputreel) [inputlong, below=of inputsimu] {Données de mesure internes au CEA};
+
+    \node (clean) [process, right=of inputsimu] {Nettoyage \\ Concaténation \\ Normalisation};
+    \node[database icon, right=of clean] (ibisdata) {\texttt{IBIS\_Data}};
+
+     \node (modelrc) [process, right=of ibisdata] {\texttt{ModelRC}};
+     \node (bbsolver) [process, above=of modelrc] {\texttt{BlackBoxThermalSolver}};
+     \node (gbsolver) [process, below=of modelrc] {\texttt{GreyBoxThermalSolver}};
+
+     \node (results) [outputshort, right=of modelrc] {Résultats};
+
+    % Arrows
+    \draw [arrow] (inputaca.east) -- ++(0.5, 0) |- (clean.west);
+    \draw [arrow] (inputsimu.east) -- (clean.west);
+    \draw [arrow] (inputreel.east) -- ++(0.5, 0) |- (clean.west);
+
+    \draw [arrow] (clean.east) -- (ibisdata.west);
+
+     \draw [arrow] (ibisdata.east) -- ++(0.5, 0) |- (bbsolver.west);
+     \draw [arrow] (ibisdata.east) -- (modelrc.west);
+     \draw [arrow] (ibisdata.east) -- ++(0.5, 0) |- (gbsolver.west);
+
+    \draw [arrow] (modelrc.south) -- (gbsolver.north);
+
+    \draw [arrow] (bbsolver.east) -- ++(0.5, 0) |- (results.west);
+    \draw [arrow] (modelrc.east) -- (results.west);
+    \draw [arrow] (gbsolver.east) -- ++(0.5, 0) |- (results.west);
+
+    \draw [arrow] (results.south) -- ++(0, -3.5) -| (ibisdata.south);
+
+\end{tikzpicture}

@@ -8,19 +8,19 @@
     arrow/.style={->, thick},
     dataset/.style={
         rectangle, rounded corners,
-        draw, fill=blue!20,
+        draw, fill=ibisBlue!20,
         minimum width=3cm, minimum height=1cm,
         text width=3cm, align=center
     },
     method/.style={
         rectangle, rounded corners,
-        draw, fill=orange!20,
+        draw, fill=ibisCoral!20,
         minimum width=3cm, minimum height=1cm,
         text width=3cm, align=center
     },
     model/.style={
         rectangle, rounded corners,
-        draw, fill=green!20,
+        draw, fill=ibisGreen!20,
         minimum width=1cm, minimum height=1cm
     },
 ]
@@ -58,7 +58,7 @@
     \node (modelX) [model, right=of mM] {$\vdots$ \\ Modèle X \\ Performance $p_X$};
 
     \node[above=0.6cm of model1, draw=none] {\textbf{Modèles}};
-    
+
     \node[
         draw,
         dotted,
@@ -68,13 +68,13 @@
         label={[anchor=north west, yshift=0.63cm, font=\sffamily, text=black!70]north
     west:Résultats après la première période d'alternance}
     ] {};
-    
+
     \foreach \d in \datasets {
         \foreach \m in \methods {
             \draw[-] (\d.east) -- (\m.west);
         }
     }
-    
+
     \draw[-] (m1.east) -- (model1.west);
     \draw[-] (m1.east) -- (model2.west);
     \draw[-] (m2.east) -- (model3.west);
@@ -86,7 +86,7 @@
     \draw[-] (m5.east) -- (model9.west);
     \draw[-] (m5.east) -- (model10.west);
     \draw[-] (mM.east) -- (modelX.west);
-    
+
 % --- Connexions Datasets -> Méthodes ---
 %    \draw[arrow] (dN.east) -- (mM.west);
 

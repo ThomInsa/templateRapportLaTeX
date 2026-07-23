@@ -28,69 +28,68 @@
 \newcommand{\TMass}[1]{\OpMass(#1)}
 
 \newcommand{\Tconsext}{T_{\text{cons}-\texttt{Ext}}}
-\newcommand{\Tconsint}{T_{\text{cons}-\texttt{Int}}}
+\newcommand{\Tcons}{T_{\text{cons}}}
+
+% ===== Flux ======
+
+\DeclareMathOperator{\PhihatOpEm}{\widehat{\overrightarrow{\phi_{\text{Em}}}}}
+\newcommand{\PhihatEm}[1]{\PhihatOpEm(#1)}
+
+\DeclareMathOperator{\PhihatOpSol}{\widehat{\overrightarrow{\phi_{{\text{Sol}}}}}}
+\newcommand{\PhihatSol}[1]{\PhihatOpSol(#1)}
 
 
-% ====== Capacitances ======= 
+\DeclareMathOperator{\OpEmm}{\overrightarrow{\mathbf{T}_{\text{Em}}}}
+\newcommand{\TEm}[1]{\OpEmm(#1)}
 
+\DeclareMathOperator{\OpCirc}{\overrightarrow{\mathbf{T}_{\text{Circ}}}}
+\newcommand{\TCirc}[1]{\OpCirc(#1)}
+
+\DeclareMathOperator{\OpEm}{\overrightarrow{\mathbf{\phi}_{\text{Em}}}}
+\newcommand{\PhiEm}[1]{\OpEm(#1)}
+
+\DeclareMathOperator{\OpSol}{\overrightarrow{\phi_{\text{Sol}}}}
+\newcommand{\PhiSol}[1]{\OpSol(#1)}
+
+\DeclareMathOperator{\OpInt}{\overrightarrow{\phi_{\text{Int}}}}
+\newcommand{\PhiInt}[1]{\OpInt(#1)}
+
+
+% ====== Capacitances =======
+\newcommand{\CBuild}{C_{\text{Building}}}
 \newcommand{\CAir}{C_{\text{Air}}}
-
 \newcommand{\CEnv}{C_{\text{Env}}}
-
 \newcommand{\CCirc}{C_{\text{Circ}}}
-
 \newcommand{\CEm}{C_{\text{Em}}}
-
 \newcommand{\CMass}{C_{\text{Mass}}}
 
-
 % ====== Conductances =======
-
+\newcommand{\UBuild}{U_{\text{Building}}}
 \newcommand{\UAirExt}{U_{\left[\text{Air-Ext}\right]}}
-
 \newcommand{\UAirEnv}{U_{\left[\text{Air-Env}\right]}}
-
 \newcommand{\UAirMass}{U_{\left[\text{Air-Mass}\right]}}
-
 \newcommand{\UAirEm}{U_{\left[\text{Air-Em}\right]}}
-
 \newcommand{\UEnvExt}{U_{\left[\text{Env-Ext}\right]}}
+\newcommand{\UEnvMass}{U_{\left[\text{Env-Mass}\right]}}
+\newcommand{\UExtMass}{U_{\left[\text{Ext-Mass}\right]}}
 
 % ====== Solar Gains ======= 
 
 \newcommand{\kAir}{k_{\text{Air}}}
 \newcommand{\kEnv}{k_{\text{Env}}}
 \newcommand{\kMass}{k_{\text{Mass}}}
-
-% ===== Flux ======
-
-
-\DeclareMathOperator{\PhihatOpHeat}{\widehat{\overrightarrow{\phi_{\text{Heat}}}}}
-\newcommand{\PhihatHeat}[1]{\PhihatOpHeat(#1)}
-
-\DeclareMathOperator{\PhihatOpSol}{\widehat{\overrightarrow{\phi_{{Sol}}}}}
-\newcommand{\PhihatSol}[1]{\PhihatOpSol(#1)}
-
-
-\DeclareMathOperator{\OpEm}{\overrightarrow{\mathbf{T}_{\text{Em}}}}
-\newcommand{\TEm}[1]{\OpEm(#1)}
-
-\DeclareMathOperator{\OpCirc}{\overrightarrow{\mathbf{T}_{\text{Circ}}}}
-\newcommand{\TCirc}[1]{\OpCirc(#1)}
-
-\DeclareMathOperator{\OpHeat}{\overrightarrow{\phi_{\text{Heat}}}}
-\newcommand{\PhiHeat}[1]{\OpHeat(#1)}
-
-\DeclareMathOperator{\OpSol}{\overrightarrow{\phi_{\text{Sol}}}}
-\newcommand{\PhiSol}[1]{\OpSol(#1)}
+\newcommand{\Am}{A_{\text{m}}}
+\newcommand{\Atot}{A_{\text{tot}}}
 
 
 \renewcommand{\it}[1]{\textit{#1}}
 
 \newenvironment{bluebox}
-    {
-        \begin{tcolorbox}[colback=linkborderColor!5!white,colframe=linkborderColor!75!black]
-    }
-    {
-        \end{tcolorbox}
-    }
+{
+    \begin{tcolorbox}[colback=calloutNoteBackground,
+        colframe=calloutNoteBorder,
+        coltitle=calloutNoteText]
+}
+{
+    \end{tcolorbox}
+}

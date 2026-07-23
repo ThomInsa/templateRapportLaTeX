@@ -1,21 +1,21 @@
-\chapter{Conception logicielle, refactoring et bonnes pratiques de développement}\label{ch:conception-logicielle-refactoring-et-bonnes-pratiques-de-developpement}
-
+\chapter{Architecture logicielle et bonnes pratiques de développement}\label{ch:conception-logicielle-refactoring-et-bonnes-pratiques-de-developpement}
+%TODO : commentaire sur Ruff
 \section{Refactoring des précédents travaux}\label{sec:refactoring-des-precedents-travaux}
 
-À l'instar de la première partie, le travail sur l'architecture logicielle du projet \gls{IBIS} porte en premier lieu sur le remaniement du code du stage
-effectué sur le projet DISTRISIM, pour l'appropriation du sujet et la montée en compétences dans un premier temps, et pour la conception d'un code plus robuste supportant
-un plus grand volume de données et différents modèles dans un second.
+    Le travail sur l'architecture logicielle du projet \gls{IBIS} s'est articulé dans un premier temps sur le remaniement du code du stage
+    effectué sur le projet DISTRISIM dans l'optique de concevoir un code plus robuste supportant
+    un plus grand volume de données et différents modèles ensuite.
 
-Comme c'est le cas dans le projet \gls{IBIS}, on appelle TST le code précédent présenté dans \cite{TST} pour les prochaines parties, et \gls{IBIS}-DISTRISIM le code récemment remanié.
+    Pour la suite, on appelle TST le code précédent présenté dans \cite{TST}.
 
-TST est à l'origine un code de 1000 lignes écrit sur un fichier donnant des courbes prévisionnelles de
-consommation d'énergie avec ou sans adaptation des paramètres du modèle aux données
-de la période précédant celle de la prévision.
-Ses entrées sont saisies séquentiellement et manuellement dans le terminal du programme.
+    TST est à l'origine un code de 1000 lignes écrit sur un fichier donnant des courbes prévisionnelles de
+    consommation d'énergie avec ou sans adaptation des paramètres du modèle aux données
+    de la période précédant celle de la prévision.
+    Ses entrées sont saisies séquentiellement et manuellement dans le terminal lancé par son script principal.
 
-Si le code livre des résultats intéressants sur les bâtiments étudiés \ref{tab:tstfinal},
-    son architecture rend difficile la compréhension microscopique du comportement du modèle
-    d'une part \textit{(en particulier la sensibilité d'un paramètre devant un résultat précis)}, et la généralisation des expériences d'autre part \textit{(notamment le lancement d'une série massive de calculs pour apprécier les sorties du modèle à plus grande échelle)}.
+    Si le code livre des résultats intéressants sur les bâtiments étudiés \ref{tab:tstfinal},
+        son architecture rend difficile la compréhension microscopique du comportement du modèle
+        d'une part \textit{(en particulier la sensibilité d'un paramètre devant un résultat précis)}, et la généralisation des expériences d'autre part \textit{(notamment le lancement d'une série massive de calculs pour apprécier les sorties du modèle à plus grande échelle)}.
 
     Ce constat permet de commencer la refactorisation avec en premier lieu la répartition des
         fonctions existantes dans une arborescence à plusieurs fichiers.
@@ -23,68 +23,74 @@ Si le code livre des résultats intéressants sur les bâtiments étudiés \ref{
         stockée à l'extérieur des sources comme le suggèrent les lignes de conduite du
         développement propre.
 
-\begin{lstlisting}[language=bash, caption={Arborescence actuelle du projet IBIS-DISTRISIM},label={
-    lst:tree}]
-|__init__.py
-├---input
-|   |   buildings_parameters.py
-|   |   input_parameters.py
-|   |   __init__.py
-├---models
-|   |   evaluation.py
-|   |   thermal_model.py
-|   |   __init__.py
-├---output
-|   |   export_results.py
-|   |   __init__.py
-|   ├---visualisation
-|   |   |   plots.py
-|   |   |   vis_config.py
-|   |   |   __init__.py
-├---solvers
-|   |   euler.py
-|   |   optimization.py
-|   |   __init__.py\end{lstlisting}
+\begin{lstlisting}[language=bash, caption={Arborescence du code source d'IBIS},label={lst:tree}]│.python-version
+│main.py
+│__init__.py
+├───loaders
+│   │   building_data.py
+│   │   model_parameters.py
+│   │   outdoor_data.py
+│   │   utils.py
+│   │   __init__.py
+│   ├───solver_parameters
+│   │   │   compute_parameters.py
+│   │   │   rc_bounds_loading.py
+│   │   │   __init__.py
+│   │   │
+│   │   └───
+│   └───
+├───models
+│   │   building_model.py
+│   │   outdoor_model.py
+│   │   thermal_models.py
+│   │   __init__.py
+│   │
+│   └───
+├───output
+│   │   export_results.py
+│   │   __init__.py
+│   ├───visualisation
+│   │   │   blackbox_plotter.py
+│   │   │   greybox_plots.py
+│   │   │   palettes.py
+│   │   │   plot_export_utils.py
+│   │   │   vis_config.py
+│   │   │   __init__.py
+│   │   └───
+│   └───
+├───solvers
+│   │   blackbox_thermal_solvers.py
+│   │   compute_parameters.py
+│   │   greybox_thermal_solvers.py
+│   │   metrics.py
+│   │   rc_bounds.py
+│   │   __init__.py
+│   └───
+└───
+|\end{lstlisting}
 
-    Ainsi, la fonction \texttt{main} (renommée \texttt{run\_computation}) peut être lancée avec des entrées de fichiers choisies dynamiquement.
-    Ceci facilite son utilisation dans des notebooks Jupyter et donc le lancement de nombreux calculs avec différents paramètres\footnote{La plupart des figures présentées dans la première partie sont obtenues grâce à cette multiplication des calculs, trop fastidieuse pour être lancée dans la première version du code.}.
+    Les sources sont ainsi pensées pour être lancées dans des notebooks Jupyter et ainsi permettre de nombreux calculs avec différents paramètres.
 
     L'arborescence du projet ébauchée, l'étape suivante est l'inspection des fonctions pour vérifier leur propreté, leur maintenabilité et la facilité à les faire évoluer.
     Autant que possible, ce procédé tente de s'appuyer sur les recommendations du livre de Robert C. Martin \cite{clean_code}, faisant figure de référence standardisée dans le milieu du développement du logiciel.
 
-Le nombre de bonnes pratiques décrites dans cet ouvrage est particulièrement élevé et toutes ne sont pas forcément applicables simultanément, en particulier les exemples sont souvent tirés du développement web, un domaine généralement éloigné du calcul scientifique.
-La synthèse la plus élémentaire des techniques de nettoyage du code donnée plus bas a tout de même guidé le développement et les réflexions autour d'\gls{IBIS} :
+    Le nombre de bonnes pratiques décrites dans cet ouvrage est particulièrement élevé et toutes ne sont pas forcément applicables simultanément, en particulier les exemples sont souvent tirés du développement web, un domaine généralement éloigné du calcul scientifique.
+    La synthèse la plus élémentaire des techniques de nettoyage du code donnée plus bas a tout de même guidé le développement et les réflexions autour d'\gls{IBIS} :
 
     \begin{itemize}
         \item Le nommage des variables doit être explicite.
-        En particulier, allonger le nom d'une variable est généralement une bonne idée même si sa lecture peut sembler fastidieuse.
+        En particulier, allonger le nom d'une variable est habituellement une bonne idée même si sa lecture peut sembler fastidieuse.
         \item Les fonctions, classes, méthodes et fichiers doivent être le plus court possible (une dizaine de lignes maximum) et chaque fonction doit remplir un seul objectif.
         En général, si une fonction dépasse ce nombre de lignes, alors elle peut être séparée.
         \item De même, le nombre de paramètres d'une fonction ne doit pas être supérieur à trois.
         \item Le \gls{TDD} reste la meilleure approche à la quasi-totalité des problèmes de programmation, aussi l'utilisation des tests doit être aussi fréquente que possible
-        \item Les commentaires doivent être utilisés avec parcimonie et ne remplacent en aucun cas l'explication du code par lui-même.
+        \item Les commentaires doivent être utilisés avec parcimonie et ne remplacent en aucun cas l'explication du code par lui-même ni une documentation complète.
         La raison d'être de nombreux commentaires est en effet la clarification d'éléments de code mal implémentés, avec pour finalité la présence dans le projet de deux informations floues plutôt qu'une explicite.
     \end{itemize}
 
-    \begin{bluebox}
-        (05/02) : Ces bonnes pratiques ne sont pour l'instant pas étendues à l'ensemble du projet \gls{IBIS}, encore à un stade très précoce de développement.
-    Elles sont néanmoins appliquées par endroit et nourrissent les réflexions pour la création des issues notamment\textit{(voir chapitre \ref{sec:versionning-et-gestion-de-projet})}.
-        Par ailleurs, d'autres conseils de développement propres spécifiques au langage Python sont données dans \cite{serious_python} mais n'ont pas été explorées à ce jour.
-    \end{bluebox}
-
-L'une des fonctions d'\gls{IBIS} est donnée dans le listing suivant.
-Celle-ci peut servir de référence de fonction "propre", bien qu'il soit en pratique difficile de créer cette architecture pour une grande proportion du code, de nombreuses fonctions étant moins facilement découpables.
-
-\begin{lstlisting}[caption={Exemple de fonction refactorisée idéale},label={lst:lstlisting}]
-def energy_need(heating_flux, living_area, dt):
-energy_need_t = 0
-for i in heating_flux:
-    energy_need_t = energy_need_t + i * dt
-return energy_need_t / 3600 / living_area\end{lstlisting}
-
-
         \begin{table}[h!]
             \centering
+            \caption{Comparaison d'architecture qualitative et quantitative entre le projet de 2023 et le projet actuel}\label{tab:table}
             \begin{adjustbox}{width=\textwidth}
             \begin{tabular}{lcc}
                 \toprule
@@ -95,25 +101,19 @@ return energy_need_t / 3600 / living_area\end{lstlisting}
                 Plus longue fonction & 363 & 85 \\
                 Plus courte fonction & 6 & 4 \\
                 Nombre de fonctions & 13 & 21 \\
-                Traitement des données & En partie hardcodée dans les sources & Dans un dossier dédiée avec une arborescence permettant l'implémentation d'une BDD relationnelle \\
-                Fonctions implémentées vs fonctions de librairies & Aucune & Aucune \textit{(Issues créées pour utiliser des solveurs de librairies)} \\
-                Approche objet & Aucune & En cours de développement \\
-                Gestion de projet (aucune VS Gitlab) & Aucune & GitLab interne déployé avec documentation des commit et suivi des issues \\
-                Librairies utilisées & PySwarm & PySwarm \\
+                Traitement des données & En partie hardcodée dans les sources & Dans un dossier dédié avec une arborescence permettant l'implémentation d'une BDD relationnelle \\
+                Dépendances tierces & Aucune du fait de très nombreuses fonctions réimplémentées & Utilisation aussi fréquente que possible de librairies robustes \textit{(SciPy, scikit-opt, scikit-learn)} \\
+                Approche objet & Aucune & Classes spécifiques au projet avec séparation des responsabilités et dissociation des aspects Modèle-Solveur \\
+                Gestion de projet (aucune VS Gitlab) & Aucune & GitLab interne déployé avec documentation des commits et suivi des issues \\
                 \bottomrule
             \end{tabular}
             \end{adjustbox}
-            \caption{Comparaison d'architecture qualitative et quantitative entre le projet de 2023 et le projet actuel}\label{tab:table}
         \end{table}
 
         L'apport de ce travail de refactorisation est double : \begin{enumerate}
            \item Les résultats précédents ont pu être consolidés avec la généralisation du
-               tableau \ref{tab:tstfinal} sur un seul bâtiment à l'ensemble du quartier étudié \ref{tab:mean_std_by_building_by_month}, sans que cette tâche soit rendue fastidieuse par une implémentation de code perfectible.
-           \item Il est désormais possible de développer de nouveaux modèles ou de consolider
-                                                                   celui existant en s'appuyant
-                                                                   sur le projet actuel, sans
-                                                                   avoir à en commencer un
-                                                                   nouveau.
+               tableau \ref{tab:tstfinal} sur un seul bâtiment à l'ensemble du quartier étudié \ref{fig:heatmap}, sans que cette tâche soit rendue fastidieuse par une implémentation de code perfectible.
+           \item Il est désormais possible de développer de nouveaux modèles ou de consolider celui existant en s'appuyant sur le projet actuel, sans avoir à en commencer un nouveau.
         \end{enumerate}
 
         \subsection{Implémentation de plusieurs cas test}\label{subsec:implementation-de-plusieurs-cas-test}
@@ -122,67 +122,81 @@ return energy_need_t / 3600 / living_area\end{lstlisting}
             Ainsi, il est important de garder un aperçu des résultats du modèle à chaque étape de développement pour s'assurer de sa performance.
             Cette vigilance est mise en oeuvre avec l'introduction de tests basés sur le modèle actuel.
 
-            Pour l'instant, le test principal implémenté est la reproductibilité des tableaux \ref{fig:heatmap} et \ref{tab:mean_std_by_building_by_month},
-                rendue possible par leurs notebooks associés, lesquels sont implémentés de sorte à faciliter la modification de leurs fonctions d'entrée pour vérifier cette reproductibilité.
+            \begin{bluebox}
+                Chaque test est détaillé dans la documentation complète du projet disponible en annexe \ref{ch:ibisdoc}.
+            \end{bluebox}
 
-            Ainsi, chaque modification majeure future peut être validée par la vérification de sa sortie avec ces deux cas test.
+    \subsection{Passage à une approche orientée objet}\label{subsec:passage-a-l'oriente-objet}
 
-\subsection{Passage à l'orienté objet}\label{subsec:passage-a-l'oriente-objet}
+\subsection{Standardisation des librairies importées}\label{subsec:standardisation-des-librairies-importees}
 
-        \subsection{Standardisation des librairies importées}\label{subsec:standardisation-des-librairies-importees}
+    \subsection{Vers un modèle de données relationnel uniformisé}\label{subsec:vers-un-modele-de-donnees-relationnel-uniformise}
+        %TODO : L'intérêt de l'architecture par clés primaire et étrangère est de pouvoir associer très facilement des données de sortie à un jeu de paramètres de calcul, tout en différentiant ces paramètres selon le stade où ils interviennent (solveur, modèle, etc)
+        %TODO : Simplicité du modèle, architecture proche d'un dossier de csv avec l'aspect relationnel en plus
+        \ref{fig:SQL}
 
-        \subsection{Vers un modèle de données relationnel uniformisé}\label{subsec:vers-un-modele-de-donnees-relationnel-uniformise}
+        \begin{figure}[H]
+            \centering
+            {\fbox{
+                \includegraphics[width = 0.9\textwidth]{figures/diagrammes/SQL_Model}
+            }}
+        \caption{Modèle relationnel de la base de données IBIS\_Data}\label{fig:SQL}
+        \end{figure}
 
-            \begin{figure}[H]
-                \centering
+\section{Aperçu de l'architecture du projet}\label{sec:apercu-de-l'architecture-du-projet}
+    \subsection{Refactoring des précédents travaux}\label{subsec:refactoring-des-precedents-travaux}
+
+        Le schéma \ref{fig:IBIS_archi} se veut le reflet de la figure \ref{fig:IBIS_final_scheme} présentée en introduction du chapitre 5,
+        le premier adoptant un point de vue développeur et l'autre un point de vue utilisateur.
+        \begin{figure}[H]
+            \centering
+            \begin{adjustbox}{max width=\textwidth}
                 {\fbox{
-                    \includegraphics[width = 0.75\textwidth]{figures/diagrammes/SQL_Model}
+                    \input{figures/diagrammes/logigrammes/IBIS_Architecture.tikz}
                 }}
-            \caption{Ébauche de modèle relationnel pour les données de DISTRISIM}\label{fig:SQL}
-            \end{figure}
-
-\section{Évaluation qualitative des performances du projet}\label{sec:evaluation-qualitative-des-performances-du-projet}
-
-    IBIS ayant connu un lancement très récent, son architecture ne souffre pas d'un grand nombre de dépendances contraignantes.
-    Il constitue donc un excellent prétexte pour challenger les approches historiques de développement scientifique en utilisant des outils équivalents plus récents.
-
-    Cette section vise à analyser avec précision le projet pour repérer ses avantages et
-
-    \subsection{Complexité des algorithmes appelés}\label{subsec:complexite-des-algorithmes-appeles}
-
-    \subsection{Outils retenus pour garantir la performance}\label{subsec:outils-retenus-pour-garantir-la-performance}
-
-        \subsubsection{uv plutôt que conda ou pip}\label{subsubsec:{uv}-plutot-que-{conda}-ou-{pip}}
-
-        \sububssection{Polars plutôt que Pandas}\label{subsec:polars-plutot-que-pandas}
-
-            \begin{table}[h!]
-                \centering
-                \begin{tabular}{lcc}
-                    \toprule
-                    \textbf{Calcul lancé} & \textbf{Avec \texttt{Pandas}} & \textbf{Avec \texttt{Polars}} \\
-                    \midrule
-                    Couple Dataset-Modèle 1 &  &  \\
-                    Couple Dataset-Modèle 2 &  &  \\
-                    \bottomrule
-                \end{tabular}
-                \caption{Benchmark de performance entre \texttt{Pandas} et \texttt{Polars}}\label{tab:table2}
-            \end{table}
+            \end{adjustbox}
+            \caption{Architecture simplifiée d'IBIS}\label{fig:IBIS_archi}
+        \end{figure}
+    \subsection{Un projet pensé pour l'utilisateur}\label{subsec:un-projet-pense-pour-l'utilisateur}
+    %TODO : - Développé directement au contact d'utilisateurs potentiels
+    %TODO : - Difficulté principale = développer un projet suffisamment gros pour qu'il puisse proposer de nombreuses fonctionnalités de façon robuste, mais ne pas rentrer dans l'usine à gaz avec des fonctionnalités inutiles et le risque d'alourdir le projet au détriment de la compréhension de l'utilisateur
+    %TODO : - Autre difficulté = architecture complète data-model-solver pour un public non développeur. Besoin d'une documentation pédagogique -> Une partie développeur et une partie utilisateur
+    %TODO : - En théorie, une fois la base de données récupérée l'utilisateur peut se contenter de jouer avec les notebooks et obtenir des résultats intéressants
+    %TODO : - Tests de modélisation par notebooks, interactifs et bien expliqués servant de "cookbook" pour les utilisateurs
+    \subsection{Modèle objet avec séparation des reponsabilités}\label{subsec:modele-objet-avec-separation-des-reponsabilites}
+    %TODO : notamment on ne représente pas les sous-classes de ModelRC et RCBounds
+        \newpage
+        \begin{figure}[H]
+            \centering
+            {\fbox{
+                \includegraphics[angle = -90, width = 0.6\linewidth]{figures/diagrammes/object_Model}
+            }}
+            \caption{Modèle objet simplifié d'IBIS}\label{fig:OOP}
+        \end{figure}
+        \newpage
+    \subsection{Utilisation de librairies standardes}\label{subsec:utilisation-de-librairies-standardes}
         
+        %TODO : Introduction au projet + séparation des responsabilités
+        %TODO : Parler du tradeoff entre l'introduction de dépendances aux librairies et le gain métier / sécu
+    \subsection{Uniformisation du modèle de données}\label{subsec:uniformisation-du-modele-de-donnees}
+
 \section{Versionning et gestion de projet}\label{sec:versionning-et-gestion-de-projet}
+
+    %TODO : parler du versionnement des données
 
     La refonte de TST dans le projet IBIS est accompagnée d'un framework de versionning
     jusqu'alors inexistant, hébergé sur un GitLab interne au \gls{CEA}\footnote{La plateforme est par ailleurs très récente et en cours de développement.
      Dans ce contexte, le projet IBIS a pu servir de retour d'expérience à l'équipe de maintenance pour son amélioration continue.}
-     
-     Ces nouvelles méthodes ont permis une meilleure supervision du projet, notamment grâce à la
-     création d'issues et à leur résolution pendant les phases de développement.
-     Un aperçu d'entre elles est donnée dans le tableau suivant.
 
-     Par ailleurs, une bonne pratique adoptée pour la suite du projet est la mise à jour de sa documentation \textit{(fichiers ReadMe)} avant chaque commit.
+    Ces nouvelles méthodes ont permis une meilleure supervision du projet, notamment grâce à la
+    création d'issues et à leur résolution pendant les phases de développement.
+    Un aperçu d'entre elles est donnée dans le tableau suivant.
 
-     \begin{table}[h!]
+    Par ailleurs, une bonne pratique adoptée pour la suite du projet est la mise à jour de sa documentation \textit{(fichiers ReadMe)} avant chaque commit.
+
+    \begin{table}[H]
         \centering
+        \caption{Issues créées et traitées jusqu'au 31/10}
         \begin{adjustbox}{width=\textwidth}
             \begin{tabular}{p{8cm}p{5cm}p{5cm}}
                 \toprule
@@ -217,8 +231,83 @@ return energy_need_t / 3600 / living_area\end{lstlisting}
                 \bottomrule
             \end{tabular}
             \end{adjustbox}
-            \caption{Issues créées et traitées jusqu'au 31/10}
             \label{tab:issuesstatesimple}
         \end{table}
-    
-    \subsection{Retour sur chaque sprint}
+
+    \ref{fig:IBIS_timeline}
+
+    \begin{figure}[H]
+        \centering
+        \begin{adjustbox}{width=\textwidth}
+        {\fbox{
+            \input{figures/diagrammes/timeline/IBIS_timeline_by_sprints.tikz}
+        }}
+        \end{adjustbox}
+        \caption{Apport de chaque sprint au projet IBIS}\label{fig:IBIS_timeline}
+    \end{figure}
+
+\section{Intégration continue et tests automatisés}\label{sec:integration-continue-et-tests-automatises}
+
+    \subsection{Ensemble des tests développés pour IBIS}\label{subsec:ensemble-des-tests-developpes-pour-ibis}
+    %TODO : - Notamment l'issue #55 où le test est écrit avant le développement
+    %TODO : - Tests écrits en .py axés développement, plus rapides
+    %TODO : > Autant que possible, l'ajout de nouvelles fonctionnalités est accompagnée de tests. C'est particulièrement vrai pour le Sprint 3 du projet dans lequel chaque ajout majeur de fonctionnalités (nouveau solveur, nouvelles données, nouveaux modèles) est accompagné d'un test incluant l'ensemble des options disponibles (un test comparant chaque modèle, un test comparant plusieurs données, un comparant les solveurs)
+        \subsubsection{OBOM - One Building, One Month}
+        \subsubsection{MEBM - Mean Error by Building by Month}
+        \subsubsection{AMSBP - All Models on Same Building and Period}
+        \subsubsection{BBAT - Black Box, All Tests}
+
+    \subsection{Vers un pipeline CI/CD simple}\label{subsec:vers-un-pipeline-ci/cd-simple}
+
+\begin{lstlisting}[language=YAML, caption={Fichier \texttt{.gitlab-ci.yml} d'IBIS},label={lst:cicd}]
+# GitLab CI/CD pipeline for the IBIS project
+# The base image only provides Python 3.12, used solely to bootstrap uv.
+# uv then downloads and manages the actual Python 3.13.7 runtime.
+
+stages:
+  - test
+
+variables:
+  UV_PYTHON_VERSION: "3.13.7"
+  UV_CACHE_DIR: "$CI_PROJECT_DIR/.uv-cache"
+
+unit_tests:
+  stage: test
+  image: python:3.12-slim
+
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - .uv-cache/
+
+  before_script:
+    # Install uv with standalone installer
+    - apt-get update -qq && apt-get install -y -qq curl ca-certificates
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+    - uv --version
+    # Install and pin the required Python version through uv
+    - uv python install "$UV_PYTHON_VERSION"
+    - uv python pin "$UV_PYTHON_VERSION"
+
+  script:
+    # Install project dependencies (respects uv.lock if present)
+    - uv sync --frozen
+    # Run tests
+    - uv run python tests/unit_test.py
+
+default:
+  tags:
+    - python
+
+  artifacts:
+    when: always
+    paths:
+      - .uv-cache/
+    expire_in: 1 week\end{lstlisting}
+
+    \begin{bluebox}
+        Ce test simple ne permet évidemment pas de couvrir l'ensemble du code et des fonctionnalités d'IBIS, bien qu'il détecte un certain nombre de dysfonctionnements simples, notamment sur la résolution d'équations différentielles par le solveur GreyBox, étape du projet la plus complexe.
+        Les tests plus complets ne sont pas ajoutés en raison des limitations techniques de l'instance GitLab du CEA, en particulier à cause du nombre limité de runners disponibles\footnote{Des travaux sont en cours pour intégrer d'autres runners à l'échelle Institut ou Laboratoire.}.
+        En effet, un seul runner étant accessible à l'échelle CEA, celui-ci a un timeout capé à 30 minutes, empêchant le lancement de tests plus longs comme MEBM et AMSBP\@.
+    \end{bluebox}

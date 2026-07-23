@@ -9,7 +9,7 @@
 \renewcommand{\thechapter}{\Roman{chapter}}
 
 %% TOC Spacing Adjustments
-\setlength{\cftbeforepartskip}{18pt}       % Space before parts in TOC
+\setlength{\cftbeforepartskip}{15pt}       % Space before parts in TOC
 \setlength{\cftbeforechapskip}{3.5pt}     % Reduce space before chapters (default: 10pt)
 \setlength{\cftbeforesecskip}{1pt}      % Reduce space before sections
 \setlength{\cftsecindent}{1em}          % Reduce section indentation (default: 1.5em)
@@ -50,18 +50,6 @@
 }
 
 %% ==================== TABLE FORMATTING ====================
-% Define custom colored column types with specific widths
-% Narrow columns (approximately 7.3% width)
-\newcolumntype{u}{>{\columncolor{PaleTurquoise1}} p{0.0727\textwidth}}
-\newcolumntype{d}{>{\columncolor{LightBlue1}} p{0.0727\textwidth}}
-\newcolumntype{t}{>{\columncolor{Khaki1}} p{0.0677\textwidth}}
-\newcolumntype{q}{>{\columncolor{Khaki2}} p{0.0727\textwidth}}
-
-% Wider columns (13% width)
-\newcolumntype{U}{>{\columncolor{PaleTurquoise1}} p{0.13\textwidth}}
-\newcolumntype{D}{>{\columncolor{LightBlue1}} p{0.13\textwidth}}
-\newcolumntype{T}{>{\columncolor{Khaki1}} p{0.13\textwidth}}
-\newcolumntype{Q}{>{\columncolor{Khaki2}} p{0.13\textwidth}}
 
 %% ==================== CODE FORMATTING ====================
 \renewcommand{\lstlistlistingname}{Liste des éléments de code}
@@ -75,38 +63,6 @@
 
 \makeatother
 
-
-% Define colors for code syntax highlighting
-\definecolor{codegreen}{rgb}{0,0.6,0}        % Green for comments
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}     % Gray for line numbers
-\definecolor{codepurple}{rgb}{0.58,0,0.82}   % Purple for strings
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92} % Light background
-
-% Define the main code style
-\lstdefinestyle{mystyle}{
-    backgroundcolor=\color{backcolour},       % Light gray background
-    frame=single,                             % Single-line frame around code
-    commentstyle=\color{codegreen},           % Green comments
-    keywordstyle=\color{magenta},             % Magenta keywords
-    numberstyle=\tiny\color{codegray},        % Small gray line numbers
-    stringstyle=\color{codepurple},           % Purple strings
-    basicstyle=\ttfamily\footnotesize,        % Monospace font, small size
-    breakatwhitespace=false,                  % Allow breaks at whitespace
-    breaklines=true,                          % Enable line breaking
-    captionpos=b,                             % Caption at bottom
-    keepspaces=true,                          % Preserve spaces
-    numbers=left,                             % Line numbers on left
-    numbersep=5pt,                            % Space between numbers and code
-    showspaces=false,                         % Don't show spaces
-    showstringspaces=false,                   % Don't show spaces in strings
-    showtabs=false,                           % Don't show tabs
-    tabsize=2,                                % Tab size of 2 spaces
-    language={Python}                         % Default language is Python
-}
-
-
-% Apply the custom style
-\lstset{style=mystyle}
 
 % Add support for French characters in code listings
 \lstset{
@@ -124,6 +80,8 @@
         {û}{{\^u}}1
         {ç}{{\c{c}}}1
 }
+
+
 
 %% ==================== PAGE HEADERS AND FOOTERS ====================
 % Setup for fancy headers with chapter title

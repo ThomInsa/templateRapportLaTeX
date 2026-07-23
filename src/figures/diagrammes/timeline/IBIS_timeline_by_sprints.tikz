@@ -1,0 +1,31 @@
+
+
+\begin{tikzpicture}[timespan={}]
+% timespan={Day} -> now we have days as reference
+% timespan={}    -> no label is displayed for the timespan
+% default timespan is 'Week'
+
+    \timeline[custom interval=true]{Sprint 0, Sprint 1, Sprint 2, Sprint 3, Sprint 4, Sprint 5}
+% \timeline[custom interval=true]{3,...,9} -> i.e., from Day 3 to Day 9
+% \timeline{8} -> i.e., from Week 1 to Week 8
+
+% put here the phases
+    \begin{phases}
+        \initialphase{involvement degree=1.75cm,phase color=black}
+        \phase{between week=1 and 2 in 0.5, involvement degree=3cm, phase color=ibisViolet}
+        \phase{between week=2 and 3 in 0.5, involvement degree=3cm, phase color=ibisGreen}
+        \phase{between week=3 and 4 in 0.5, involvement degree=3cm, phase color=ibisViolet}
+        \phase{between week=4 and 5 in 0.5, involvement degree=3cm, phase color=ibisGreen}
+        \phase{between week=5 and 6 in 0.5, involvement degree=3cm, phase color=ibisViolet}
+    \end{phases}
+
+% put here the milestones
+    \addmilestone{at=phase-0.90,direction=90:1cm,text={Début d'alternance},text options={above}}
+    \addmilestone{at=phase-0.270,direction=270:1cm,text={Reprise du projet TST},text options={below}}
+
+    \addmilestone{at=phase-1.270,direction=270:3cm,text=\shortstack{Construction \textit{from scratch} d'une arborescence de projet \\ Nettoyage des données et du code},text options={below, fill = white}}
+    \addmilestone{at=phase-2.270,direction=270:1cm,text=\shortstack{Conception du modèle Objet \\ Création de la base de données \\ Chargement de l'ensemble des données dans la BDD \\ Relevé des performances du projet sur un grand nombre de calculs},text options={below}}
+
+    \addmilestone{at=phase-1.90,direction=90:3cm,text=\shortstack{Reproduction des précédents résultats et généralisation aux 11 bâtiments étudiés \\ Étude des limites de la PSO et de la méthode de la sécante},text options={above}}
+    \addmilestone{at=phase-2.90,direction=90:1cm,text=\shortstack{Étendue des tests aux prédictions de $\PhiEm{t}$ \\ Analyse plus poussée des données d'entrée de DISTRISIM},text options={above}}
+\end{tikzpicture}

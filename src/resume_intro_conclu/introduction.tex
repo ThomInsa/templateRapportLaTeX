@@ -4,8 +4,7 @@
 \begin{abstract}
 
     Les chiffres publiés le plus récemment sur la consommation énergétique de bâtiments indiquent
-    que
-    celle-ci représente 45\% de la consommation d'énergie finale française \textit{(30\% pour le résidentiel et 15\% pour le tertiaire)}\cite{consoenerfrance}.
+    que celle-ci représente 45\% de la consommation d'énergie finale française \textit{(30\% pour le résidentiel et 15\% pour le tertiaire)}\cite{consoenerfrance}.
     Au niveau mondial, cette part s'élève à environ 30\%\cite{consoenermonde}.
 
     Lorsqu'ils sont rapprochés de la part des énergies fossiles dans le mix énergétique mondial~\textit{(81\% en 2020, \cite{mixenermonde})} ou de la part du gaz dans les énergies de chauffage en France~\textit{(35,8\% en 2020, \cite{mixbatfrance})}, ces indicateurs montrent l'importance
@@ -14,31 +13,31 @@
     La modélisation thermique d'un bâtiment est toutefois un processus complexe devant tenir compte de nombreux paramètres, rendu possible
     par plusieurs paradigmes, et évoluant nécessairement en phase avec l'état de l'art en calcul scientifique\footnote{On pense immédiatement à la multiplication des modélisations "data-driven" rendues possibles par les récentes avancées de l'Intelligence Artificielle.}.
 
-    À cet égard, le \gls{CEA} et en particulier son Département des Technologies Solaires sur les plateformes de l'\gls{INES}\footnote{Voir le rapport intermédiaire sur les Aspects Humanités} rattaché au Centre de Grenoble
+    À cet égard, le \gls{CEA} et en particulier son \gls{DTS} basé sur les plateformes de l'\gls{INES}\footnote{Voir le rapport intermédiaire sur les Aspects Humanités} rattaché au Centre de Grenoble
     travaille à l'amélioration des modèles existants et à la capitalisation de données de diverses sources.
 
     C'est dans ce contexte qu'a été créée une alternance d'un an en contrat de professionnalisation au sein du \gls{LELA}.
     Son point de départ est l'amélioration d'un \gls{algorithme} développé lors d'un précédent stage en 2023 modélisant les bâtiments du quartier Cambdrige de Grenoble par l'analogie électrique, une approche répandue de l'énergétique du bâtiment.
     Cette amélioration vise \textit{in fine} à motiver un certain nombre d'autres modèles plus ou moins proches de celui existant, avec d'autres données provenant notamment des équipements instrumentés du \gls{DTS}.
-    Les points d'améliorations consistent en particulier à corriger les défauts d'identification des paramètres, d'élargir les structures de modèles de bâtiments possibles en vue de la généralisation du processus complet et le rendre plus facilement accessible.
-    L'algorithme final sera ensuite confronté aux données expérimentales disponibles au laboratoire.
+    Les points d'améliorations consistent en particulier à corriger les défauts d'identification des paramètres, élargir les structures de modèles de bâtiments possibles en vue de la généralisation du processus complet et le rendre plus facilement accessible.
+    L'algorithme final est ensuite confronté aux données expérimentales disponibles au laboratoire.
+    Le nom de projet retenu au cours de cette alternance est \gls{IBIS}.
 
     Le présent rapport synthétise les travaux de l'alternant.
+
     Celui-ci est ouvert par une présentation à différentes échelles du CEA avec une focalisation progressive sur les activités en énergétique du bâtiment.
-    La seconde partie aborde les aspects théoriques de cette discipline puis ouvre la voie à un nouveau projet interne au \gls{CEA}, nommé \gls{IBIS}.
-    Celle-ci sert à ce titre de rappels fondamentaux pour comprendre
-    la suite du document, et d'ensemble hétérogène de pistes futures pour de nouvelles approches.
-    Enfin, une partie sera consacrée à préciser les choix d'architecture logicielle du modèle et rappeller les bonnes pratiques de développement visant à être adoptées à l'échelle de l'équipe du projet \gls{IBIS}, voire du laboratoire.
-    Celle-ci comporte deux chapitres portant respectivement sur les aspects de propreté logicielle et de gestion de projet, et de sécurité \textit{(notamment sécurité des données et des algorithmes de machine learning)}.
+    La seconde partie aborde en premier lieu les aspects théoriques de cette discipline pour donner plusieurs rappels fondamentaux nécessaires à la compréhension de la suite du document, et pouvant servir d'ensemble hétérogène de pistes futures pour de nouvelles approches.
+    Les fonctionnalités haut niveau d'IBIS sont ensuite introduites, avec le détail des hypothèses de modélisation et les deux paradigmes utilisés, l'un dit "Boîte Grise - Modèle $RC$" et l'autre "Boîte Noire - Modèle ARX".
+    Une troisième partie vise à préciser les choix d'architecture logicielle du projet, donnant un aperçu d'un point de vue "développeur" sur les différentes fonctionnalités.
+    Celle-ci comporte deux chapitres portant respectivement sur les aspects développement et gestion de projet, et de sécurité \textit{(notamment sécurité des données et des algorithmes de machine learning)}.
 
     Cette dissociation des aspects de modélisation et d'architecture est volontaire et permet au lecteur de parcourir ou non chacune des parties selon son appétence pour les domaines cités, chaque partie
-    citant l'autre mais ne nécessitant pas sa compréhension fine pour être lue intégralement.
+    citant l'autre, mais ne nécessitant pas sa compréhension fine pour être lue intégralement.
+    Par ailleurs, le dernier chapitre propose une synthèse des deux parties et permet donc d'identifier les marges d'amélioration du projet, en cohérence d'une part avec les besoins du LELA, et d'autre part avec l'état de l'art en énergétique du bâtiment et en développement scientifique.
 
-    Enfin, les annexes contiennent un livrable rédigé en parallèle pendant les premières semaines de l'alternance, ainsi qu'une synthèse de l'organisation des phases de travail complétée par un retour d'expérience.
+    Enfin, l'annexe reprend la documentation utilisateur d'IBIS\@.
 
     \begin{bluebox}
-        La présente version du document est provisoire et incomplète.
-
-        Quand une partie est identifiée comme perfectible, un cadre comme celui-ci vient préciser la continuité des travaux.
+        J'atteste sur l'honneur qu'aucun paragraphe de ce document n'a été généré par ou à l'aide d'un grand modèle de langage.
     \end{bluebox}
 \end{abstract}
