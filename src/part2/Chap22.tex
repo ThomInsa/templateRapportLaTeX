@@ -1,22 +1,7 @@
 %! suppress = MissingImport
 \chapter{IBIS : Un projet modulaire destiné à différents modèles, bâtiments et données}\label{ch:ibis}
     Le chapitre précédent montre de façon non exhaustive l'étendue des possibilités en matière de modélisation énergétique des bâtiments.
-    Il est proposé dans celui-ci d'en explorer quelques-unes à travers les fonctionnalités du projet IBIS, développé en parallèle de la rédaction de ce livrable.
-
-    Ainsi, les éléments mathématiques et physiques d'une part et algorithmes et numériques d'autre part sont joints dans les prochaines sections, et sont complétées notamment par les chapitres suivants :
-    \begin{itemize}
-        \item Le chapitre \ref{ch:analyse-de-donnees-sur-les-premieres-applications-d'ibis} explorant les résultats obtenus
-        \item Le chapitre \ref{ch:resultats-et-failles-d'ibis-:-une-synthese-apres-un-an-de-developpement} synthétisant les forces et points d'améliorations du projet à date de livraison du présent rapport
-        \item L'annexe \ref{ch:ibisdoc} reprenant la documentation technique du projet comme guide pratique à destination des utilisateurs comme des développeurs
-    \end{itemize}
-
-    Ce chapitre couvre quant à lui, dans cet ordre :
-    \begin{enumerate}
-        \item Les objectifs poursuivis par le projet
-        \item La cadre d'étude général et les principales hypothèses ayant piloté la modélisation
-        \item Deux approches prédictives différentes, appelées "Boîte noire" et "Boîte grise", chacun de ces termes pouvant respectivement être interchangé avec les notions de "méthode ARX" et de "modèle $RC$"
-    \end{enumerate}
-
+    Il est proposé dans celui-ci d'approfondir celles qui ont été choisies comme fonctionnalités du projet IBIS\@.
 \section{Genèse et raison d'être du projet}\label{sec:genese-et-raison-d'etre-du-projet}
 
     Comme précisé en introduction de ce rapport, le lancement du projet IBIS est motivé par le besoin d'un outil protéiforme pour la modélisation et l'analyse de données de bâtiments, en particulier au regard de l'impossibilité
@@ -32,13 +17,13 @@
 
     Ces contraintes prises en compte, il devient possible d'atteindre les visées finales du projet, définies comme suit :
     \begin{itemize}
-        \item Analyser des données de bâtiment sous différents prismes et notamment différents modèles, en interfaçant les modèles précédemment développés avec les travaux conduits lors du développement d'IBIS pour permettre leur compatibilité.
-        \item Prédire le comportement énergétique des bâtiments à différents horizons temporels de courte échelle
-        \item Au-delà des capacités de prédiction des modèles, participer à la description rigoureuse des bâtiments pour expliquer les liens entre leurs caractéristiques et leurs profils physiques\footnote{Des travaux de recherche sont par ailleurs actuellement conduits au LELA pour déterminer des classes de bâtiments à l'échelle du parc résidentiel français, particulièrement par des algorithmes de clustering.}
+        \item Analyser des données de bâtiment sous différents prismes et notamment différents modèles, en interfaçant les modèles précédemment développés avec les travaux conduits lors du développement d'IBIS pour permettre leur compatibilité;
+        \item Prédire le comportement énergétique des bâtiments à différents horizons temporels de courte échelle;
+        \item Au-delà des capacités de prédiction des modèles, participer à la description rigoureuse des bâtiments pour expliquer les liens entre leurs caractéristiques et leurs profils physiques\footnote{Des travaux de recherche sont par ailleurs actuellement conduits au LELA pour déterminer des classes de bâtiments à l'échelle du parc résidentiel français, particulièrement par des algorithmes de clustering.}.
     \end{itemize}
 
     \begin{bluebox}
-        Ainsi, IBIS se donne comme principal objectif et pilote de développement la détermination d'un Modèle de Contrôle Prédictif obtenant le meilleur compromis entre précision des résultats, temps de calcul, généralisation et interprétabilité physique des paramètres quand ces deux dernières sont possibles.
+        Ainsi, le principal objectif d'IBIS est le développement d'un Modèle de Contrôle Prédictif obtenant le meilleur compromis entre précision des résultats, temps de calcul, généralisation et interprétabilité physique des paramètres, quand ces deux dernières sont possibles.
         À date de livraison du présent rapport, les fonctionnalités et modèles proposés sont synthétisés par la figure \ref{fig:IBIS_final_scheme}.
         Cette figure montre qu'il est possible de résumer ces fonctionnalités à une prédiction de séries temporelles, soit par résolution numérique d'équations différentielles induites par des modèles $RC$, soit par des méthodes plus proches du Machine Learning traditionnel dites "méthodes auto-régressives", les deux approches reposant sur les mêmes données d'entrée et de sortie.
         Les sections suivantes décrivent donc respectivement le format de ces données, puis chacune de ces deux méthodes.
@@ -69,8 +54,20 @@
             \item Pour la majeure partie des études menées et notamment l'ensemble de la section \ref{sec:approche-predictive-principale-:-du-modele-$rc$-au-profil-de-chauffage}, constance de la température de consigne sur l'ensemble de la période étudiée
         \end{itemize}
 
+        \textbf{Ces hypothèses permettent de définir les séries temporelles d'entrée d'IBIS synthétisées par l'équation \ref{eq:IBISinput}.}
+
+        \begin{equation}
+            \overrightarrow{\underline{\underline{\textbf{IBIS}}}}_{\text{input}} =
+            \begin{bmatrix}
+                \TAir{t}\\
+                \TExt{t}\\
+                \PhiEm{t}\\
+                \PhiSol{t}\\
+                \PhiInt{t}
+            \end{bmatrix}\label{eq:IBISinput}
+        \end{equation}\myequations{Séries temporelles d'entrée d'IBIS}
+
         \begin{bluebox}
-            Ces hypothèses permettent de définir les séries temporelles d'entrée d'IBIS synthétisées par l'équation \ref{eq:IBISinput}.
 
             Bien qu'elles ne soient pas appelées comme tel par la suite, elles constituent les données d'entraînement $\underline{\underline{\mathbf X}}(t)$ et prédites $\overrightarrow{\mathbf y} (t)$ au sens de la nomenclature classique du Machine Learning.
             Comme vu dans les sections suivantes, la répartition de ces séries entre les données d'entraînement et les données prédites dépend du modèle utilisé.
@@ -78,22 +75,12 @@
             Cependant, dans le cas des modèles MIMO proposés en \ref{sec:methodesautoregressives}, il est possible de prédire les deux séries simultanément à partir des autres entrées.
         \end{bluebox}
 
-        \begin{equation}
-            \overrightarrow{\underline{\underline{\textbf{IBIS}}}}_{\text{input}} = \begin{bmatrix}
-                        \TAir{t}\\
-                        \TExt{t}\\
-                        \PhiEm{t}\\
-                        \PhiSol{t}\\
-                        \PhiInt{t}
-            \end{bmatrix}\label{eq:IBISinput}
-        \end{equation}\myequations{Séries temporelles d'entrée d'IBIS}
-
         \subsubsection{Précisions sur la fenêtre temporelle et le pas de temps}
             Les modèles $RC$ simples ne sont généralement pas adaptés à l'étude de dynamiques très courtes, c'est-à-dire une fréquence d'oscillation de $\TAir{t}$ et $\PhiEm{t}$ élevée \textit{(voir \ref{sec:donnees-reelles-dans-le-cadre-du-projet-inxs})}.
             En dépit de cette limitation, les données relevées lors de campagnes d'essais ou présentées dans la littérature ont un pas de temps relativement faible, de l'ordre de quelques minutes.
             Ce choix est souvent imposé par les techniques d'instrumentation insuffisantes pour mesurer avec précision les flux physiques d'une zone habitable \textit{(en particulier la présence des occupants et les gains solaires)}, nécessitant alors des mesures régulières pour s'assurer de la fiabilité des données.
 
-            Pour ces raisons, il est choisi de restreindre les périodes pendant lesquelles le modèle est calibré puis appliqué à une période allant de quelques jours à quelques semaines, quand cela est possible\footnote{Les résultats présentés en \ref{sec:point-de-depart-sur-un-modele-simple-et-des-donnees-synthetiques-:-besoins-energetiques-du-quartier-cambridge-dans-le-cadre-du-projet-distrisim} faisant exception car issues d'une étude précédente basée sur des périodes d'un mois.}
+            Pour ces raisons, il est choisi de restreindre les périodes pendant lesquelles le modèle est calibré puis appliqué à une période allant de quelques jours à quelques semaines, quand cela est possible\footnote{Les résultats présentés en \ref{sec:point-de-depart-sur-un-modele-simple-et-des-donnees-synthetiques-:-besoins-energetiques-du-quartier-cambridge-dans-le-cadre-du-projet-distrisim} faisant exception car issues d'une étude précédente basée sur des périodes d'un mois.}.
 
             En outre, et pour pallier le défaut des données réelles parfois incomplètes, les données manquantes sont recomposées par interpolation de type "B-Spline" de degré 1\footnote{Détails décrits dans \cite{spline}}.
             Cette technique introduit cependant un biais dans les données et peut produire des résultats manquant de fiabilité.
@@ -105,8 +92,8 @@
             En effet, le caractère temporel des données d'entrée et de sortie impose de manipuler les métriques classiques plus précautioneusement qu'avec des données non temporelles.
             Par exemple, dans le cas de l'évaluation par $\mathrm{RMSE}$\eqref{eq:RMSE}, un score haut comme bas est plus difficilement interprétable, pour deux raisons au moins :
             \begin{itemize}
-                \item Une erreur élevée peut être mesurée sur un modèle bien que celui-ci puisse par ailleurs être considéré comme satisfaisant, notamment si l'on s'intéresse à la dynamique des oscillations mais que les amplitudes prédites sont trop fortes
-                \item À l'inverse, une erreur faible peut êre obtenue par le modèle s'il fait une prédiction relativement naïve, en prenant une moyenne lissée des oscillations d'entrée, sans pour autant modéliser la dynamique réelle du système
+                \item Une erreur élevée peut être mesurée sur un modèle considéré satisfaisant par ailleurs, notamment si l'on est plus intéressé par la dynamique des oscillations que l'erreur point-à-point
+                \item À l'inverse, une erreur faible dans l'absolu peut être obtenue par un modèle naïf, en prenant une moyenne lissée des oscillations d'entrée, sans pour autant prendre en compte la dynamique réelle du système
             \end{itemize}
 
             Ce problème est en fait celui de la rupture de la structure temporelle provoquée par l'utilisation d'une métrique "point à point" : deux scores, qu'ils soient faibles ou élevés, peuvent refléter des réalités physiques très différentes d'un point de vue dynamique.
@@ -115,15 +102,7 @@
             Par ailleurs, les modèles développés ont pour ambition d'être applicables à une année entière, plage temporelle pendant laquelle il est observé une nette variation des amplitudes de température.
             Il est alors nécessaire d'apprécier la performance du modèle en comparant des métriques absolues, en $^\circ\mathbf{C}$, à des métriques relatives standardisées sur la distribution statistique des données d'entrée.
 
-            \begin{bluebox}
-                Ainsi, les six métriques suivantes sont retenues pour l'évaluation des performances d'IBIS\@.
-                Le tableau \ref{tab:metriquescompare} montre comment sont réparties ces métriques entre les deux approches proposées\footnote{L'astérisque * indique que la métrique annotée est utilisée pour l'évaluation des données de sortie mais également pour l'optimisation des paramètres du modèle.}
-                L'évaluation des deux paradigmes n'est donc pas uniformisée : ceci est dû d'une part à une non-priorisation de cette tâche dans le développement du projet, et d'autre part au fait que ces deux approches ne suivent pas exactement
-                la même méthodologie.
-                En particulier, pour le modèle $RC$, la phase de test est conçue différemment de la phase d'entraînement, et les données d'entrée ne permettent pas non plus une utilisation uniforme d'une seule métrique d'évaluation.
-
-                Pour la suite, selon la variable prédite, on définit $y$ tel que $y \in \left\{\TAir{t},\PhiEm{t}\right\}$.
-            \end{bluebox}
+            \textbf{Ainsi, les six métriques suivantes sont retenues pour l'évaluation des performances d'IBIS. Le tableau \ref{tab:metriquescompare} montre comment sont réparties ces métriques entre les deux approches proposées\footnote{L'astérisque * indique que la métrique annotée est utilisée pour l'évaluation des données de sortie mais également pour l'optimisation des paramètres du modèle.}}.
 
             \begin{table}[H]
                 \caption{Attribution des métriques d'évaluation à chacun des paradigmes de modélisation}
@@ -141,29 +120,42 @@
                 \label{tab:metriquescompare}
             \end{table}
 
+            \begin{bluebox}
+
+                L'évaluation des deux paradigmes n'est donc pas uniformisée : ceci est dû d'une part à une non-priorisation de cette tâche dans le développement du projet, et d'autre part au fait que ces deux approches ne suivent pas exactement
+                la même méthodologie.
+                En particulier, pour le modèle $RC$, la phase de test est conçue différemment de la phase d'entraînement, et les données d'entrée ne permettent pas non plus une utilisation uniforme d'une seule métrique d'évaluation.
+
+                Pour la suite, selon la variable prédite, on définit $y$ tel que $y \in \left\{\TAir{t},\PhiEm{t}\right\}$.
+            \end{bluebox}
+
             \paragraph{Formulation et justification du choix de chaque métrique}
 
             La façon la plus rapide d'évaluer une erreur entre deux séries statistiques de même taille est de calculer la différence moyenne entre les valeurs prédites et réelles : c'est la fonction de la métrique MAE\@.
-            Il est choisi de croiser l'étude de cette valeur avec la RMSE, cette dernière présentant la particularité de fortement pénaliser les données extrêmes, cette propriété pouvant se révéler utile ou dommageable pour l'évaluation du modèle
-            selon la grandeur étudiée\footnote{En effet, il a été préféré au cours du développement de se baser sur le couple de valeurs $\left\{ \mathrm{RMSE}\left(\TAir{t}, \ThatAir{t}\right), \mathrm{MAE}\left(\PhiEm{t}, \PhihatEm{t}\right)\right\}$, du fait de la forme d'onde particulière du flux de chaleur, nul sur de grandes plages temporelles, en particulier en été, provoquant une RMSE systématiquement élevée sur cette période.}.
+
             \begin{equation}
                 \mathrm{MAE}\left(\overrightarrow {\mathbf y(t)}, \widehat{\overrightarrow{\mathbf y(t)}}\right) = \frac{1}{N_{\text{test}}}\sum_t\left|y-\hat y\right|\label{eq:mae}
             \end{equation}\myequations{Formulation de la métrique $\mathrm{MAE}$}
+
+            Il est choisi de croiser l'étude de cette valeur avec la RMSE, cette dernière présentant la particularité de fortement pénaliser les données extrêmes, cette propriété pouvant se révéler utile ou dommageable pour l'évaluation du modèle
+            selon la grandeur étudiée.
+            En effet, il a été préféré au cours du développement de se baser sur le couple de valeurs $\left\{ \mathrm{RMSE}\left(\TAir{t}, \ThatAir{t}\right), \mathrm{MAE}\left(\PhiEm{t}, \PhihatEm{t}\right)\right\}$, du fait de la forme d'onde particulière du flux de chaleur, nul sur de grandes plages temporelles, en particulier en été, provoquant une RMSE systématiquement élevée sur cette période.
+
             \begin{equation}
                 \mathrm{RMSE}\left(\overrightarrow {\mathbf y(t)}, \widehat{\overrightarrow{\mathbf y(t)}}\right) = \sqrt{\sum_t \left(y -\hat y\right)^2}\label{eq:RMSE}
             \end{equation}\myequations{Formulation de la métrique $\mathrm{RMSE}$}
 
-            Cependant, la valeur d'une erreur absolue en température a par définition une signification différente selon la période de l'année, empêchant sa comparaison directe d'une saison à l'autre.
-            C'est la raison pour laquelle la version "standardisée", \textit{(c'est-à-dire divisée par l'étendue)} est également ajoutée et étudiée.
-
-            \begin{bluebox}
-                L'implémentation de cette métrique est principalement motivée par les résultats satisfaisants qu'elle permet d'obtenir pour les travaux de thèse de \cite{scanu}, portant sur de nombreux modèles$RC$.
-                Cependant, son utilisation dans IBIS est sujette aux problèmes expliqués en introduction de cette section, ce qui explique le choix de la métrique RRSE pour les méthodes autorégressives.
-            \end{bluebox}
+            Cependant, la valeur d'une erreur absolue en température a une signification différente selon la période de l'année, empêchant sa comparaison directe d'une saison à l'autre.
+            C'est la raison pour laquelle la version "standardisée" (SRMSE), \textit{(c'est-à-dire divisée par l'étendue)} est également ajoutée et étudiée.
 
             \begin{equation}
                 \mathrm{SRMSE}\left(\overrightarrow {\mathbf y(t)}, \widehat{\overrightarrow{\mathbf y(t)}}\right) = \frac{\sum_t \left(y -\hat y\right)^2}{\max_t{\left(\overrightarrow {\mathbf y\left(t \right)}\right)}-\min_t\left( \overrightarrow {\mathbf y(t) }\right)}\label{eq:SRMSE}
             \end{equation}\myequations{Formulation de la métrique $\mathrm{SRMSE}$}
+
+            \begin{bluebox}
+                L'implémentation de cette métrique est principalement motivée par les résultats satisfaisants qu'elle permet d'obtenir pour les travaux de thèse de \cite{scanu}, portant sur de nombreux modèles $RC$.
+                Cependant, son utilisation dans IBIS est sujette aux problèmes expliqués en introduction de cette section, ce qui explique le choix de la métrique RRSE pour les méthodes autorégressives.
+            \end{bluebox}
 
             La métrique RRSE permet de standardiser l'erreur non pas par son étendue, mais par son écart-type, ce qui la rend théoriquement plus fiable que la SRMSE\@, bien qu'elle non plus ne permette pas de décrire complètement le système.
 
@@ -179,7 +171,7 @@
             \end{equation}\myequations{Formulation de la métrique $\mathrm{MASE}$}
 
             Enfin, le coefficient de Pearson permet d'évaluer la corrélation statistique entre les valeurs réelles et prédites.
-            Cet indicateur est utile lorsque la RRSE, utilisée comme métrique principale, indique un score faible.
+            Cet indicateur est utile lorsque la RRSE, utilisée comme métrique principale, indique un score élevé.
             En effet, deux cas de figures sont alors possibles :
             \begin{itemize}
                 \item $\rho$ est élevé et le modèle est mal calibré, c'est-à-dire que la série prédite est décalée verticalement d'une constante seulement de la série réelle
@@ -244,7 +236,7 @@
             Cependant, l'objectif de l'étude se limite aux besoins de chauffage et considère à ce titre le système de chauffage comme une boîte noire.
             Par ailleurs les datasets récupérés dans le cadre du projet sont moins riches que ceux utilisés par le modèle initial.
             C'est la raison pour laquelle on néglige l'influence de la masse thermique et du circuit de chauffage.
-            Enfin, pour linéariser le modèle, les facteurs de gains solaires sont simplifiés en deux ouvertures dépendantes l'une de l'autre, l'une sur l'\gls{enveloppe} et l'autre sur l'air intérieur.
+            Enfin, pour linéariser le modèle, les facteurs de gains solaires sont simplifiés en deux ouvertures dont les coefficients $k_2$ et $k_2-k_1$ dépendent l'un de l'autre, l'un sur l'\gls{enveloppe} et l'autre sur l'air intérieur.
             On définit alors les paramètres thermiques suivants :
 
             \begin{equation}
@@ -355,7 +347,7 @@
             \State Initialiser $t_0 \gets t_0$
             \State Initialiser $y_0 \gets y_0$
 
-            \For{$n = 0$ \textbf{à} $N-1$}
+            \For{$n = 0$ \textbf{ à } $N-1$}
                 \State $t_{n+1} \gets t_n + h$
                 \State $y_{n+1} \gets y_n + h f(t_n, y_n)$
             \EndFor
@@ -375,7 +367,7 @@
                 \Ensure Une solution approximée $\hat y$ de $y$
                 \State $\left\{c_1, \dots, c_s\right\} \gets x \text{ tel que }\frac{\mathrm d^{s-1}}{\mathrm dx^{s-1}}\left(x^{s-1} \left(x-1\right)^s\right)$
                 \State Construction du polynôme $u(t)$ de degré $s$ tel que $u\left(t_n\right)=y_n$ et $\dot u\left(t_n + c_i h\right)=f\left(t_n + c_i h, u\left(t_n + c_i h\right)\right) \forall i$
-                \For{$t=1 \textbf{à} T$}
+                \For{$t=1 \textbf{ à } T$}
                     \State $y_{t+1} \gets u\left(t + h\right)$
                 \EndFor
                 \Return

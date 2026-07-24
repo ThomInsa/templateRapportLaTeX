@@ -6,31 +6,31 @@
 
 \section{Introduction à l'énergétique du bâtiment}\label{sec:introduction-a-l'energetique-du-batiment}
 
-    Pour des raisons évidentes et de plus en plus actuelles, la caractérisation du comportement énergétique d'un bâtiment est un sujet scientifique de premier plan, pour l'ingénierie comme pour la recherche.
-    Ce domaine mêlant physique théorique et ingénierie du bâtiment est confronté à de nombreuses contraintes, la plus importante étant probablement la difficulté à proposer un modèle ou une méthode d'évaluation facilement généralisable.
-    En effet, les bâtiments ont pour la majorité d'entre eux des caractéristiques individuelles et dépendent de facteurs très nombreux.
+    Pour les raisons mentionnées en introduction, la caractérisation du comportement énergétique d'un bâtiment est un sujet scientifique de premier plan, pour l'ingénierie comme pour la recherche.
+    Ce domaine mêlant physique théorique et ingénierie du bâtiment est confronté à de nombreuses contraintes, l'une des plus importantes étant la difficulté à proposer un modèle ou une méthode d'évaluation facilement généralisable et peu coûteuse.
+    En effet, les bâtiments ont pour leur majorité des caractéristiques individuelles dépendant de nombreux facteurs.
 
     L'énergétique du bâtiment n'en reste pas moins une science riche et active, en particulier depuis ces vingt dernières années.
     Du point de vue strict de la modélisation, les problèmes regroupés par ce domaine se
     rapportent souvent à une prédiction ou une régression sur des séries temporelles\cite{LU2022111718}.
     
-    Les méthodes pour évaluer la consommation d'énergie d'un bâtiment sont nombreuses, et un audit détaillé d'un bâtiment comprend souvent de nombreux aspects, parmi lesquels~\cite{audit_energy_engineering}:
+    Les méthodes pour prédire la consommation d'énergie d'un bâtiment sont nombreuses, et un audit détaillé d'un bâtiment comprend souvent de nombreux aspects, parmi lesquels~\cite{audit_energy_engineering}:
     \begin{enumerate}
-        \item L'instrumentation sur site pour un bâtiment entier ou des composants de celui-ci \textit{(lumières, climatisation…)}
+        \item L'instrumentation sur site pour un bâtiment entier ou des postes de consommation de celui-ci \textit{(lumières, climatisation…)}
         \item Une ou plusieurs simulations pour cartographier la consommation d'énergie
         \textit{(mêmes exemples)}, à l'aide des outils de calcul scientifique classique
-        \textit{(Python, SciPy)} ou de logiciels spécialisés \it{(EnergyPlus)}
-        \item La compréhension du fonctionnement du bâtiment par l'introduction d'un modèle plus ou moins abstrait \textit{(modélisation 3D, négligence ou non de certains paramètres…)}
+        \textit{(modèles nodaux basés sur des équations de transfert de chaleur sur Python)} ou de logiciels spécialisés \it{(EnergyPlus, Pleiades, Design Buider, Simulations en Élements Finis)}
+        \item La définition d'un modèle et d'un certain niveau d'abstraction pour comprendre le fonctionnement du bâtiment
     \end{enumerate}
 
     Notons que certains bâtiments très sensibles comme les centrales nucléaires sont parfois
     modélisés par des jumeaux numériques, une méthode très technique, reposant sur une science
-    encore jeune et concernant fréquemment des installations dont les études ne se limitent pas à la
+    encore récente et concernant fréquemment des installations dont les études ne se limitent pas à la
     consommation énergétique\cite{DT}.
-    En pratique, les modélisations détaillées de type CFD sont généralement très complexes dans
-        pour une estimation d'énergie ou de confort dans un bâtiment, à grandes échelles spatiale et temporelle, et de fait évitées, car trop coûteuses en ressources de calcul.
+    En pratique, les modélisations détaillées de type CFD sont généralement très complexes et coûteuses pour une estimation d'énergie ou de confort dans un bâtiment.
     Elles sont alors remplacées par des approches plus pragmatiques et minimalistes, comme celle présentée dans la section suivante : le contrôle prédictif.
 
+\newpage
 \section{Modèle de Contrôle Prédictif pour l'énergétique du bâtiment}\label{sec:modele-de-controle-predictif-pour-l'energetique-du-batiment}
 
     \subsection{Principes fondamentaux du MPC}\label{subsec:principes-fondamentaux-du-mpc}
@@ -91,7 +91,7 @@
         d'assimiler le comportement de la chaleur dans un bâtiment à
         celle du flux d'électrons dans un circuit électrique sous certaines hypothèses
         fortes
-        \textit{(en particulier, en simplifiant l'évolution de la température à travers les murs)}.
+        \footnote{en particulier, en considérant linéaire l'évolution de la différence de température des deux surfaces d'un mur soumises à des sollicitations thermiques différentes}.
         Dès lors, on peut associer à un mur une résistance thermique $R$ pour caractériser
         les pertes de chaleur au sein de celui-ci.
         L'analogie se poursuit avec l'équivalent de la loi d'Ohm :
@@ -118,7 +118,7 @@
                   \item $c_p$ la capacité thermique massique en $\bf J.kg^{-1}.K^{-1}$
         \end{itemize}
 
-        Pour caractériser complètement un bâtiment, il peut suffire d'associer ces deux
+        Dès lors, pour caractériser complètement un bâtiment, il suffit d'associer ces deux
         paramètres à plusieurs noeuds de température $T_{\text{milieu}}(t)$ caractérisant la
         température à chaque instant dans un espace considéré homogène d'un
         point de vue thermique.
@@ -156,7 +156,7 @@
 
         Contrairement aux modèles précédemment exposés, il n'existe pas de standard ou de ligne de
         conduite à proprement parler lorsque l'on envisage d'utiliser des algorithmes de Machine
-        Learning pour modéliser un bâtiment\footnote{(23/01) Du moins aucune n'a émergé lors des recherches bibliographiques synthétisées ici. Notons tout de même que la partie Machine Learning a été beaucoup moins approfondie que la partie MPC car cette dernière était requise pour reprendre les travaux de la section \ref{sec:point-de-depart-sur-un-modele-simple-et-des-donnees-synthetiques-:-besoins-energetiques-du-quartier-cambridge-dans-le-cadre-du-projet-distrisim}.}\cite{ZHANG2021116452}.
+        Learning pour modéliser un bâtiment\cite{ZHANG2021116452}.
 
         En dépit de ce constat, la croissance du nombre de bâtiments instrumentés,
         l'apparition de l'IoT et le développement du Big Data ont favorisé les approches dites "data-driven", et on peut citer de façon non exaustive les algorithmes relevés dans la
@@ -187,11 +187,11 @@
 
             \begin{itemize}
                 \item La littérature scientifique est globalement très enthousiaste sur
-                l'utilisation du Machine Learning pour les modèles de bâtiment
+                l'utilisation du Machine Learning pour les modèles thermo-énergétiques de bâtiment;
                 \item Un des avantages principaux des algorithmes de ML est leur temps de calcul
                 généralement très inférieur à celui d'une simulation de performances classique,
                 mais cet argument est à tempérer en considérant le temps de réflexion
-                nécessaire à l'élaboration d'un modèle
+                nécessaire à l'élaboration d'un modèle;
                 \item Les meilleurs résultats sont obtenus avec des solutions hybrides mêlant
                 ML et méthodes traditionnelles.
             \end{itemize}
@@ -239,13 +239,10 @@
             un aperçu qualitatif d'une méthode de Deep Learning efficace pour la modélisation de bâtiment.
             \paragraph{Exemples d'applications de réseaux de neurones à l'énergétique du bâtiment}
                 \subparagraph{(2018) ANN, algorithmes génétiques et contrôle Prédictif}~\cite{OC_NN}\\
-                    Un réseau de neurones artificiels est développé sur un bâtiment avec comme
-                    paramètres d'entrée les données météorologiques, la température intérieure et le
-                    taux d'occupation du bâtiment et comme sorties la température intérieure prédite
-                    et la consommation d'énergie associée.
-                    Un algorithme génétique est ensuite
-                    appliqué pour minimiser cette consommation.
-                    Faute de méthodologie standardisée, les hyperparamètres du réseau de neurones
+                    Un réseau de neurones artificiels est développé sur un bâtiment avec des données météorologiques, la température intérieure et le
+                    taux d'occupation du bâtiment comme paramètres d'entrée et la température intérieure et la consommation d'énergie associée comme données de sorties
+                    Un algorithme génétique est ensuite appliqué pour minimiser cette consommation.
+                    En l'absence d'une méthodologie standardisée, les hyperparamètres du réseau de neurones
                     sont fixés empiriquement par essais-erreurs.
                     \begin{itemize}
                         \item Nombre et profondeur des couches : 5-20-20-2 ou 6-20-20-2 selon les
@@ -256,6 +253,7 @@
                         multiplication du Jacobien par sa transposée $\uuline H= \uuline J^{\text T}\uuline J$)}
                         \item Fonction d'activation : Tangente hyperbolique
                     \end{itemize}
+                \newpage
                 \subparagraph{(2019) Contrôle optimal et réseaux convexes}\cite{REYNOLDS2018729}\\
                     Le principal objectif des auteurs est de proposer un réseau de neurones tractable,
                     c'est-à-dire relativement rapide et robuste à l'augmentation du volume de
@@ -322,8 +320,8 @@
                 \end{enumerate}
 
                 \subparagraph{Utilisation des méta-heuristiques}
-                Celle-ci est prépondérante dans la littérature pour l'optimisation des hyperparamètres des réseaux de neurones, et les algorithmes associés peuvent
-                être regroupés en quatre catégories :
+                Celles-ci sont prépondérantes dans la littérature pour l'optimisation des hyperparamètres des réseaux de neurones, et les algorithmes associés peuvent
+                être regroupés en quatre catégories\footnote{On définit une méta-heuristique comme un algorithme d’optimisation visant à résoudre des problèmes d’optimisation difficiles \cite{mh}} :
                 \begin{enumerate}
                     \item Algorithmes basés sur l'évolution
                     \textit{(algorithmes évolutionnaires, algorithmes génétiques…)}

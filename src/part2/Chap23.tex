@@ -190,71 +190,73 @@
                 \caption{Matrice de confusion représentant $\mathrm{SRMSE}\left(\TAir{t}, \ThatAir{t}\right)_{\text{Bâtiment}}$ pour mois et chaque bâtiment}\label{fig:heatmap}
             \end{figure}\vspace*{\fill}
 
-    \newpage\section{Reproduction de conditions réelles avec le projet INXS}\label{sec:donnees-reelles-dans-le-cadre-du-projet-inxs}
-        %TODO : Expliquer qu'IBIS a plus de difficultés sur les pas de temps plus faibles (mauvaise calibration des modèles RC)
-        \ref{fig:incas}
+    \newpage
 
-        \begin{table}[H]
-            \centering
-            \caption{Hyperparamètres des prédictions sur les données INXS}
-            \label{tab:hp_inxs}
-            \begin{tabular}{ll}
-                \toprule
-                \textbf{Périodes $n$ d'optimisation des modèles $RC$} & Deux semaines de début janvier 2026 à début avril 2026\\
-                \textbf{Périodes $n+1$ d'application des modèles $RC$} & Une semaine sur la même période\\
-                \textbf{Pas de temps des données initiales} & $60\mathbf s$\\
-                \textbf{Pas de temps fixé} & $1\mathbf h$\\
-                \textbf{Modèle $RC$} & $5R2C2A$\\
-                \textbf{Températures initiales du solveur} & $\left\{ T_{\text{air}_0}; T_{\text{mass}_0} \right\} = \left\{ 19^\circ\mathbf{C}; 19^\circ\mathbf{C} \right\}$ \\
-                \textbf{Température de consigne} & $19^\circ C$\\
-                \textbf{Précision du solveur de l'équation thermique} & $0.001\mathbf C^\circ$ \\
-                \textbf{Algorithme d'optimisation} & PSO avec précision à $0.01\mathbf C^\circ$ \\
-                \bottomrule
-            \end{tabular}
-        \end{table}
+\section{Reproduction de conditions réelles avec le projet INXS}\label{sec:donnees-reelles-dans-le-cadre-du-projet-inxs}
+    %TODO : Expliquer qu'IBIS a plus de difficultés sur les pas de temps plus faibles (mauvaise calibration des modèles RC)
+    \ref{fig:incas}
 
-        Lorem
+    \begin{table}[H]
+        \centering
+        \caption{Hyperparamètres des prédictions sur les données INXS}
+        \label{tab:hp_inxs}
+        \begin{tabular}{ll}
+            \toprule
+            \textbf{Périodes $n$ d'optimisation des modèles $RC$} & Deux semaines de début janvier 2026 à début avril 2026\\
+            \textbf{Périodes $n+1$ d'application des modèles $RC$} & Une semaine sur la même période\\
+            \textbf{Pas de temps des données initiales} & $60\mathbf s$\\
+            \textbf{Pas de temps fixé} & $1\mathbf h$\\
+            \textbf{Modèle $RC$} & $5R2C2A$\\
+            \textbf{Températures initiales du solveur} & $\left\{ T_{\text{air}_0}; T_{\text{mass}_0} \right\} = \left\{ 19^\circ\mathbf{C}; 19^\circ\mathbf{C} \right\}$ \\
+            \textbf{Température de consigne} & $19^\circ C$\\
+            \textbf{Précision du solveur de l'équation thermique} & $0.001\mathbf C^\circ$ \\
+            \textbf{Algorithme d'optimisation} & PSO avec précision à $0.01\mathbf C^\circ$ \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
 
-        \newpage
-        \begin{figure}[H] \centering
-            \subfloat[Optimisation, 260101-260115]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260101 - Train/522363_T_Air}}}\qquad
-            \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Test/523955_T_Air}}}\qquad
-            \subfloat[Optimisation, 260115-260129]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Train/522815_T_Air}}}\qquad
-            \subfloat[Application, 260129-260205]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Test/523961_T_Air}}}\qquad
-            \subfloat[Optimisation, 260129-260212]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Train/523298_T_Air}}}\qquad
-            \subfloat[Application, 260212-260219]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Test/523968_T_Air}}}\qquad
-            \caption{Séries de $\TAir{t}$ calculées par IBIS sur les données INXS \textit{(Première série)}}\label{fig:resultats_inxs}
-        \end{figure}
-        \newpage
-        \begin{figure}[H] \centering
-            \subfloat[Optimisation, 260212-26026]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Train/523612_T_Air}}}\qquad
-            \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Test/523973_T_Air}}}\qquad
-            \subfloat[Optimisation, 260226-260305]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Train/523666_T_Air}}}\qquad
-            \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260305 - Test/523980_T_Air}}}\qquad
-            \subfloat[Optimisation, 260312-260326]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260312 - Train/523944_T_Air}}}\qquad
-            \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260326 - Test/523986_T_Air}}}\qquad
-            \caption{Séries de $\TAir{t}$ calculées par IBIS sur les données INXS \textit{(Seconde série)}}\label{fig:resultats_inxs2}
-        \end{figure}
-        \newpage
-        \begin{figure}[H] \centering
-            \subfloat[Optimisation, 260101-260115]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260101 - Train/522364_Phi_Em}}}\qquad
-            \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Test/523955_Phi_Em}}}\qquad
-            \subfloat[Optimisation, 260115-260129]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Train/522816_Phi_Em}}}\qquad
-            \subfloat[Application, 260129-260205]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Test/523961_Phi_Em}}}\qquad
-            \subfloat[Optimisation, 260129-260212]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Train/523298_Phi_Em}}}\qquad
-            \subfloat[Application, 260212-260219]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Test/523968_Phi_Em}}}\qquad
-            \caption{Séries de $\PhiEm{t}$ calculées par IBIS sur les données INXS \textit{(Première série)}}\label{fig:resultats_inxs_phi_em}
-        \end{figure}
-        \newpage
-        \begin{figure}[H] \centering
-            \subfloat[Optimisation, 260212-26026]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Train/523613_Phi_Em}}}\qquad
-            \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Test/523974_Phi_Em}}}\qquad
-            \subfloat[Optimisation, 260226-260305]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Train/523666_Phi_Em}}}\qquad
-            \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260305 - Test/523981_Phi_Em}}}\qquad
-            \subfloat[Optimisation, 260312-260326]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260312 - Train/523945_Phi_Em}}}\qquad
-            \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260326 - Test/523986_Phi_Em}}}\qquad
-            \caption{Séries de $\PhiEm{t}$ calculées par IBIS sur les données INXS \textit{(Seconde série)}}\label{fig:resultats_inxs2_phi_em}
-        \end{figure}
+    Lorem
+
+    \newpage
+%    \begin{figure}[H] \centering
+%        \subfloat[Optimisation, 260101-260115]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260101 - Train/522363_T_Air}}}\qquad
+%        \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Test/523955_T_Air}}}\qquad
+%        \subfloat[Optimisation, 260115-260129]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Train/522815_T_Air}}}\qquad
+%        \subfloat[Application, 260129-260205]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Test/523961_T_Air}}}\qquad
+%        \subfloat[Optimisation, 260129-260212]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Train/523298_T_Air}}}\qquad
+%        \subfloat[Application, 260212-260219]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Test/523968_T_Air}}}\qquad
+%        \caption{Séries de $\TAir{t}$ calculées par IBIS sur les données INXS \textit{(Première série)}}\label{fig:resultats_inxs}
+%    \end{figure}
+%    \newpage
+%    \begin{figure}[H] \centering
+%        \subfloat[Optimisation, 260212-26026]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Train/523612_T_Air}}}\qquad
+%        \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Test/523973_T_Air}}}\qquad
+%        \subfloat[Optimisation, 260226-260305]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Train/523666_T_Air}}}\qquad
+%        \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260305 - Test/523980_T_Air}}}\qquad
+%        \subfloat[Optimisation, 260312-260326]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260312 - Train/523944_T_Air}}}\qquad
+%        \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260326 - Test/523986_T_Air}}}\qquad
+%        \caption{Séries de $\TAir{t}$ calculées par IBIS sur les données INXS \textit{(Seconde série)}}\label{fig:resultats_inxs2}
+%    \end{figure}
+%    \newpage
+%    \begin{figure}[H] \centering
+%        \subfloat[Optimisation, 260101-260115]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260101 - Train/522364_Phi_Em}}}\qquad
+%        \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Test/523955_Phi_Em}}}\qquad
+%        \subfloat[Optimisation, 260115-260129]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260115 - Train/522816_Phi_Em}}}\qquad
+%        \subfloat[Application, 260129-260205]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Test/523961_Phi_Em}}}\qquad
+%        \subfloat[Optimisation, 260129-260212]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260129 - Train/523298_Phi_Em}}}\qquad
+%        \subfloat[Application, 260212-260219]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Test/523968_Phi_Em}}}\qquad
+%        \caption{Séries de $\PhiEm{t}$ calculées par IBIS sur les données INXS \textit{(Première série)}}\label{fig:resultats_inxs_phi_em}
+%    \end{figure}
+%    \newpage
+%    \begin{figure}[H] \centering
+%            \subfloat[Optimisation, 260212-26026]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260212 - Train/523613_Phi_Em}}}\qquad
+%            \subfloat[Application, 260115-260122]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Test/523974_Phi_Em}}}\qquad
+%            \subfloat[Optimisation, 260226-260305]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260226 - Train/523666_Phi_Em}}}\qquad
+%            \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260305 - Test/523981_Phi_Em}}}\qquad
+%            \subfloat[Optimisation, 260312-260326]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260312 - Train/523945_Phi_Em}}}\qquad
+%            \subfloat[Application, 260326-260401]{\fbox{\includegraphics[width = 0.45\textwidth]{figures/diagrammes/courbes/inxs/260622/260326 - Test/523986_Phi_Em}}}\qquad
+%            \caption{Séries de $\PhiEm{t}$ calculées par IBIS sur les données INXS \textit{(Seconde série)}}\label{fig:resultats_inxs2_phi_em}
+%        \end{figure}
 
     \newpage\section{Intégration de données réelles sur des bâtiments présentant différentes propriétés}\label{sec:integration-de-donnees-reelles-sur-des-batiments-presentant-differentes-proprietes}
         \cite{subhourlysixdatasets}

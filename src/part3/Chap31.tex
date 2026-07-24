@@ -1,29 +1,38 @@
 \chapter{Architecture logicielle et bonnes pratiques de développement}\label{ch:conception-logicielle-refactoring-et-bonnes-pratiques-de-developpement}
-%TODO : commentaire sur Ruff
-\section{Refactoring des précédents travaux}\label{sec:refactoring-des-precedents-travaux}
 
-    Le travail sur l'architecture logicielle du projet \gls{IBIS} s'est articulé dans un premier temps sur le remaniement du code du stage
-    effectué sur le projet DISTRISIM dans l'optique de concevoir un code plus robuste supportant
-    un plus grand volume de données et différents modèles ensuite.
+Ce chapitre vise à donner un historique du développement d'IBIS, et présente ses différents composants en argumentant chacun des choix d'implémentation.
+À l'instar des précédents chapitres portant sur les aspects de modélisation, celui-ci est challengé par les conclusions rendues dans le chapitre final \ref{ch:resultats-et-failles-d'ibis-:-une-synthese-apres-un-an-de-developpement}.
+L'absence de renvoi explicite à la documentation du projet s'explique par le fait que celle-ci est produite dans un autre livrable, bien qu'un extrait soit donné à titre indicatif en annexe \ref{ch:ibisdoc} de ce rapport.
 
-    Pour la suite, on appelle TST le code précédent présenté dans \cite{TST}.
+\section{Aperçu de l'architecture du projet}\label{sec:apercu-de-l'architecture-du-projet}
 
-    TST est à l'origine un code de 1000 lignes écrit sur un fichier donnant des courbes prévisionnelles de
-    consommation d'énergie avec ou sans adaptation des paramètres du modèle aux données
-    de la période précédant celle de la prévision.
-    Ses entrées sont saisies séquentiellement et manuellement dans le terminal lancé par son script principal.
+    Le schéma \ref{fig:IBIS_archi} se veut le reflet de la figure \ref{fig:IBIS_final_scheme} présentée en introduction du chapitre 5,
+    le premier adoptant un point de vue développeur et l'autre un point de vue utilisateur.
+    Les principaux modules d'IBIS sont représentés et permettent d'établir un cycle de vie complet pour une modélisation :
+    \begin{enumerate}
+        \item Les données sont récupérées et aggrégées depuis diverses sources, puis importées dans une base de données unique.
+            Cette étape peut imposer d'émettre plusieurs hypothèses nécessaires au traitement des données \textit{(par exemple si l'on récupère des données multizones alors que l'on cherche à définir un modèle monozone)}.
+        \item Les deux approches concurrentes, développées dans leurs classes respectives \texttt{BlackboxThermalSolver} et \texttt{GreyboxThermalSolver}, utilisent les données d'entrée d'une part et des paramètres de calcul d'autre part, également stockés dans la base de données, pour prédire le comportement thermique d'un bâtiment.
+        \item Les données de sortie sont à leur tour stockées dans la base de données pour analyse\footnote{Les courbes de températures et de chauffage sont également récupérées mais stockées dans des dossiers classiques pour faciliter l'implémentation de la base de données.}.
+    \end{enumerate}
 
-    Si le code livre des résultats intéressants sur les bâtiments étudiés \ref{tab:tstfinal},
-        son architecture rend difficile la compréhension microscopique du comportement du modèle
-        d'une part \textit{(en particulier la sensibilité d'un paramètre devant un résultat précis)}, et la généralisation des expériences d'autre part \textit{(notamment le lancement d'une série massive de calculs pour apprécier les sorties du modèle à plus grande échelle)}.
+    À plus bas niveau, le listing \ref{lst:tree} montre l'architecture complète d'IBIS, organisée selon les modules principaux \texttt{loaders} \textit{(API avec la base de données)},
+    \texttt{models} \textit{(logique métier, modèles thermiques et équations associées)}, et \texttt{solvers} \textit{(résolution des modèles, optimiseurs et régresseurs)} et \texttt{output} \textit{(exportation des résultats dans la base de données et tracé des figures)}.
 
-    Ce constat permet de commencer la refactorisation avec en premier lieu la répartition des
-        fonctions existantes dans une arborescence à plusieurs fichiers.
-    Le listing suivant montre l'architecture adoptée, à l'exception de la partie \texttt{data}
-        stockée à l'extérieur des sources comme le suggèrent les lignes de conduite du
-        développement propre.
+    \begin{figure}[H]
+        \centering
+        \begin{adjustbox}{max width=\textwidth}
+            {\fbox{
+                \input{figures/diagrammes/logigrammes/IBIS_Architecture.tikz}
+            }}
+        \end{adjustbox}
+        \caption{Architecture simplifiée d'IBIS}\label{fig:IBIS_archi}
+    \end{figure}
 
-\begin{lstlisting}[language=bash, caption={Arborescence du code source d'IBIS},label={lst:tree}]│.python-version
+    Cette architecture est pensée à la reprise du code développé dans \cite{TST}, qu'IBIS cherche à compléter et améliorer.
+    C'est pourquoi quelques éléments relatifs à la transition entre les deux projets sont donnés dans la section suivante, avant d'approfondir les détails d'implémentation d'IBIS\@.
+
+\begin{lstlisting}[language=bash, caption={Arborescence du code source d'IBIS},label={lst:tree}]
 │main.py
 │__init__.py
 ├───loaders
@@ -36,28 +45,21 @@
 │   │   │   compute_parameters.py
 │   │   │   rc_bounds_loading.py
 │   │   │   __init__.py
-│   │   │
-│   │   └───
-│   └───
 ├───models
 │   │   building_model.py
 │   │   outdoor_model.py
 │   │   thermal_models.py
 │   │   __init__.py
-│   │
-│   └───
 ├───output
 │   │   export_results.py
 │   │   __init__.py
 │   ├───visualisation
-│   │   │   blackbox_plotter.py
+│   │   │   blackbox\_plotter.py
 │   │   │   greybox_plots.py
 │   │   │   palettes.py
 │   │   │   plot_export_utils.py
 │   │   │   vis_config.py
 │   │   │   __init__.py
-│   │   └───
-│   └───
 ├───solvers
 │   │   blackbox_thermal_solvers.py
 │   │   compute_parameters.py
@@ -65,74 +67,52 @@
 │   │   metrics.py
 │   │   rc_bounds.py
 │   │   __init__.py
-│   └───
-└───
 |\end{lstlisting}
 
-    Les sources sont ainsi pensées pour être lancées dans des notebooks Jupyter et ainsi permettre de nombreux calculs avec différents paramètres.
+    \subsection{Point d'étape sur le refactoring des précédents travaux}\label{subsec:refactoring-des-precedents-travaux}
+        D'un point de vue chronologique, IBIS connaît comme première phase et axe de travail la restructuration des travaux menés sur l'identification des paramètres de bâtiment en 2023.
+        Ceux-ci, bien qu'efficaces et permettant de produire les figures \ref{fig:predictioncambridgetst} et \ref{tab:tstfinal}, sont limités principalement par leur incapacité structurelle à généraliser les résultats, ce qu'IBIS cherche à pallier.
+        Un autre objectif majeur est l'amélioration de la modularité du code avec l'ambition de pouvoir facilement changer de source de données en entrée ou de modèle sans devoir modifier le code outre mesure.
 
-    L'arborescence du projet ébauchée, l'étape suivante est l'inspection des fonctions pour vérifier leur propreté, leur maintenabilité et la facilité à les faire évoluer.
-    Autant que possible, ce procédé tente de s'appuyer sur les recommendations du livre de Robert C. Martin \cite{clean_code}, faisant figure de référence standardisée dans le milieu du développement du logiciel.
-
-    Le nombre de bonnes pratiques décrites dans cet ouvrage est particulièrement élevé et toutes ne sont pas forcément applicables simultanément, en particulier les exemples sont souvent tirés du développement web, un domaine généralement éloigné du calcul scientifique.
-    La synthèse la plus élémentaire des techniques de nettoyage du code donnée plus bas a tout de même guidé le développement et les réflexions autour d'\gls{IBIS} :
-
-    \begin{itemize}
-        \item Le nommage des variables doit être explicite.
-        En particulier, allonger le nom d'une variable est habituellement une bonne idée même si sa lecture peut sembler fastidieuse.
-        \item Les fonctions, classes, méthodes et fichiers doivent être le plus court possible (une dizaine de lignes maximum) et chaque fonction doit remplir un seul objectif.
-        En général, si une fonction dépasse ce nombre de lignes, alors elle peut être séparée.
-        \item De même, le nombre de paramètres d'une fonction ne doit pas être supérieur à trois.
-        \item Le \gls{TDD} reste la meilleure approche à la quasi-totalité des problèmes de programmation, aussi l'utilisation des tests doit être aussi fréquente que possible
-        \item Les commentaires doivent être utilisés avec parcimonie et ne remplacent en aucun cas l'explication du code par lui-même ni une documentation complète.
-        La raison d'être de nombreux commentaires est en effet la clarification d'éléments de code mal implémentés, avec pour finalité la présence dans le projet de deux informations floues plutôt qu'une explicite.
-    \end{itemize}
+        Ainsi, la première période de développement s'appuie autant que possible sur les lignes de conduite du code propre dressées dans \cite{clean_code} et est synthétisée par le tableau \ref{tab:comparaisonarchi}, qui compare
+        les spécifications internes des deux projets après quelques semaines de développement d'IBIS, à données d'entrée et de sortie similaires.
 
         \begin{table}[h!]
             \centering
-            \caption{Comparaison d'architecture qualitative et quantitative entre le projet de 2023 et le projet actuel}\label{tab:table}
+            \caption{Comparaison qualitative et quantitative des architectures entre le projet de 2023 et IBIS en janvier 2026}\label{tab:comparaisonarchi}
             \begin{adjustbox}{width=\textwidth}
-            \begin{tabular}{lcc}
-                \toprule
-                \textbf{Critère} & \textbf{Projet TST (2023)} & \textbf{IBIS-DISTRISIM (2026)} \\
-                \midrule
-                Nombre de lignes totales & 1154 & 515 \\
-                Nombre de fichiers source & 1 & 8\\
-                Plus longue fonction & 363 & 85 \\
-                Plus courte fonction & 6 & 4 \\
-                Nombre de fonctions & 13 & 21 \\
-                Traitement des données & En partie hardcodée dans les sources & Dans un dossier dédié avec une arborescence permettant l'implémentation d'une BDD relationnelle \\
-                Dépendances tierces & Aucune du fait de très nombreuses fonctions réimplémentées & Utilisation aussi fréquente que possible de librairies robustes \textit{(SciPy, scikit-opt, scikit-learn)} \\
-                Approche objet & Aucune & Classes spécifiques au projet avec séparation des responsabilités et dissociation des aspects Modèle-Solveur \\
-                Gestion de projet (aucune VS Gitlab) & Aucune & GitLab interne déployé avec documentation des commits et suivi des issues \\
-                \bottomrule
-            \end{tabular}
+                \begin{tabular}{lcc}
+                    \toprule
+                    \textbf{Critère} & \textbf{Projet TST (2023)} & \textbf{IBIS-DISTRISIM (2026)} \\
+                    \midrule
+                    Nombre de lignes totales & 1154 & 515 \\
+                    Nombre de fichiers source & 1 & 8\\
+                    Plus longue fonction & 363 & 85 \\
+                    Plus courte fonction & 6 & 4 \\
+                    Nombre de fonctions & 13 & 21 \\
+                    Traitement des données & En partie hardcodée dans les sources & Dans un dossier dédié avec une arborescence permettant l'implémentation d'une BDD relationnelle \\
+                    Dépendances tierces & Aucune du fait de très nombreuses fonctions réimplémentées & Utilisation aussi fréquente que possible de librairies robustes \textit{(SciPy, scikit-opt, scikit-learn)} \\
+                    Approche objet & Aucune & Classes spécifiques au projet avec séparation des responsabilités et dissociation des aspects Modèle-Solveur \\
+                    Gestion de projet (aucune VS Gitlab) & Aucune & GitLab interne déployé avec documentation des commits et suivi des issues \\
+                    \bottomrule
+                \end{tabular}
             \end{adjustbox}
         \end{table}
 
         L'apport de ce travail de refactorisation est double : \begin{enumerate}
-           \item Les résultats précédents ont pu être consolidés avec la généralisation du
-               tableau \ref{tab:tstfinal} sur un seul bâtiment à l'ensemble du quartier étudié \ref{fig:heatmap}, sans que cette tâche soit rendue fastidieuse par une implémentation de code perfectible.
+           \item IBIS remplit sa promesse de pouvoir généraliser les résultats en reproduisant le tableau \ref{tab:tstfinal} puis en l'étendant à l'ensemble du quartier étudié \ref{fig:heatmap}, sans que cette tâche soit complexe ou fastidieuse;
            \item Il est désormais possible de développer de nouveaux modèles ou de consolider celui existant en s'appuyant sur le projet actuel, sans avoir à en commencer un nouveau.
         \end{enumerate}
 
-        \subsection{Implémentation de plusieurs cas test}\label{subsec:implementation-de-plusieurs-cas-test}
+    \subsection{Un projet pensé pour l'utilisateur}\label{subsec:un-projet-pense-pour-l'utilisateur}
+        Comme c'est le cas pour de nombreux autres projets, le principal enjeu pour IBIS est que sa compréhension par de futurs utilisateurs soit limpide, indépendamment de la vie d'une équipe de développement destinée à évoluer rapidement.
 
-            La plupart des futures modifications envisagées pour \gls{IBIS} sont d'une ampleur bien supérieure à celles déjà effectuées.
-            Ainsi, il est important de garder un aperçu des résultats du modèle à chaque étape de développement pour s'assurer de sa performance.
-            Cette vigilance est mise en oeuvre avec l'introduction de tests basés sur le modèle actuel.
-
-            \begin{bluebox}
-                Chaque test est détaillé dans la documentation complète du projet disponible en annexe \ref{ch:ibisdoc}.
-            \end{bluebox}
-
-    \subsection{Passage à une approche orientée objet}\label{subsec:passage-a-l'oriente-objet}
-
-\subsection{Standardisation des librairies importées}\label{subsec:standardisation-des-librairies-importees}
-
-    \subsection{Vers un modèle de données relationnel uniformisé}\label{subsec:vers-un-modele-de-donnees-relationnel-uniformise}
-        %TODO : L'intérêt de l'architecture par clés primaire et étrangère est de pouvoir associer très facilement des données de sortie à un jeu de paramètres de calcul, tout en différentiant ces paramètres selon le stade où ils interviennent (solveur, modèle, etc)
-        %TODO : Simplicité du modèle, architecture proche d'un dossier de csv avec l'aspect relationnel en plus
+        %TODO : - Développé directement au contact d'utilisateurs potentiels
+        %TODO : - Difficulté principale = développer un projet suffisamment gros pour qu'il puisse proposer de nombreuses fonctionnalités de façon robuste, mais ne pas rentrer dans l'usine à gaz avec des fonctionnalités inutiles et le risque d'alourdir le projet au détriment de la compréhension de l'utilisateur
+        %TODO : - Autre difficulté = architecture complète data-model-solver pour un public non développeur. Besoin d'une documentation pédagogique -> Une partie développeur et une partie utilisateur
+        %TODO : - En théorie, une fois la base de données récupérée l'utilisateur peut se contenter de jouer avec les notebooks et obtenir des résultats intéressants
+        %TODO : - Tests de modélisation par notebooks, interactifs et bien expliqués servant de "cookbook" pour les utilisateurs
+    \subsection{Uniformisation du modèle de données}\label{subsec:uniformisation-du-modele-de-donnees}
         \ref{fig:SQL}
 
         \begin{figure}[H]
@@ -140,31 +120,13 @@
             {\fbox{
                 \includegraphics[width = 0.9\textwidth]{figures/diagrammes/SQL_Model}
             }}
-        \caption{Modèle relationnel de la base de données IBIS\_Data}\label{fig:SQL}
+            \caption{Modèle relationnel de la base de données IBIS\_Data}\label{fig:SQL}
         \end{figure}
-
-\section{Aperçu de l'architecture du projet}\label{sec:apercu-de-l'architecture-du-projet}
-    \subsection{Refactoring des précédents travaux}\label{subsec:refactoring-des-precedents-travaux}
-
-        Le schéma \ref{fig:IBIS_archi} se veut le reflet de la figure \ref{fig:IBIS_final_scheme} présentée en introduction du chapitre 5,
-        le premier adoptant un point de vue développeur et l'autre un point de vue utilisateur.
-        \begin{figure}[H]
-            \centering
-            \begin{adjustbox}{max width=\textwidth}
-                {\fbox{
-                    \input{figures/diagrammes/logigrammes/IBIS_Architecture.tikz}
-                }}
-            \end{adjustbox}
-            \caption{Architecture simplifiée d'IBIS}\label{fig:IBIS_archi}
-        \end{figure}
-    \subsection{Un projet pensé pour l'utilisateur}\label{subsec:un-projet-pense-pour-l'utilisateur}
-    %TODO : - Développé directement au contact d'utilisateurs potentiels
-    %TODO : - Difficulté principale = développer un projet suffisamment gros pour qu'il puisse proposer de nombreuses fonctionnalités de façon robuste, mais ne pas rentrer dans l'usine à gaz avec des fonctionnalités inutiles et le risque d'alourdir le projet au détriment de la compréhension de l'utilisateur
-    %TODO : - Autre difficulté = architecture complète data-model-solver pour un public non développeur. Besoin d'une documentation pédagogique -> Une partie développeur et une partie utilisateur
-    %TODO : - En théorie, une fois la base de données récupérée l'utilisateur peut se contenter de jouer avec les notebooks et obtenir des résultats intéressants
-    %TODO : - Tests de modélisation par notebooks, interactifs et bien expliqués servant de "cookbook" pour les utilisateurs
+    %TODO : L'intérêt de l'architecture par clés primaire et étrangère est de pouvoir associer très facilement des données de sortie à un jeu de paramètres de calcul, tout en différentiant ces paramètres selon le stade où ils interviennent (solveur, modèle, etc)
+    %TODO : Simplicité du modèle, architecture proche d'un dossier de csv avec l'aspect relationnel en plus
     \subsection{Modèle objet avec séparation des reponsabilités}\label{subsec:modele-objet-avec-separation-des-reponsabilites}
     %TODO : notamment on ne représente pas les sous-classes de ModelRC et RCBounds
+        \ref{fig:OOP}
         \newpage
         \begin{figure}[H]
             \centering
@@ -178,15 +140,36 @@
         
         %TODO : Introduction au projet + séparation des responsabilités
         %TODO : Parler du tradeoff entre l'introduction de dépendances aux librairies et le gain métier / sécu
-    \subsection{Uniformisation du modèle de données}\label{subsec:uniformisation-du-modele-de-donnees}
+
+        \begin{table}
+            \centering
+            \begin{tabular}{lll}
+                \toprule
+                \textbf{Librairie importée} & \textbf{Utilité principale} & \textbf{Emplacement d'appel} \\
+                \midrule
+                sqlite3 & Interface avec la base de données & \texttt{notebooks/}, \texttt{tests/}, \texttt{blackbox\_plotter.py}, \texttt{exports\_results.py} \\
+                pandas & API avec sqlite3, gestion des données en lecture/écriture & \texttt{loaders/} \\
+                numpy & Calcul vectorisé et ORM pour le modèle de données & Ensemble du projet \\
+                scipy & Résolution des équations différentielles et calcul des racines & \texttt{GreyBoxThermalSolver} \\
+                scikit-opt & Optimisation par méta-heuristiques & \texttt{GreyBoxThermalSolver} \\
+                sysidentpy, statsmodels & Prédiction par modèles autorégressifs & \texttt{BlackBoxThermalSolver} \\
+                scikit-learn, sktime & Métriques d'évaluation des modèles & \texttt{BlackBoxMetrics}  \\
+                scikit-opt	Optimisation par méta-heuristiques	\texttt{GreyBoxThermalSolver} \\
+                matplotlib, seaborn & Visualisation des résultats & \texttt{greybox\_plots.py}, \texttt{blackbox\_plotter.py} \\
+                \bottomrule
+            \end{tabular}
+            \caption{Principales librairies Python appelées par IBIS}
+            \label{tab:librairies}
+        \end{table}
+        
 
 \section{Versionning et gestion de projet}\label{sec:versionning-et-gestion-de-projet}
 
     %TODO : parler du versionnement des données
 
-    La refonte de TST dans le projet IBIS est accompagnée d'un framework de versionning
-    jusqu'alors inexistant, hébergé sur un GitLab interne au \gls{CEA}\footnote{La plateforme est par ailleurs très récente et en cours de développement.
-     Dans ce contexte, le projet IBIS a pu servir de retour d'expérience à l'équipe de maintenance pour son amélioration continue.}
+%    La refonte de TST dans le projet IBIS est accompagnée d'un framework de versionning
+%    jusqu'alors inexistant, hébergé sur un GitLab interne au \gls{CEA}\footnote{La plateforme est par ailleurs très récente et en cours de développement.
+%     Dans ce contexte, le projet IBIS a pu servir de retour d'expérience à l'équipe de maintenance pour son amélioration continue.}
 
     Ces nouvelles méthodes ont permis une meilleure supervision du projet, notamment grâce à la
     création d'issues et à leur résolution pendant les phases de développement.
@@ -196,43 +179,253 @@
 
     \begin{table}[H]
         \centering
-        \caption{Issues créées et traitées jusqu'au 31/10}
-        \begin{adjustbox}{width=\textwidth}
-            \begin{tabular}{p{8cm}p{5cm}p{5cm}}
+        \caption{Issues créées et traitées jusqu'au 23/07}
+        \begin{adjustbox}{width=0.6\textwidth}
+            \begin{tabular}{p{5cm}p{5cm}p{8cm}}
                 \toprule
                 \textbf{To Do} & \textbf{Doing} & \textbf{Done} \\
                 \midrule
-                $\left[\text{Visualization}\right]$ Rename and rescale the x (time) axis on TAir and PhiHeat figures to visualize months instead of seconds & Refactor previous project & Consider using Seaborn rather than MPL \\
-                $\left[\text{PLOTS}\right]$ automatically exports plots after computation & Refactor secant method & Host all data on data format files \\
-                $\left[\text{PLOTS}\right]$ automatically name plots referencing buildings name &  & Merge data and hour input variables to be closer to data architecture \\
-                Consider implementing a full-end architecture to enhance UX &  & Translate all variables and methods names in English \\
-                $\left[\text{Data Storage}\right]$ Make sure data files are stored with LFS framework &  & Refactor the visualisation functions \\
-                Implement the possibility to easily use different values of RC parameters &  & Refactor the mode function \\
-                Reconsider input management, especially filepaths locations &  &  \\
-                Consider using a clean backend data management using PostgreSQL or similar tools &  &  \\
-                Consider using polars rather than pandas for data storage &  &  \\
-                Consider the use of specialised workflow for Data hosting (DVS or others) &  &  \\
-                $\left[\text{OOP}\right]$ Consider using OOP for further development and refactoring &  &  \\
-                Implement better handling of error measurements &  &  \\
-                Allow easy switch feature between models &  &  \\
-                Consider calling librairies for solvers and optimization problems &  &  \\
-                Store buildings data in dedicated files &  &  \\
-                $\left[\text{OOP}\right]$ Format model data in clean classes &  &  \\
-                ToFix : No output when ending date does not strictly match a value of input data &  &  \\
-                $\left[\text{Computation in series}\right]$ &  &  \\
-                Clean DISTRISIM data &  &  \\
-                $\left[\text{Reporting}\right]$ Analyze, visualise and report input data &  &  \\
-                Consider challenging the secant method (with Newton method for example) &  &  \\
-                Work on how to challenge \gls{PSO}                                                                                                          &  &                                                                       \\
-                $\left[\text{Optimisation}\right]$ Implement brent solving to challenge secant method &  &  \\
-                Consider refactoring the 3CL method &  &  \\
-                Reduce input and output variables of functions &  &  \\
-                $\left[\text{Errors handling}\right]$ Implement errors and assertions in DISTRISIM project &  &  \\
+                % TO DO
+                Consider using polars rather than pandas for data storage
+                &
+                % DOING
+                Seek to challenge main test's performances
+                &
+                % DONE
+                Refactor previous project \\
+
+                Consider the use of specialised workflow for Data hosting (DVC or others)
+                &
+                Start the ``thoughts on code architecture'' part of documentation
+                &
+                Store buildings data in dedicated files \\
+
+                {[OOP]} Consider using OOP for further development and refactoring
+                &
+                Implement autoregressive methods like ARX to challenge RC paradigm
+                &
+                Allow easy switch feature between models \\
+
+                Consider implementing a full front-end architecture to enhance UX
+                &
+                &
+                Host all data on data format files \\
+
+                Develop a framework to allow a 3CL method-based project to work with IBIS
+                &
+                &
+                ToFix : No output when ending\_date does not strictly match a value of input\_data \\
+
+                {[Visualization]} Rename and rescale the x (time) axis on TAir and PhiEm figures to visualize months instead of seconds
+                &
+                &
+                Refactor secant method function \\
+
+                Add new data to existing models
+                &
+                &
+                Consider calling librairies for solvers and optimization problems \\
+
+                Find out what are the best initial conditions for phi\_em prediction
+                &
+                &
+                Implement better handling of error measurements especially for PhiEm evaluation \\
+
+                Investigate what could work best for RC's optimization metrics
+                &
+                &
+                Translate all variables and methods names in English \\
+
+                Handle the case where timesteps of outdoor and building profiles are differents
+                &
+                &
+                Reduce input and output variables of functions \\
+
+                {[Object Model]} Split ComputeParameters class to better separate responsabilities
+                &
+                &
+                Work on how to challenge PSO \\
+
+                {[Object Model]} Split the ComputeParameters class to better separate responsabilities
+                &
+                &
+                Consider challenging the secant method (with Newton method for example) \\
+
+                {[Code Cleaning]} Improve modularity of RC models by changing parameters handling methods
+                &
+                &
+                    {[OOP]} Format model data in clean classes \\
+
+                {[metrics]} Merge greybox and blackbox metrics
+                &
+                &
+                    {[Errors handling]} Implement errors and assertions in DISTRISIM project \\
+
+                &
+                &
+                Merge data and hour input variables to be closer to data architecture \\
+
+                &
+                &
+                Clean DISTRISIM data \\
+
+                &
+                &
+                    {[PLOTS]} automatically exports plots after computation \\
+
+                &
+                &
+                    {[PLOTS]} automatically name plots referencing buildings name \\
+
+                &
+                &
+                Implement the possibility to easily use different values of RC parameters \\
+
+                &
+                &
+                Reconsider input management, especially filepaths locations \\
+
+                &
+                &
+                Consider using a clean backend data management using PostgreSQL or similar tools \\
+
+                &
+                &
+                    {[Reporting]} Analyze, visualise and report input data \\
+
+                &
+                &
+                    {[Optimisation]} Implement brent solving to challenge secant method \\
+
+                &
+                &
+                Refactor the optimize condition and input data \\
+
+                &
+                &
+                    {[Data Model]} {[DISTRISIM]} Create a Building table \\
+
+                &
+                &
+                    {[Test]} Implement tests to measure errors on heating needs in parallel to temperature needs \\
+
+                &
+                &
+                    {[Modeling]} Identify why CastelR has a different behavior from other buildings \\
+
+                &
+                &
+                    {[BUG]} Find reasons to anormal behavior of PhiEm heatmaps \\
+
+                &
+                &
+                    {[CRITIC]} Load data once for main test \\
+
+                &
+                &
+                    {[Documentation]} Add docstring to all functions and notebooks after sprint 1 \\
+
+                &
+                &
+                    {[Modeling]} Create a smart flow to interpolate PhiEm(TAir) from discrete calculated data and visualize it + study the possibility of implementing it in secant method \\
+
+                &
+                &
+                    {[PSO]} Change PSO implementation to use scikit-opt \\
+
+                &
+                &
+                    {[Data]} Modify data structure to include non building-based control for bounds \\
+
+                &
+                &
+                Normalize datetime format in BUILDINGS\_PROFILES table \\
+
+                &
+                &
+                    {[Performance]} Separate the two components of the thermal equation \\
+
+                &
+                &
+                    {[DOCUMENTATION]} Emphasize on input data handling for both csv using and database modifications \\
+
+                &
+                &
+                Increase PSO research space, justify it and document it \\
+
+                &
+                &
+                Explore other metaheuristics offered by scikit-opt \\
+
+                &
+                &
+                    {[Reporting]} Plot scatterplot of RC parameters through months \\
+
+                &
+                &
+                    {[BUG]} Understand why NaN values appear during PSO evaluation \\
+
+                &
+                &
+                Pass all compute parameters through the Solver class \\
+
+                &
+                &
+                Add other RC models \\
+
+                &
+                &
+                Add a visualisation at the middle of MEBM to visualize only RMSE on relevant months \\
+
+                &
+                &
+                Design IBIS final form \\
+
+                &
+                &
+                    {[Project Readability]} Find a way to better identify training and testing period \\
+
+                &
+                &
+                Adapt phi\_em visualisation to visualise prediction method \\
+
+                &
+                &
+                Visualize PhiEm(Tair) \\
+
+                &
+                &
+                Separate building-dependant data and non building-dependant data in IBIS\_Data \\
+
+                &
+                &
+                Structurer le projet de manière plus standard \\
+
+                &
+                &
+                Mettre un .gitignore \\
+
+                &
+                &
+                Utiliser Git LFS - .gitattributes \\
+
+                &
+                &
+                    {[Testing]} Implement the main tests through GitLab runners \\
+
+                &
+                &
+                    {[Testing]} Implement data and a notebook to perform prediction for short periods \\
+
+                &
+                &
+                    {[BUG]} Correct t\_for\_phi\_em method of GreyBoxThermalSolver for it to be used with other RC models \\
+
                 \bottomrule
             \end{tabular}
-            \end{adjustbox}
-            \label{tab:issuesstatesimple}
-        \end{table}
+        \end{adjustbox}
+        \label{tab:issuesstatesimple}
+    \end{table}
 
     \ref{fig:IBIS_timeline}
 
@@ -246,8 +439,11 @@
         \caption{Apport de chaque sprint au projet IBIS}\label{fig:IBIS_timeline}
     \end{figure}
 
-\section{Intégration continue et tests automatisés}\label{sec:integration-continue-et-tests-automatises}
+    \subsection{Point d'attention sur le versionnement des données}\label{subsec:point-d'attention-sur-le-versionnement-des-donnees}
 
+\section{Intégration continue et tests automatisés}\label{sec:integration-continue-et-tests-automatises}
+    %TODO : Ainsi, il est important de garder un aperçu des résultats du modèle à chaque étape de développement pour s'assurer de sa performance.
+    %TODO : Cette vigilance est mise en oeuvre avec l'introduction de tests basés sur le modèle actuel.
     \subsection{Ensemble des tests développés pour IBIS}\label{subsec:ensemble-des-tests-developpes-pour-ibis}
     %TODO : - Notamment l'issue #55 où le test est écrit avant le développement
     %TODO : - Tests écrits en .py axés développement, plus rapides
@@ -258,6 +454,12 @@
         \subsubsection{BBAT - Black Box, All Tests}
 
     \subsection{Vers un pipeline CI/CD simple}\label{subsec:vers-un-pipeline-ci/cd-simple}
+        %TODO : Commentaire sur Ruff
+        \begin{enumerate}
+            \item Applique \texttt{ruff format}
+            \item Applique \texttt{ruff check}
+            \item Lance OBOM
+        \end{enumerate}
 
 \begin{lstlisting}[language=YAML, caption={Fichier \texttt{.gitlab-ci.yml} d'IBIS},label={lst:cicd}]
 # GitLab CI/CD pipeline for the IBIS project
